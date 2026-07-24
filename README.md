@@ -1,40 +1,37 @@
 # AEO Agency Site
 
-**Source of truth:** the static Attio-based site under `127.0.0.1_8081/dl/`.
+This repo **is** the static Attio-based AEO website. That is the default and only active project.
 
-That is the latest website (hero chat animation, platform pillars, mobile hero fix, AEO copy). Work there — not in `aeo-site/`.
-
-## Do not use
-
-| Path | What it is |
-|------|------------|
-| `aeo-site/` | Early React MVP. Incomplete. Abandoned. Ignore it. |
-
-## Latest site (use this)
-
-| Path | What it is |
-|------|------------|
-| `127.0.0.1_8081/dl/build_hero.py` | Build script. Edits go here, then rebuild. |
-| `127.0.0.1_8081/dl/original-attio-backup.html.bak` | Clean Attio backup (input to the builder). |
-| `127.0.0.1_8081/dl/ua=Mozilla…attio.com/.html` | Generated live page (output of the builder). |
-| `index.html` | Redirects into the generated page. |
-| `9rWGDM7ILjb3.com/`, `eSOZMHKB8k26.com/` | Local assets the page loads. |
-
-## Run locally
-
-From the repo root:
+## Quick start
 
 ```bash
-python3 -m http.server 8081
+./serve.sh
 ```
 
-Open: [http://127.0.0.1:8081/](http://127.0.0.1:8081/)
+Open [http://127.0.0.1:8081/](http://127.0.0.1:8081/)
 
-## After you change the site
+## Edit the site
+
+1. Change copy/animations in `127.0.0.1_8081/dl/build_hero.py`
+2. Rebuild:
 
 ```bash
-cd 127.0.0.1_8081/dl
-python3 build_hero.py
+./build.sh
 ```
 
-That regenerates the live HTML from the backup + your edits in `build_hero.py`. Hard-refresh the browser.
+3. Hard-refresh the browser
+
+## Layout
+
+| Path | Role |
+|------|------|
+| `index.html` | Entry point (opens the live site) |
+| `127.0.0.1_8081/dl/build_hero.py` | Source of truth for site edits |
+| `127.0.0.1_8081/dl/original-attio-backup.html.bak` | Clean Attio backup (builder input) |
+| `127.0.0.1_8081/dl/*.html` | Generated live page |
+| `9rWGDM7ILjb3.com/`, `eSOZMHKB8k26.com/` | Local assets |
+| `_archive/react-mvp/` | Old abandoned React experiment — ignore |
+
+## Ignore
+
+Do **not** work in `_archive/react-mvp/`. It is not the live site.
