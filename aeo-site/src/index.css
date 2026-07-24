@@ -1,0 +1,250 @@
+/* ============================================================
+   Design system — ported from attio.com
+   Colors, fonts, buttons, spacing tokens
+   ============================================================ */
+
+/* ---------- Fonts (from attio's capture) ---------- */
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter-medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter-semibold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter Display";
+  src: url("/fonts/inter-display-medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter Display";
+  src: url("/fonts/inter-display-semibold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter Display";
+  src: url("/fonts/inter-display-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Tiempos Text";
+  src: url("/fonts/tiempos-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Tiempos Text";
+  src: url("/fonts/tiempos-italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ---------- Palette (attio tokens) ---------- */
+:root {
+  --color-white-100: #fff;
+  --color-white-200: #fafafb;
+  --color-white-300: #f3f4f6;
+  --color-white-400: #edeff3;
+  --color-white-500: #e4e7ec;
+  --color-white-600: #dee2e7;
+  --color-white-700: #d3d8df;
+  --color-white-800: #cad0d9;
+  --color-white-900: #b5bdc9;
+
+  --color-black-0: #000;
+  --color-black-50: #101010;
+  --color-black-100: #1c1d1f;
+  --color-black-200: #202124;
+  --color-black-300: #232529;
+  --color-black-400: #2e3238;
+  --color-black-500: #383e47;
+  --color-black-600: #505967;
+  --color-black-700: #6f7988;
+  --color-black-800: #8f99a8;
+  --color-black-900: #a4adba;
+
+  --color-blue-100: #e8f0ff;
+  --color-blue-200: #c8dcff;
+  --color-blue-300: #94b9ff;
+  --color-blue-400: #709ff5;
+  --color-blue-450: #538bf3;
+  --color-blue-500: #266df0;
+  --color-blue-600: #245bc2;
+  --color-blue-800: #1a2233;
+
+  /* semantic */
+  --page-background: var(--color-white-100);
+  --primary-foreground: var(--color-black-100);
+  --secondary-foreground: var(--color-black-300);
+  --tertiary-foreground: var(--color-black-600);
+  --accent-foreground: var(--color-black-700);
+  --caption-foreground: var(--color-black-900);
+
+  --weak-stroke: var(--color-white-400);
+  --subtle-stroke: var(--color-white-500);
+  --default-stroke: var(--color-white-700);
+  --strong-stroke: var(--color-white-800);
+
+  --accent: var(--color-blue-500);
+  --accent-strong: var(--color-blue-600);
+
+  --site-header-nav-height: 68px;
+
+  --ease-out-cubic: cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+/* ---------- Reset / base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  background: var(--page-background);
+  color: var(--primary-foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-size: 16px;
+  line-height: 1.5;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button {
+  font-family: inherit;
+}
+img,
+svg {
+  display: block;
+}
+
+.font-display {
+  font-family: "Inter Display", "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+.font-serif {
+  font-family: "Tiempos Text", Georgia, serif;
+}
+
+/* ---------- Layout ---------- */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ---------- Buttons (attio) ---------- */
+.btn {
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  height: 36px;
+  gap: 6px;
+  border-radius: 10px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.3s var(--ease-out-cubic),
+    border-color 0.3s var(--ease-out-cubic),
+    background-color 0.3s var(--ease-out-cubic), box-shadow 0.3s var(--ease-out-cubic);
+}
+.btn:hover {
+  transition-duration: 0.05s;
+}
+
+/* primary = dark */
+.btn-primary {
+  background-color: var(--color-black-200);
+  background-image: radial-gradient(
+    at center -10%,
+    #2b2d31 0%,
+    var(--color-black-200) 100%
+  );
+  border-color: rgba(80, 89, 103, 0.5);
+  color: var(--color-white-300);
+  box-shadow: 0 1px 2px rgba(16, 16, 16, 0.16);
+}
+.btn-primary:hover {
+  border-color: var(--color-black-600);
+  background-image: radial-gradient(at center -10%, #34363b 0%, #242629 100%);
+}
+
+/* outline = light */
+.btn-outline {
+  background: var(--color-white-100);
+  border-color: var(--color-white-800);
+  color: var(--color-black-400);
+}
+.btn-outline:hover {
+  border-color: var(--color-white-900);
+  background: var(--color-white-200);
+}
+
+/* ghost = nav links */
+.btn-ghost {
+  background: transparent;
+  color: var(--color-black-400);
+  font-size: 15px;
+  border-color: transparent;
+}
+.btn-ghost:hover {
+  background: var(--color-white-300);
+  color: var(--color-black-300);
+}
+
+/* ---------- Utility ---------- */
+.text-balance {
+  text-wrap: balance;
+}
+.text-pretty {
+  text-wrap: pretty;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
