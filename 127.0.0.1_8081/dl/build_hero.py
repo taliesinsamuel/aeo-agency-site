@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import glob, os
 
-HEAD = "Be the business that AI recommends"
+HEAD = "Be the business that AI recommends to customers"
+HEAD_HTML = "Be the business that AI recommends<br>to customers"
 SUB = "We get local businesses recommended by ChatGPT, Perplexity, Gemini and Claude."
 BADGE = "Best AEO agency 2026"
 
@@ -11,7 +12,7 @@ LIVE = [f for f in glob.glob("*.html") if "backup" not in f][0]
 html = open(SRC, encoding="utf-8").read()
 
 # --- 1. text edits (all occurrences incl. RSC payload => no flash, hydration-safe) ---
-html = html.replace("Welcome to agentic revenue.", HEAD)
+html = html.replace("Welcome to agentic revenue.", HEAD_HTML)
 html = html.replace(
     "Attio is the CRM that builds pipeline, advances deals, and grows accounts around the clock.",
     SUB,
@@ -78,6 +79,7 @@ INJECT = r"""
 /* neutralize attio's sticky-scroll choreography so the hero scrolls normally
    and the chat window never overlaps the headline/subline/CTAs */
 .aeo-hero{position:relative}
+.aeo-hero h1{text-wrap:balance}
 .aeo-hero [class*="sticky"]{position:static!important}
 .aeo-hero [class~="h-svh"]{height:auto!important;min-height:0!important;margin-top:64px;padding-top:0!important;padding-bottom:80px!important;align-items:flex-start!important}
 .aeo-hero [class*="100svh"]{position:absolute!important;inset:0!important;height:100%!important;min-height:0!important}
@@ -98,7 +100,7 @@ INJECT = r"""
 </style>
 <script id="aeo-script">
 (function(){
-  var HEAD=%%HEAD%%, SUB=%%SUB%%, BADGE=%%BADGE%%;
+  var HEAD=%%HEAD%%, HEAD_HTML=%%HEAD_HTML%%, SUB=%%SUB%%, BADGE=%%BADGE%%;
   var ITEMS=[
     {biz:"dentist",city:"Austin"},
     {biz:"law firm",city:"Miami"},
@@ -162,7 +164,7 @@ INJECT = r"""
   }
   function applyText(){
     var s=getHero(); if(!s)return;
-    s.querySelectorAll("h1").forEach(function(h){ if(h.textContent!==HEAD)h.textContent=HEAD; });
+    s.querySelectorAll("h1").forEach(function(h){ if(h.innerHTML.indexOf("<br>")===-1||h.textContent.replace(/\s+/g," ").trim()!==HEAD)h.innerHTML=HEAD_HTML; });
     s.querySelectorAll("p").forEach(function(p){ var t=p.textContent||""; if((/recommended by|Attio is the CRM/.test(t))&&!p.querySelector(".aeo-ai-row"))p.innerHTML=SUB_HTML; });
   }
   function findMobileMock(){
@@ -284,7 +286,7 @@ INJECT = r"""
 """
 
 import json
-INJECT = INJECT.replace("%%HEAD%%", json.dumps(HEAD)).replace("%%SUB%%", json.dumps(SUB)).replace("%%BADGE%%", json.dumps(BADGE))
+INJECT = INJECT.replace("%%HEAD%%", json.dumps(HEAD)).replace("%%HEAD_HTML%%", json.dumps(HEAD_HTML)).replace("%%SUB%%", json.dumps(SUB)).replace("%%BADGE%%", json.dumps(BADGE))
 
 # ============================================================
 #  AEO PLATFORM SECTION  (replaces attio's Platform section)
@@ -435,6 +437,17 @@ PLATFORM = r"""
 .aeo-bm-eng .aeo-bm-name{width:132px}
 .aeo-bm-eng .aeo-bm-val{width:28px}
 
+/* ---- viz 1 (new): "how often AI mentions you" dot grid ---- */
+.aeo-dg-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 2px 15px;margin-bottom:18px;border-bottom:1px solid var(--color-white-400,#edeff3)}
+.aeo-dg-q{font-size:15px;font-weight:600;color:var(--color-black-100,#1c1d1f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aeo-dg-days{font-size:13px;font-weight:500;color:var(--color-black-800,#a4adba);flex:none}
+.aeo-dg-score{display:flex;align-items:baseline;gap:10px;margin-bottom:20px}
+.aeo-dg-num{font-family:"Inter Display",Inter,sans-serif;font-size:52px;font-weight:700;line-height:1;letter-spacing:-.02em;color:var(--color-black-100,#1c1d1f);font-variant-numeric:tabular-nums}
+.aeo-dg-cap{font-size:15px;font-weight:500;color:var(--color-black-700,#6f7988)}
+.aeo-dg-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:clamp(6px,1vw,9px)}
+.aeo-dg-dot{aspect-ratio:1/1;border-radius:999px;background:var(--color-white-500,#e4e7ec);transition:background .32s cubic-bezier(.33,1,.68,1),transform .32s cubic-bezier(.33,1,.68,1)}
+.aeo-dg-dot.on{background:var(--color-blue-500,#266df0)}
+
 /* ---- viz 3 content (Attio outreach-list style) ---- */
 .aeo-askbar{display:flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid var(--color-white-600,#dee2e7);border-radius:14px;background:#fff;box-shadow:0 1px 2px rgba(16,16,16,.04);margin-bottom:18px}
 .aeo-askbar-ph{flex:1;font-size:14.5px;color:var(--color-black-800,#8f99a8);font-weight:500}
@@ -486,23 +499,23 @@ PLATFORM = r"""
   '<div class="aeo-plat-inner">'+
     '<div class="aeo-plat-intro">'+
       '<span class="aeo-pill aeo-pill-center">Answer Engine Optimization Agency</span>'+
-      '<h2 class="aeo-h2">Everything your business needs to be recommended by AI</h2>'+
-      '<p class="aeo-lead">We improve every signal AI uses to understand, trust and recommend your business across ChatGPT, Perplexity, Gemini, Claude and Google AI Overviews.</p>'+
+      '<h2 class="aeo-h2">How we help customers find your business through AI</h2>'+
+      '<p class="aeo-lead">We optimize your website, content and online presence so you appear when customers search with AI.</p>'+
     '</div>'+
     '<div class="aeo-block">'+
-      '<div class="aeo-block-copy"><span class="aeo-pill">Measure</span><h3 class="aeo-h3">AI Visibility</h3><p class="aeo-body">Understand how AI sees your business, benchmark your visibility against competitors and identify where the biggest opportunities exist.</p></div>'+
-      '<div class="aeo-viz"><div class="aeo-card">'+bar("AI visibility",LIVE)+'<div class="aeo-card-body" id="aeo-viz-vis"></div></div></div>'+
+      '<div class="aeo-block-copy"><span class="aeo-pill">Visibility</span><h3 class="aeo-h3">Understand how often AI mentions you</h3><p class="aeo-body">We ask AI the questions your customers ask, hundreds of times a month, and count how often your name comes back.</p></div>'+
+      '<div class="aeo-viz"><div class="aeo-card"><div class="aeo-card-body" id="aeo-viz-vis"></div></div></div>'+
     '</div>'+
     '<div class="aeo-block rev">'+
-      '<div class="aeo-block-copy"><span class="aeo-pill">Structure</span><h3 class="aeo-h3">Website Optimization</h3><p class="aeo-body">Structure your website so AI can accurately understand your services, locations, expertise and the customers you serve.</p></div>'+
+      '<div class="aeo-block-copy"><span class="aeo-pill">Site Structure</span><h3 class="aeo-h3">Make your site easy for AI to read</h3><p class="aeo-body">We organize your site so AI can clearly read your services, locations and hours.</p></div>'+
       '<div class="aeo-viz"><div class="aeo-card">'+bar("Site structure")+'<div class="aeo-card-body" id="aeo-viz-web"></div></div></div>'+
     '</div>'+
     '<div class="aeo-block">'+
-      '<div class="aeo-block-copy"><span class="aeo-pill">Create</span><h3 class="aeo-h3">Content Optimization</h3><p class="aeo-body">Create and improve the content AI relies on when answering customer questions, comparing businesses and making recommendations.</p></div>'+
+      '<div class="aeo-block-copy"><span class="aeo-pill">Content</span><h3 class="aeo-h3">Create content that AI quotes</h3><p class="aeo-body">We write the pages AI pulls from when it answers your customers\u2019 questions.</p></div>'+
       '<div class="aeo-viz"><div class="aeo-card">'+bar("Content")+'<div class="aeo-card-body" id="aeo-viz-content"></div></div></div>'+
     '</div>'+
     '<div class="aeo-block rev">'+
-      '<div class="aeo-block-copy"><span class="aeo-pill">Strengthen</span><h3 class="aeo-h3">Authority Building</h3><p class="aeo-body">Strengthen the trust signals AI uses through reviews, citations, business profiles, third-party mentions and wider brand coverage.</p></div>'+
+      '<div class="aeo-block-copy"><span class="aeo-pill">Authority</span><h3 class="aeo-h3">Show up in the sources AI checks</h3><p class="aeo-body">We build the reviews, citations and mentions AI looks at before recommending you.</p></div>'+
       '<div class="aeo-viz"><div class="aeo-card">'+bar("Trust signals",LIVE)+'<div class="aeo-card-body" id="aeo-viz-auth"></div></div></div>'+
     '</div>'+
   '</div>';
@@ -514,46 +527,40 @@ PLATFORM = r"""
   }
   function toks(str){return str.match(/\S+\s*|\s+/g)||[];}
 
-  /* ---------------- viz 1: AI Visibility (per engine, real logos) ---------------- */
+  /* ---------------- viz 1: how often AI mentions you (dot grid) ---------------- */
   function startVisibility(){
     var root=document.getElementById("aeo-viz-vis");if(!root||!A())return;
-    var a=A();
-    var engs=[
-      {name:"ChatGPT",bg:"#000",col:"#fff",logo:a.aiSvg(a.P_OPENAI),v:94,avg:47},
-      {name:"Perplexity",bg:"#20808D",col:"#fff",logo:a.aiSvg(a.P_PPLX),v:88,avg:44},
-      {name:"Claude",bg:"#D97757",col:"#fff",logo:a.aiSvg(a.P_CLAUDE),v:81,avg:46},
-      {name:"AI Overviews",bg:"#fff",col:"#000",logo:GOOG,v:73,avg:52,extra:"border:1px solid #e4e7ec"},
-      {name:"Gemini",bg:"#fff",col:"#000",logo:a.GEM_SVG,v:62,avg:55,extra:"border:1px solid #d9dde3"}
+    var scenarios=[
+      {q:'"Best HVAC company in Phoenix"',n:64},
+      {q:'"Top rated dentist near me"',n:71},
+      {q:'"Emergency plumber in Austin"',n:58},
+      {q:'"Best med spa in Dallas"',n:68}
     ];
-    function pill(v){return v>=80?'<span class="aeo-bm-pill good">Strong</span>':v>=70?'<span class="aeo-bm-pill mid">Growing</span>':'<span class="aeo-bm-pill low">Opportunity</span>';}
-    var idx=Math.round(engs.reduce(function(s,e){return s+e.v;},0)/engs.length);
-    var head='<div class="aeo-bm-head"><div><div class="aeo-bm-label">AI visibility index</div><div class="aeo-bm-score"><span class="aeo-bm-num" id="aeo-bm-num">0</span><span class="aeo-bm-delta">+45 pts</span></div><div class="aeo-bm-sub">How often AI recommends you, last 30 days</div></div></div>'+
-      '<div class="aeo-bm-legend"><span><i></i>Your visibility</span><span><i class="mk"></i>Competitor average</span></div>';
-    var body='';
-    engs.forEach(function(e){
-      body+='<div class="aeo-bm-row aeo-bm-eng"><span class="aeo-bm-av" style="background:'+e.bg+';color:'+e.col+';'+(e.extra||'')+'">'+e.logo+'</span><span class="aeo-bm-name">'+e.name+'</span><span class="aeo-bm-track"><span class="aeo-bm-mark" style="left:'+e.avg+'%"></span><span class="aeo-bm-fill" data-v="'+e.v+'"></span></span><span class="aeo-bm-val" data-v="'+e.v+'">0</span>'+pill(e.v)+'</div>';
-    });
-    root.innerHTML=head+'<div class="aeo-bm-list">'+body+'</div>';
-    var fills=root.querySelectorAll(".aeo-bm-fill"),vals=root.querySelectorAll(".aeo-bm-val"),num=document.getElementById("aeo-bm-num");
+    var dots='';for(var i=0;i<100;i++)dots+='<span class="aeo-dg-dot"></span>';
+    root.innerHTML='<div class="aeo-dg-head"><span class="aeo-dg-q" id="aeo-dg-q"></span><span class="aeo-dg-days">Last 30 days</span></div>'+
+      '<div class="aeo-dg-score"><span class="aeo-dg-num" id="aeo-dg-num">0</span><span class="aeo-dg-cap">of 100 answers name you</span></div>'+
+      '<div class="aeo-dg-grid" id="aeo-dg-grid">'+dots+'</div>';
+    var grid=document.getElementById("aeo-dg-grid"),num=document.getElementById("aeo-dg-num"),qEl=document.getElementById("aeo-dg-q");
+    var cells=grid.querySelectorAll(".aeo-dg-dot");
+    function order(){var a=[],j,k,t;for(j=0;j<100;j++)a.push(j);for(j=99;j>0;j--){k=Math.floor(Math.random()*(j+1));t=a[j];a[j]=a[k];a[k]=t;}return a;}
     (async function(){
-      await sleep(360);if(!document.body.contains(root))return;
-      // clean reveal
-      for(var i=0;i<fills.length;i++){
-        if(!document.body.contains(root))return;
-        var v=+fills[i].getAttribute("data-v");
-        fills[i].style.width=v+"%";countTo(vals[i],v,760);
-        await sleep(150);
-      }
-      countTo(num,idx,900);
-      // continuous loop: re-measure (drift then settle) so it clearly keeps working, never empties
+      var si=0;
       while(document.body.contains(root)){
+        var sc=scenarios[si%scenarios.length];
+        qEl.textContent=sc.q;
+        var ord=order();
+        for(var c=0;c<cells.length;c++)cells[c].classList.remove("on");
+        num.textContent="0";
+        await sleep(460);if(!document.body.contains(root))return;
+        countTo(num,sc.n,Math.max(760,sc.n*13));
+        for(var d=0;d<sc.n;d++){
+          if(!document.body.contains(root))return;
+          cells[ord[d]].classList.add("on");
+          await sleep(13);
+        }
+        num.textContent=sc.n;
         await sleep(3400);if(!document.body.contains(root))return;
-        var t1=0;
-        for(var d=0;d<fills.length;d++){var bv=+fills[d].getAttribute("data-v");var nv=Math.max(55,Math.min(97,bv+(Math.random()<.5?-3:3)));fills[d].style.width=nv+"%";countTo(vals[d],nv,600);t1+=nv;}
-        countTo(num,Math.round(t1/fills.length),600);
-        await sleep(1500);if(!document.body.contains(root))return;
-        var t2=0;for(var j=0;j<fills.length;j++){var cv=+fills[j].getAttribute("data-v");fills[j].style.width=cv+"%";countTo(vals[j],cv,600);t2+=cv;}
-        countTo(num,Math.round(t2/fills.length),600);
+        si++;
       }
     })();
   }
@@ -575,9 +582,7 @@ PLATFORM = r"""
       {k:"Business",ic:IC.biz,v:["Your Business"]},
       {k:"Services",ic:IC.svc,v:["Cleanings","Implants","Whitening"]},
       {k:"Locations",ic:IC.loc,v:["Austin","Dallas","+2"]},
-      {k:"Hours",ic:IC.hrs,v:["Mon to Sat"]},
-      {k:"Expertise",ic:IC.exp,v:["Cosmetic","Family"]},
-      {k:"Serves",ic:IC.usr,v:["Families","Professionals"]}
+      {k:"Hours",ic:IC.hrs,v:["Mon to Sat"]}
     ];
     var head='<div class="aeo-rec-head"><span class="aeo-rec-fav">'+GLOBE+'</span><span class="aeo-rec-url">yourbusiness.com</span></div>'+
       '<div class="aeo-rec-prog"><span>Understood by AI</span><span class="aeo-rec-pct" id="aeo-rec-pct">0%</span></div>'+
@@ -659,30 +664,37 @@ PLATFORM = r"""
   function startAuthority(){
     var root=document.getElementById("aeo-viz-auth");if(!root||!A())return;
     var STAR='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>';
-    var feed=[
-      {logo:GOOG,t:"New 5-star review",m:"Google",p:5},
-      {logo:TRUST,t:"Rated Excellent",m:"Trustpilot",p:6},
-      {logo:YELP,t:"New 5-star review",m:"Yelp",p:4},
-      {logo:FB,t:"Recommended by a customer",m:"Facebook",p:6},
+    var items=[
       {logo:GOOG,t:"Added to a recommended list",m:"Google",p:5},
-      {logo:TRUST,t:"New verified review",m:"Trustpilot",p:5}
+      {logo:FB,t:"Recommended by a customer",m:"Facebook",p:6},
+      {logo:YELP,t:"New 5-star review",m:"Yelp",p:4},
+      {logo:TRUST,t:"Rated Excellent",m:"Trustpilot",p:6}
+    ];
+    var extra=[
+      {logo:GOOG,t:"New 5-star review",m:"Google",p:5},
+      {logo:TRUST,t:"New verified review",m:"Trustpilot",p:5},
+      {logo:FB,t:"Tagged in a local recommendation",m:"Facebook",p:4}
     ];
     var stars='';for(var s=0;s<5;s++)stars+=STAR;
     var head='<div class="aeo-tr-head"><div><div class="aeo-bm-label">Authority score</div><div class="aeo-tr-num" id="aeo-tr-num">0</div><div class="aeo-tr-stars">'+stars+'</div></div><span class="aeo-tr-delta" id="aeo-tr-delta">rising</span></div>';
     root.innerHTML=head+'<div class="aeo-tr-feed" id="aeo-tr-feed"></div>';
-    var feedEl=document.getElementById("aeo-tr-feed"),num=document.getElementById("aeo-tr-num"),delta=document.getElementById("aeo-tr-delta"),MAXVIS=4;
+    var feedEl=document.getElementById("aeo-tr-feed"),num=document.getElementById("aeo-tr-num"),delta=document.getElementById("aeo-tr-delta");
+    function mk(f){return el("div","aeo-tr-item enter",'<span class="aeo-tr-logo">'+f.logo+'</span><span class="aeo-tr-main"><span class="aeo-tr-t">'+f.t+'</span><span class="aeo-tr-m">'+f.m+'</span></span><span class="aeo-tr-pts">+'+f.p+'</span>');}
     (async function(){
-      var i=0,score=84;
-      countTo(num,84,900);
-      await sleep(950);
+      countTo(num,100,1100);delta.textContent="rising";
+      for(var k=items.length-1;k>=0;k--){
+        if(!document.body.contains(root))return;
+        feedEl.insertBefore(mk(items[k]),feedEl.firstChild);
+        await sleep(430);
+      }
+      delta.textContent="Top rated";
+      // calm: occasionally slide in a fresh signal and drop the oldest
+      var e=0;
       while(document.body.contains(root)){
-        var f=feed[i%feed.length];
-        var item=el("div","aeo-tr-item enter",'<span class="aeo-tr-logo">'+f.logo+'</span><span class="aeo-tr-main"><span class="aeo-tr-t">'+f.t+'</span><span class="aeo-tr-m">'+f.m+'</span></span><span class="aeo-tr-pts">+'+f.p+'</span>');
-        feedEl.insertBefore(item,feedEl.firstChild);
-        score=Math.min(100,score+f.p);countTo(num,score,700);delta.textContent=score>=100?"Top rated":"+"+f.p+" pts";
-        while(feedEl.children.length>MAXVIS)feedEl.removeChild(feedEl.lastChild);
-        await sleep(1950);if(!document.body.contains(root))return;
-        i++;
+        await sleep(4200);if(!document.body.contains(root))return;
+        feedEl.insertBefore(mk(extra[e%extra.length]),feedEl.firstChild);
+        while(feedEl.children.length>4)feedEl.removeChild(feedEl.lastChild);
+        e++;
       }
     })();
   }
