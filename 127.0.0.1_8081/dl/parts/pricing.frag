@@ -1,0 +1,147 @@
+<style id="aeo-pricing-style">
+.aeo-subpage .aeo-plat-inner{padding-top:clamp(120px,14vw,170px)}
+.aeo-price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch}
+.aeo-price{position:relative;display:flex;flex-direction:column;background:#fff;border:1px solid var(--color-white-600,#dee2e7);border-radius:18px;padding:30px 28px;box-shadow:0 1px 2px rgba(16,16,16,.04),0 22px 46px -30px rgba(28,29,31,.18);transition:transform .45s cubic-bezier(.33,1,.68,1),box-shadow .45s;opacity:0;transform:translateY(22px)}
+.aeo-price.in{opacity:1;transform:none}
+.aeo-price:hover{transform:translateY(-5px);box-shadow:0 2px 4px rgba(16,16,16,.05),0 30px 60px -30px rgba(38,109,240,.25)}
+.aeo-price--hot{border-color:transparent}
+.aeo-price--hot::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;background:linear-gradient(135deg,#266df0,#8c6ef5 45%,#2dbfa8);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;pointer-events:none}
+.aeo-price-flag{position:absolute;top:-13px;left:50%;transform:translateX(-50%);font-size:11.5px;font-weight:700;letter-spacing:.03em;color:#fff;background:linear-gradient(135deg,#266df0,#8c6ef5);padding:5px 14px;border-radius:999px;white-space:nowrap;box-shadow:0 6px 16px -6px rgba(38,109,240,.6)}
+.aeo-price-name{font-family:"Inter Display",Inter,sans-serif;font-size:19px;font-weight:600;color:#1c1d1f;letter-spacing:-.01em}
+.aeo-price-sub{margin-top:6px;font-size:13.5px;line-height:1.5;color:#6f7988;font-weight:500;min-height:40px}
+.aeo-price-amount{display:flex;align-items:baseline;gap:7px;margin:18px 0 4px}
+.aeo-price-num{font-family:"Inter Display",Inter,sans-serif;font-size:44px;font-weight:700;letter-spacing:-.02em;color:#1c1d1f;line-height:1;font-variant-numeric:tabular-nums}
+.aeo-price-per{font-size:14px;font-weight:500;color:#8f99a8}
+.aeo-price-feats{margin:20px 0 26px;padding:18px 0 0;border-top:1px solid var(--color-white-400,#edeff3);display:flex;flex-direction:column;gap:11px;flex:1}
+.aeo-price-feat{display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:1.45;color:#3a4150;font-weight:500}
+.aeo-price-feat svg{width:16px;height:16px;flex:none;margin-top:2px;color:#16a34a}
+.aeo-price-feat.dim{color:#8f99a8}
+.aeo-price .aeo-btn{width:100%}
+.aeo-price-note{text-align:center;margin:26px auto 0;font-size:13.5px;color:#8f99a8;font-weight:500}
+
+/* FAQ */
+.aeo-faq{max-width:760px;margin:clamp(72px,9vw,120px) auto 0}
+.aeo-faq-h{text-align:center;margin-bottom:34px}
+.aeo-faq details{border:1px solid var(--color-white-500,#e4e7ec);border-radius:14px;background:#fff;margin-bottom:12px;overflow:hidden;transition:box-shadow .3s}
+.aeo-faq details[open]{box-shadow:0 14px 34px -24px rgba(28,29,31,.25)}
+.aeo-faq summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 20px;font-size:15.5px;font-weight:600;color:#1c1d1f;font-family:inherit}
+.aeo-faq summary::-webkit-details-marker{display:none}
+.aeo-faq summary::after{content:"+";font-size:20px;font-weight:500;color:#8f99a8;transition:transform .25s;line-height:1}
+.aeo-faq details[open] summary::after{transform:rotate(45deg)}
+.aeo-faq-a{padding:0 20px 18px;font-size:14.5px;line-height:1.6;color:#5b6472;font-weight:500}
+
+/* CTA band */
+.aeo-cta-band{position:relative;margin-top:clamp(72px,9vw,120px);border-radius:22px;background:#0e0f11;overflow:hidden;text-align:center;padding:clamp(52px,6vw,84px) 28px}
+.aeo-cta-band .bg{position:absolute;inset:0;pointer-events:none}
+.aeo-cta-band .bg i{position:absolute;border-radius:50%;filter:blur(70px);display:block}
+.aeo-cta-band .bg i:nth-child(1){width:44vw;height:44vw;left:-10%;top:-70%;background:radial-gradient(circle,rgba(38,109,240,.30),transparent 65%);animation:aeo-drift-a 24s ease-in-out infinite alternate}
+.aeo-cta-band .bg i:nth-child(2){width:38vw;height:38vw;right:-8%;bottom:-80%;background:radial-gradient(circle,rgba(140,110,245,.24),transparent 65%);animation:aeo-drift-b 30s ease-in-out infinite alternate}
+.aeo-cta-band h2{position:relative;font-family:"Inter Display",Inter,sans-serif;font-weight:600;font-size:clamp(28px,3.6vw,44px);letter-spacing:-.02em;line-height:1.05;margin:0 0 14px;background:linear-gradient(180deg,#fff 45%,#9db9f2);-webkit-background-clip:text;background-clip:text;color:transparent;text-wrap:balance}
+.aeo-cta-band p{position:relative;margin:0 auto 28px;font-size:16px;color:#aab1bd;font-weight:500;max-width:48ch}
+.aeo-cta-band .aeo-btn{position:relative}
+@media (max-width:960px){.aeo-price-grid{grid-template-columns:1fr;max-width:460px;margin:0 auto}}
+@media (prefers-reduced-motion: reduce){.aeo-price{opacity:1;transform:none;transition:none}}
+</style>
+<template id="aeo-page-tpl">
+<section class="aeo-plat aeo-subpage" id="aeo-page">
+  <div class="aeo-plat-bg"><i class="aeo-blob aeo-blob-a"></i><i class="aeo-blob aeo-blob-b"></i></div>
+  <div class="aeo-plat-inner">
+    <div class="aeo-plat-intro">
+      <span class="aeo-pill aeo-pill-center">Pricing</span>
+      <h1 class="aeo-h2" style="font-size:clamp(38px,5vw,62px)">Plans that pay for themselves</h1>
+      <p class="aeo-lead">Every plan starts with a free AI visibility audit. No long-term contracts &mdash; you stay because it works.</p>
+    </div>
+    <div class="aeo-price-grid">
+      <div class="aeo-price">
+        <div class="aeo-price-name">Audit</div>
+        <div class="aeo-price-sub">See exactly how AI talks about your business today.</div>
+        <div class="aeo-price-amount"><span class="aeo-price-num">Free</span></div>
+        <div class="aeo-price-feats">
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Mention-rate baseline across 4 AI engines</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Schema and site readability report</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Competitor comparison for your area</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>30-minute walkthrough call</div>
+        </div>
+        <a class="aeo-btn aeo-btn--ghost" href="contact.html">Get your free audit</a>
+      </div>
+      <div class="aeo-price aeo-price--hot">
+        <span class="aeo-price-flag">Most popular</span>
+        <div class="aeo-price-name">Growth</div>
+        <div class="aeo-price-sub">Everything you need to become the answer in your area.</div>
+        <div class="aeo-price-amount"><span class="aeo-price-num">$990</span><span class="aeo-price-per">/month</span></div>
+        <div class="aeo-price-feats">
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in Audit</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Schema and site structure fixes</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>4 AI-ready pages every month</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Review and citation building</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Monthly mention-rate reporting</div>
+        </div>
+        <a class="aeo-btn aeo-btn--blue" href="contact.html">Start with Growth</a>
+      </div>
+      <div class="aeo-price">
+        <div class="aeo-price-name">Dominate</div>
+        <div class="aeo-price-sub">For businesses that want the whole market, not a share.</div>
+        <div class="aeo-price-amount"><span class="aeo-price-num">$1,990</span><span class="aeo-price-per">/month</span></div>
+        <div class="aeo-price-feats">
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in Growth</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>10 AI-ready pages every month</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Weekly tracking and alerts</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Competitor displacement strategy</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Priority support, quarterly strategy</div>
+        </div>
+        <a class="aeo-btn aeo-btn--ghost" href="contact.html">Book a call</a>
+      </div>
+    </div>
+    <p class="aeo-price-note">Prices in USD. Month to month &mdash; cancel anytime. Everything we build stays yours.</p>
+    <div class="aeo-faq">
+      <div class="aeo-faq-h"><span class="aeo-pill aeo-pill-center">FAQ</span><h2 class="aeo-h2" style="font-size:clamp(26px,3vw,38px)">Questions, answered</h2></div>
+      <details open><summary>What is answer engine optimization?</summary><div class="aeo-faq-a">When customers ask ChatGPT, Perplexity, Gemini or Claude &ldquo;who&rsquo;s the best plumber near me?&rdquo;, those engines pick a handful of businesses to recommend. AEO is the work of making sure your business is one of them &mdash; structured data, content the engines want to quote, and the reviews and citations they check before recommending anyone.</div></details>
+      <details><summary>How long until I see results?</summary><div class="aeo-faq-a">Most clients see their mention rate start moving within 30&ndash;60 days. The full effect typically lands around 90 days, once new pages and citations have been crawled and picked up by the engines.</div></details>
+      <details><summary>How do you measure &ldquo;recommended by AI&rdquo;?</summary><div class="aeo-faq-a">Every month we run hundreds of real customer questions through each AI engine and count how often your business is named. That gives you a mention rate &mdash; a single number you can watch climb, benchmarked against your competitors.</div></details>
+      <details><summary>Do I need a new website?</summary><div class="aeo-faq-a">No. We work with your existing site &mdash; we add structured data, fix what AI can&rsquo;t read, and publish new pages inside your current setup. You keep full ownership of everything.</div></details>
+      <details><summary>What happens if I cancel?</summary><div class="aeo-faq-a">Everything stays yours: the schema, the pages, the citations and the reviews. There are no lock-ins and nothing is removed. Most of the work keeps compounding after we stop.</div></details>
+    </div>
+    <div class="aeo-cta-band">
+      <div class="bg"><i></i><i></i></div>
+      <h2>Be the business AI recommends.</h2>
+      <p>Start with a free audit &mdash; see your mention rate, your competitors&rsquo;, and exactly what it takes to win.</p>
+      <a class="aeo-btn aeo-btn--blue" href="contact.html">Get your free audit</a>
+    </div>
+  </div>
+</section>
+</template>
+<script id="aeo-page-script">
+(function(){
+  function mount(){
+    var main=document.querySelector("main");if(!main)return;
+    if(!document.getElementById("aeo-page")){
+      var tpl=document.getElementById("aeo-page-tpl");if(!tpl)return;
+      main.insertBefore(tpl.content.cloneNode(true),main.firstChild);
+      reveal();
+    }
+    var kids=main.children;
+    for(var i=0;i<kids.length;i++){
+      var k=kids[i];
+      if(k.id==="aeo-page")continue;
+      if(k.style.display!=="none")k.style.display="none";
+    }
+  }
+  function reveal(){
+    var cards=document.querySelectorAll(".aeo-price");
+    var reduce=false;try{reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;}catch(e){}
+    if(reduce||!("IntersectionObserver" in window)){cards.forEach(function(c){c.classList.add("in");});return;}
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){
+      if(!e.isIntersecting)return;io.unobserve(e.target);
+      var d=(e.target.getAttribute("data-i")||0)*140;
+      (function(t){setTimeout(function(){t.classList.add("in");},d);})(e.target);
+    });},{threshold:.15});
+    cards.forEach(function(c,i){c.setAttribute("data-i",i);io.observe(c);});
+  }
+  var n=0,iv=setInterval(function(){mount();if(++n>70)clearInterval(iv);},150);
+  document.addEventListener("DOMContentLoaded",mount);
+  window.addEventListener("load",mount);
+  var mo=new MutationObserver(mount);
+  try{mo.observe(document.body||document.documentElement,{childList:true,subtree:true});}catch(e){}
+  setTimeout(function(){try{mo.disconnect();}catch(e){}},11000);
+})();
+</script>

@@ -1,13 +1,51 @@
 #!/usr/bin/env python3
-import glob, os
+import glob, os, re
 
-HEAD = "Be the business that AI recommends to customers"
-HEAD_HTML = "Be the business that AI recommends<br>to customers"
+HEAD = "Be the business that AI recommends"
+HEAD_HTML = "Be the business that AI recommends"
 SUB = "We get local businesses recommended by ChatGPT, Perplexity, Gemini and Claude."
 BADGE = "Best AEO agency 2026"
 
 SRC = "original-attio-backup.html.bak"
-LIVE = [f for f in glob.glob("*.html") if "backup" not in f][0]
+LIVE = [f for f in glob.glob("*.html") if f.startswith("ua=")][0]
+
+# The page-saving tool left every /_next/... script, style, and image reference as a
+# root-absolute URL, but the actual files only exist under eSOZMHKB8k26.com/_next/...,
+# with query strings folded into the filename (e.g. "foo.svg?dpl=X" -> "foo_dpl=X.svg",
+# and "/_next/image?url=A&w=B" saved as a literal directory "/_next/image/url=A&w=B").
+# Without this rewrite every JS/CSS/image request 404s and the page renders blank.
+def fix_next_asset_paths(html):
+    def repl(m):
+        # raw is "_next/..." whether the source had it as a root-absolute ref
+        # or already prefixed with "../../eSOZMHKB8k26.com" (the save tool did
+        # this for some <img> tags, but left the query string double-encoded).
+        raw = m.group(2)
+        # Some srcset/preload entries are double percent-encoded (%3D for "=",
+        # %26 for "&", %252F for "%2F") while the saved-on-disk names use a single
+        # encoding pass. Normalizing first collapses every variant to one shape.
+        raw = raw.replace("%3D", "=").replace("%26", "&").replace("%25", "%")
+        img_m = re.match(r"_next/image[?/](.*)", raw, re.S)
+        if img_m:
+            # The saved file's name preserves a literal "%2F" (not a real slash),
+            # but Python's http.server URL-decodes %XX before the filesystem
+            # lookup, turning %2F into an actual "/" and breaking the match.
+            # Escaping "%" as "%25" here means it survives exactly one decode
+            # pass intact and lands back on the literal disk filename.
+            fixed = "_next/image/" + img_m.group(1).replace("%", "%25")
+        elif "?" in raw:
+            base, query = raw.split("?", 1)
+            dot = base.rfind(".")
+            fixed = f"{base[:dot]}_{query}{base[dot:]}" if dot != -1 else f"{base}_{query}"
+        else:
+            fixed = raw
+        return "../../eSOZMHKB8k26.com/" + fixed
+
+    # Matches every /_next/... reference, whether root-absolute or already
+    # relative-but-still-mis-encoded, and rewrites it idempotently so both
+    # shapes converge on the same correct, disk-matching relative path.
+    # Parens are excluded too so unquoted CSS url(...) values terminate at
+    # the closing paren instead of swallowing the rest of the declaration.
+    return re.sub(r'(\.\./\.\./eSOZMHKB8k26\.com)?/(_next/[^"\'\\,\s()]+)', repl, html)
 
 html = open(SRC, encoding="utf-8").read()
 
@@ -25,6 +63,10 @@ html = html.replace("filter:blur(1.5px);opacity:0", "")
 
 # --- 1c. CTA copy: make the free offer explicit everywhere ---
 html = html.replace("Start for free", "Get your free audit")
+
+# --- 1d. final CTA + misc copy for the agency site ---
+html = html.replace("Agentic revenue runs on Attio.", "Be the business AI recommends.")
+html = html.replace("Talk to sales", "Book a call")
 
 # --- 2. injected style + script (mounts chat animation into attio's mockup slot) ---
 INJECT = r"""
@@ -164,7 +206,7 @@ INJECT = r"""
   }
   function applyText(){
     var s=getHero(); if(!s)return;
-    s.querySelectorAll("h1").forEach(function(h){ if(h.innerHTML.indexOf("<br>")===-1||h.textContent.replace(/\s+/g," ").trim()!==HEAD)h.innerHTML=HEAD_HTML; });
+    s.querySelectorAll("h1").forEach(function(h){ if(h.innerHTML!==HEAD_HTML)h.innerHTML=HEAD_HTML; });
     s.querySelectorAll("p").forEach(function(p){ var t=p.textContent||""; if((/recommended by|Attio is the CRM/.test(t))&&!p.querySelector(".aeo-ai-row"))p.innerHTML=SUB_HTML; });
   }
   function findMobileMock(){
@@ -291,448 +333,31 @@ INJECT = INJECT.replace("%%HEAD%%", json.dumps(HEAD)).replace("%%HEAD_HTML%%", j
 # ============================================================
 #  AEO PLATFORM SECTION  (replaces attio's Platform section)
 # ============================================================
-PLATFORM = r"""
-<style id="aeo-plat-style">
-.aeo-plat{background:var(--color-white-200,#fafafb);border-top:1px solid var(--color-white-500,#e4e7ec);font-family:var(--font-inter),"Inter",system-ui,sans-serif}
-.aeo-plat *{box-sizing:border-box}
-.aeo-plat-inner{max-width:1180px;margin:0 auto;padding:clamp(72px,9vw,132px) 24px}
-.aeo-plat-intro{text-align:center;max-width:820px;margin:0 auto}
-.aeo-pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;letter-spacing:.01em;color:var(--color-blue-600,#245bc2);background:var(--color-blue-100,#e8f0ff);border:1px solid rgba(38,109,240,.16);padding:5px 12px;border-radius:999px;margin-bottom:18px}
-.aeo-pill-center{margin:0 auto 4px}
-.aeo-h2{font-family:"Inter Display",Inter,sans-serif;font-weight:600;font-size:clamp(32px,4.4vw,54px);line-height:1.02;letter-spacing:-.025em;color:var(--color-black-100,#1c1d1f);margin:16px 0 0;text-wrap:balance}
-.aeo-lead{font-size:clamp(17px,1.4vw,20px);line-height:1.4;color:var(--color-black-700,#6f7988);margin:18px auto 0;max-width:60ch;font-weight:500;text-wrap:balance}
-.aeo-block{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,5vw,88px);align-items:center;padding:clamp(44px,6.5vw,104px) 0}
-.aeo-block.rev .aeo-block-copy{order:2}
-.aeo-block.rev .aeo-viz{order:1}
-.aeo-h3{font-family:"Inter Display",Inter,sans-serif;font-weight:600;font-size:clamp(26px,2.9vw,38px);line-height:1.05;letter-spacing:-.02em;color:var(--color-black-100,#1c1d1f);margin:0 0 16px;text-wrap:balance}
-.aeo-body{font-size:clamp(16px,1.25vw,18px);line-height:1.5;color:var(--color-black-700,#6f7988);font-weight:500;max-width:46ch}
-.aeo-card{position:relative;background:#fff;border:1px solid var(--color-white-600,#dee2e7);border-radius:18px;box-shadow:0 1px 2px rgba(16,16,16,.04),0 22px 44px -24px rgba(28,29,31,.20),0 60px 110px -70px rgba(28,29,31,.30);overflow:hidden;min-height:340px}
-.aeo-card-bar{display:flex;align-items:center;gap:11px;height:44px;padding:0 16px;border-bottom:1px solid var(--color-white-400,#edeff3)}
-.aeo-tl{display:flex;gap:6px}
-.aeo-tl i{width:10px;height:10px;border-radius:999px;display:block}
-.aeo-tl i:nth-child(1){background:#ff5f57}.aeo-tl i:nth-child(2){background:#febc2e}.aeo-tl i:nth-child(3){background:#28c840}
-.aeo-card-title{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--color-black-600,#505967)}
-.aeo-card-body{padding:20px 22px}
-/* shared logo tile */
-.aeo-ai-sq{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;box-shadow:0 1px 2px rgba(16,16,16,.14);flex:none}
-.aeo-ai-sq svg{width:16px;height:16px;display:block}
+PLATFORM = open("parts/platform.frag", encoding="utf-8").read()
 
-.aeo-card-badge{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:#127a45;background:#e7f7ee;border:1px solid #cdeeda;border-radius:999px;padding:3px 9px}
-.aeo-card-badge .aeo-live-dot{width:6px;height:6px;border-radius:999px;background:#16a34a;animation:aeo-livepulse 1.6s ease-in-out infinite}
-@keyframes aeo-livepulse{0%,100%{opacity:.35;transform:scale(.9)}50%{opacity:1;transform:scale(1)}}
-.aeo-fadein{animation:aeo-fadein .5s cubic-bezier(.33,1,.68,1) both}
-@keyframes aeo-fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+CHROME = open("parts/chrome.frag", encoding="utf-8").read()
+HOMEXTRA = open("parts/home_extra.frag", encoding="utf-8").read()
 
-/* ---- viz 1: AI Visibility (benchmark index) ---- */
-.aeo-bm-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px}
-.aeo-bm-label{font-size:13px;font-weight:600;color:var(--color-black-700,#6f7988);margin-bottom:6px}
-.aeo-bm-score{display:flex;align-items:baseline;gap:10px}
-.aeo-bm-num{font-family:"Inter Display",Inter,sans-serif;font-size:46px;font-weight:700;line-height:1;letter-spacing:-.02em;color:var(--color-black-100,#1c1d1f);font-variant-numeric:tabular-nums}
-.aeo-bm-delta{font-size:12px;font-weight:600;color:#0f8a4f;background:#e7f7ee;border-radius:999px;padding:3px 9px}
-.aeo-bm-spark{display:flex;align-items:flex-end;gap:3px;height:38px}
-.aeo-bm-spark i{width:5px;border-radius:3px;background:var(--color-white-500,#e4e7ec);display:block;transition:height .6s cubic-bezier(.33,1,.68,1),background .6s}
-.aeo-bm-spark i.on{background:var(--color-blue-400,#5c8bf5)}
-.aeo-bm-row{display:flex;align-items:center;gap:12px;padding:9px 0}
-.aeo-bm-av{width:28px;height:28px;border-radius:8px;background:var(--color-white-400,#edeff3);flex:none;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--color-black-700,#6f7988)}
-.aeo-bm-name{font-size:14px;font-weight:600;color:var(--color-black-300,#232529);width:118px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none}
-.aeo-bm-track{flex:1;height:9px;border-radius:999px;background:var(--color-white-400,#edeff3);overflow:hidden}
-.aeo-bm-fill{height:100%;width:0;border-radius:999px;background:var(--color-black-800,#c3c9d2);transition:width 1.1s cubic-bezier(.33,1,.68,1)}
-.aeo-bm-val{width:28px;text-align:right;font-size:13px;font-weight:600;color:var(--color-black-700,#6f7988);font-variant-numeric:tabular-nums;flex:none}
-.aeo-bm-row.you .aeo-bm-name{color:var(--color-blue-600,#245bc2);font-weight:700}
-.aeo-bm-row.you .aeo-bm-av{background:var(--color-blue-500,#266df0);color:#fff}
-.aeo-bm-row.you .aeo-bm-fill{background:linear-gradient(90deg,var(--color-blue-400,#5c8bf5),var(--color-blue-500,#266df0))}
-.aeo-bm-row.you .aeo-bm-val{color:var(--color-blue-600,#245bc2)}
+html = html.replace("</body>", INJECT + CHROME + PLATFORM + HOMEXTRA + "</body>", 1)
 
-/* ---- viz 2: Website Optimization (structured record) ---- */
-.aeo-rec-head{display:flex;align-items:center;gap:10px;padding-bottom:16px}
-.aeo-rec-fav{width:30px;height:30px;border-radius:8px;background:var(--color-blue-100,#e8f0ff);color:var(--color-blue-600,#245bc2);display:inline-flex;align-items:center;justify-content:center;flex:none}
-.aeo-rec-fav svg{width:17px;height:17px}
-.aeo-rec-url{font-size:14px;font-weight:600;color:var(--color-black-200,#202124)}
-.aeo-rec-prog{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;font-weight:600;color:var(--color-black-700,#6f7988);margin-bottom:8px}
-.aeo-rec-pct{color:var(--color-black-100,#1c1d1f);font-variant-numeric:tabular-nums}
-.aeo-rec-bar{height:6px;border-radius:999px;background:var(--color-white-400,#edeff3);overflow:hidden;margin-bottom:6px}
-.aeo-rec-bar-fill{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,var(--color-blue-400,#5c8bf5),var(--color-blue-500,#266df0));transition:width .7s cubic-bezier(.33,1,.68,1)}
-.aeo-attr{display:flex;align-items:center;gap:12px;padding:12px 2px;border-top:1px solid var(--color-white-400,#edeff3);opacity:0;transform:translateY(6px);transition:opacity .45s cubic-bezier(.33,1,.68,1),transform .45s cubic-bezier(.33,1,.68,1)}
-.aeo-attr.in{opacity:1;transform:none}
-.aeo-attr-k{width:92px;font-size:13px;color:var(--color-black-800,#8f99a8);font-weight:600;flex:none}
-.aeo-attr-v{flex:1;display:flex;gap:6px;flex-wrap:wrap;min-width:0}
-.aeo-vchip{padding:3px 9px;border-radius:7px;background:var(--color-white-300,#f3f4f6);border:1px solid var(--color-white-500,#e4e7ec);font-size:12.5px;font-weight:600;color:var(--color-black-300,#232529);white-space:nowrap}
-.aeo-attr-ic{width:20px;height:20px;border-radius:999px;background:#16a34a;color:#fff;display:inline-flex;align-items:center;justify-content:center;flex:none;opacity:0;transform:scale(.6);transition:opacity .3s,transform .3s cubic-bezier(.33,1,.68,1)}
-.aeo-attr-ic svg{width:12px;height:12px}
-.aeo-attr.in .aeo-attr-ic{opacity:1;transform:none}
-
-/* ---- viz 3: Content Optimization (content answers questions) ---- */
-.aeo-cc-ctx{font-size:13px;color:var(--color-black-700,#6f7988);font-weight:500;margin-bottom:14px}
-.aeo-cc-ctx b{color:var(--color-black-100,#1c1d1f);font-weight:600}
-.aeo-cc-doc{border:1px solid var(--color-white-500,#e4e7ec);border-radius:12px;background:var(--color-white-200,#fafafb);padding:16px 16px;min-height:118px}
-.aeo-cc-doc-t{font-size:14px;font-weight:700;color:var(--color-black-100,#1c1d1f);margin-bottom:8px}
-.aeo-cc-txt{font-size:14px;line-height:1.62;color:var(--color-black-200,#202124);min-height:66px}
-.aeo-cc-txt .aeo-tok{white-space:pre-wrap}
-.aeo-cc-hl{background:var(--color-blue-100,#e8f0ff);color:var(--color-blue-600,#245bc2);border-radius:5px;padding:0 4px;font-weight:600;box-shadow:inset 0 0 0 1px rgba(38,109,240,.16)}
-.aeo-cc-foot{display:flex;align-items:center;gap:10px;margin-top:16px}
-.aeo-cc-cov{font-size:12.5px;font-weight:600;color:var(--color-black-700,#6f7988)}
-.aeo-cc-cov b{color:var(--color-black-100,#1c1d1f);font-variant-numeric:tabular-nums}
-.aeo-cc-dots{display:flex;gap:5px;margin-left:auto}
-.aeo-cc-dot{width:16px;height:16px;border-radius:999px;background:var(--color-white-400,#edeff3);color:transparent;display:inline-flex;align-items:center;justify-content:center;transition:background .35s,color .35s,transform .25s}
-.aeo-cc-dot svg{width:10px;height:10px}
-.aeo-cc-dot.on{background:#16a34a;color:#fff}
-.aeo-cc-dot.pop{transform:scale(1.18)}
-
-/* ---- viz 4: Authority Building (trust signals feed) ---- */
-.aeo-tr-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
-.aeo-tr-num{font-family:"Inter Display",Inter,sans-serif;font-size:44px;font-weight:700;line-height:1;letter-spacing:-.02em;color:var(--color-black-100,#1c1d1f);font-variant-numeric:tabular-nums}
-.aeo-tr-stars{display:flex;gap:2px;color:#f5a623;margin-top:6px}
-.aeo-tr-stars svg{width:14px;height:14px}
-.aeo-tr-stars .off{color:var(--color-white-700,#d4d8de)}
-.aeo-tr-delta{font-size:12px;font-weight:600;color:#0f8a4f;background:#e7f7ee;border-radius:999px;padding:3px 9px}
-.aeo-tr-feed{position:relative;display:flex;flex-direction:column;gap:8px}
-.aeo-tr-item{display:flex;align-items:center;gap:11px;padding:11px 12px;border:1px solid var(--color-white-500,#e4e7ec);border-radius:12px;background:#fff;box-shadow:0 1px 2px rgba(16,16,16,.03)}
-.aeo-tr-item.enter{animation:aeo-tr-in .5s cubic-bezier(.33,1,.68,1) both}
-@keyframes aeo-tr-in{from{opacity:0;transform:translateY(-10px) scale(.98)}to{opacity:1;transform:none}}
-.aeo-tr-logo{width:30px;height:30px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;flex:none;background:var(--color-white-300,#f3f4f6);border:1px solid var(--color-white-500,#e4e7ec)}
-.aeo-tr-logo svg{width:17px;height:17px;display:block}
-.aeo-tr-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
-.aeo-tr-t{font-size:13.5px;font-weight:600;color:var(--color-black-200,#202124);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.aeo-tr-m{font-size:12px;color:var(--color-black-800,#8f99a8);font-weight:500}
-.aeo-tr-pts{font-size:12.5px;font-weight:700;color:#0f8a4f;flex:none;font-variant-numeric:tabular-nums}
-
-/* ---- refinements: realistic avatars, ranks, attribute icons ---- */
-.aeo-bm-sub{font-size:12px;color:var(--color-black-800,#8f99a8);font-weight:500;margin-top:4px}
-.aeo-bm-rank{width:14px;text-align:center;font-size:12.5px;font-weight:600;color:var(--color-black-800,#a4adba);font-variant-numeric:tabular-nums;flex:none}
-.aeo-bm-row.you .aeo-bm-rank{color:var(--color-blue-600,#245bc2)}
-.aeo-bm-av{color:#fff;font-size:10.5px;letter-spacing:.02em;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14),0 1px 2px rgba(16,16,16,.12)}
-.aeo-bm-trend{display:inline-flex;align-items:center;justify-content:flex-end;gap:1px;font-size:11px;font-weight:600;flex:none;width:34px}
-.aeo-bm-trend svg{width:10px;height:10px}
-.aeo-bm-trend.up{color:#0f8a4f}
-.aeo-bm-trend.flat{color:var(--color-black-900,#a4adba)}
-.aeo-bm-fill{background:var(--color-white-700,#cfd4db)}
-.aeo-bm-row.you .aeo-bm-track{background:var(--color-blue-100,#e8f0ff)}
-.aeo-attr{gap:11px}
-.aeo-attr-ico{width:26px;height:26px;border-radius:7px;background:var(--color-white-300,#f3f4f6);border:1px solid var(--color-white-500,#e4e7ec);color:var(--color-black-700,#6f7988);display:inline-flex;align-items:center;justify-content:center;flex:none}
-.aeo-attr-ico svg{width:14px;height:14px}
-.aeo-attr-k{width:78px}
-.aeo-cc-doc-badge{margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#127a45;background:#e7f7ee;border:1px solid #cdeeda;border-radius:999px;padding:2px 8px;opacity:0;transition:opacity .4s}
-.aeo-cc-doc-badge.in{opacity:1}
-.aeo-cc-doc-badge svg{width:11px;height:11px}
-.aeo-cc-doc-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.aeo-cc-doc-ic{width:20px;height:20px;border-radius:6px;background:var(--color-blue-100,#e8f0ff);color:var(--color-blue-600,#245bc2);display:inline-flex;align-items:center;justify-content:center;flex:none}
-.aeo-cc-doc-ic svg{width:12px;height:12px}
-.aeo-cc-doc-head .aeo-cc-doc-t{margin:0;flex:1;font-size:14px}
-.aeo-tr-logo{width:32px;height:32px;background:#fff}
-.aeo-tr-logo svg{width:19px;height:19px}
-
-/* ---- viz 1 engine board additions ---- */
-.aeo-bm-legend{display:flex;align-items:center;gap:16px;margin:2px 0 14px;font-size:11.5px;font-weight:500;color:var(--color-black-800,#8f99a8)}
-.aeo-bm-legend span{display:inline-flex;align-items:center;gap:6px}
-.aeo-bm-legend i{display:inline-block;width:14px;height:8px;border-radius:999px;background:linear-gradient(90deg,#5c8bf5,#266df0)}
-.aeo-bm-legend i.mk{width:2px;height:12px;border-radius:1px;background:var(--color-black-700,#6f7988)}
-.aeo-bm-track{position:relative;overflow:visible}
-.aeo-bm-track>.aeo-bm-fill{position:relative;z-index:1}
-.aeo-bm-mark{position:absolute;top:-2px;bottom:-2px;width:2px;border-radius:1px;background:var(--color-black-700,#8f99a8);z-index:2}
-.aeo-bm-pill{flex:none;font-size:10.5px;font-weight:600;border-radius:999px;padding:3px 8px;width:80px;text-align:center}
-.aeo-bm-pill.good{color:#127a45;background:#e7f7ee;border:1px solid #cdeeda}
-.aeo-bm-pill.mid{color:#245bc2;background:var(--color-blue-100,#e8f0ff);border:1px solid rgba(38,109,240,.18)}
-.aeo-bm-pill.low{color:#b45309;background:#fef3e2;border:1px solid #f6dcae}
-.aeo-bm-av svg{width:17px;height:17px;display:block}
-.aeo-bm-eng .aeo-bm-name{width:132px}
-.aeo-bm-eng .aeo-bm-val{width:28px}
-
-/* ---- viz 1 (new): "how often AI mentions you" dot grid ---- */
-.aeo-dg-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 2px 15px;margin-bottom:18px;border-bottom:1px solid var(--color-white-400,#edeff3)}
-.aeo-dg-q{font-size:15px;font-weight:600;color:var(--color-black-100,#1c1d1f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.aeo-dg-days{font-size:13px;font-weight:500;color:var(--color-black-800,#a4adba);flex:none}
-.aeo-dg-score{display:flex;align-items:baseline;gap:10px;margin-bottom:20px}
-.aeo-dg-num{font-family:"Inter Display",Inter,sans-serif;font-size:52px;font-weight:700;line-height:1;letter-spacing:-.02em;color:var(--color-black-100,#1c1d1f);font-variant-numeric:tabular-nums}
-.aeo-dg-cap{font-size:15px;font-weight:500;color:var(--color-black-700,#6f7988)}
-.aeo-dg-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:clamp(6px,1vw,9px)}
-.aeo-dg-dot{aspect-ratio:1/1;border-radius:999px;background:var(--color-white-500,#e4e7ec);transition:background .32s cubic-bezier(.33,1,.68,1),transform .32s cubic-bezier(.33,1,.68,1)}
-.aeo-dg-dot.on{background:var(--color-blue-500,#266df0)}
-
-/* ---- viz 3 content (Attio outreach-list style) ---- */
-.aeo-askbar{display:flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid var(--color-white-600,#dee2e7);border-radius:14px;background:#fff;box-shadow:0 1px 2px rgba(16,16,16,.04);margin-bottom:18px}
-.aeo-askbar-ph{flex:1;font-size:14.5px;color:var(--color-black-800,#8f99a8);font-weight:500}
-.aeo-askbar-go{width:28px;height:28px;border-radius:999px;background:var(--color-blue-100,#e8f0ff);color:var(--color-blue-600,#245bc2);display:inline-flex;align-items:center;justify-content:center;flex:none}
-.aeo-askbar-go svg{width:14px;height:14px}
-.aeo-clist-label{font-size:13px;font-weight:500;color:var(--color-black-700,#6f7988);margin-bottom:6px}
-.aeo-clist{display:flex;flex-direction:column;min-height:236px}
-.aeo-clist-row{display:flex;align-items:center;gap:12px;padding:13px 4px;border-top:1px solid var(--color-white-400,#edeff3);opacity:0;transform:translateY(8px);transition:opacity .45s cubic-bezier(.33,1,.68,1),transform .45s cubic-bezier(.33,1,.68,1);pointer-events:none}
-.aeo-clist-row.in{opacity:1;transform:none;pointer-events:auto}
-.aeo-clist-ico{width:30px;height:30px;border-radius:9px;background:var(--color-white-300,#f3f4f6);border:1px solid var(--color-white-500,#e4e7ec);color:var(--color-black-600,#505967);display:inline-flex;align-items:center;justify-content:center;flex:none}
-.aeo-clist-ico svg{width:15px;height:15px}
-.aeo-clist-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
-.aeo-clist-t{font-size:14.5px;font-weight:600;color:var(--color-black-100,#1c1d1f);line-height:1.25}
-.aeo-clist-m{font-size:13px;color:var(--color-black-800,#8f99a8);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-@media (max-width:860px){
-  .aeo-block{grid-template-columns:1fr;gap:28px}
-  .aeo-block.rev .aeo-block-copy{order:1}
-  .aeo-block.rev .aeo-viz{order:2}
-  .aeo-body{max-width:none}
-}
-</style>
-<script id="aeo-plat-script">
-(function(){
-  function A(){return window.__AEO||null;}
-  function el(tag,cls,html){var e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;}
-  function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
-  var CHECK='<svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  var YELP='<svg viewBox="0 0 24 24" fill="#FF1A1A"><path d="m7.6885 15.1415-3.6715.8483c-.3769.0871-.755.183-1.1452.155-.2611-.0188-.5122-.0414-.7606-.213a1.179 1.179 0 0 1-.331-.3594c-.3486-.5519-.3656-1.3661-.3697-2.0004a6.2874 6.2874 0 0 1 .3314-2.0642 1.857 1.857 0 0 1 .1073-.2474 2.3426 2.3426 0 0 1 .1255-.2165 2.4572 2.4572 0 0 1 .1563-.1975 1.1736 1.1736 0 0 1 .399-.2831 1.082 1.082 0 0 1 .4592-.0837c.2355.0016.5139.052.91.1734.0555.0191.1237.0382.1856.0572.3277.1013.7048.2404 1.1499.3987.6863.2404 1.3663.487 2.0463.7397l1.2117.4423c.2217.0807.4363.18.6412.297.174.0984.3273.2298.4512.387a1.217 1.217 0 0 1 .192.4309 1.2205 1.2205 0 0 1-.872 1.4522c-.0468.0151-.0852.0239-.1085.0293l-1.105.2553-.0031-.001zM18.8208 7.565a1.8506 1.8506 0 0 0-.2042-.1754 2.4082 2.4082 0 0 0-.2077-.1394 2.3607 2.3607 0 0 0-.2269-.109 1.1705 1.1705 0 0 0-.482-.0796 1.0862 1.0862 0 0 0-.4498.1263c-.2107.1048-.4388.2732-.742.5551-.042.0417-.0947.0886-.142.133-.2502.2351-.5286.5252-.8599.863a114.6363 114.6363 0 0 0-1.5166 1.5629l-.8962.9293a4.1897 4.1897 0 0 0-.4466.5483 1.541 1.541 0 0 0-.2364.5459 1.2199 1.2199 0 0 0 .0107.4518l.0046.02a1.218 1.218 0 0 0 1.4184.923 1.162 1.162 0 0 0 .1105-.0213l4.7781-1.104c.3766-.087.7587-.1667 1.097-.3631.2269-.1316.4428-.262.5909-.5252a1.1793 1.1793 0 0 0 .1405-.4683c.0733-.6512-.2668-1.3908-.5403-1.963a6.2792 6.2792 0 0 0-1.2001-1.7103zM8.9703.0754a8.6724 8.6724 0 0 0-.83.1564c-.2754.066-.548.1383-.8146.2236-.868.2844-2.0884.8063-2.295 1.8065-.1165.5655.1595 1.1439.3737 1.66.2595.6254.614 1.1889.9373 1.7777.8543 1.5545 1.7245 3.0993 2.5922 4.6457.259.4617.5416 1.0464 1.043 1.2856a1.058 1.058 0 0 0 .1013.0383c.2248.0851.4699.1016.7041.0471a4.3015 4.3015 0 0 0 .0418-.0097 1.2136 1.2136 0 0 0 .5658-.3397 1.1033 1.1033 0 0 0 .079-.0822c.3463-.435.3454-1.0833.3764-1.6134.1042-1.771.2139-3.5423.3009-5.3142.0332-.6712.1055-1.3333.0655-2.0096-.0328-.5579-.0368-1.1984-.3891-1.6563-.6218-.8073-1.9476-.741-2.8523-.6158z"/></svg>';
-  var GOOG='<svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.28-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
-  var TRUST='<svg viewBox="0 0 24 24" fill="#00B67A"><path d="M17.227 16.67l2.19 6.742-7.413-5.388 5.223-1.354zM24 9.31h-9.165L12.005.589l-2.84 8.723L0 9.3l7.422 5.397-2.84 8.714 7.422-5.388 4.583-3.326L24 9.311z"/></svg>';
-  var FB='<svg viewBox="0 0 24 24"><path fill="#1877F2" d="M24 12a12 12 0 1 0-13.9 11.9v-8.4H7.1V12h3V9.4c0-3 1.8-4.6 4.5-4.6 1.3 0 2.6.2 2.6.2v2.9h-1.5c-1.5 0-1.9.9-1.9 1.8V12h3.3l-.5 3.5h-2.8v8.4A12 12 0 0 0 24 12z"/></svg>';
-
-  function engines(){
-    var a=A();if(!a)return[];
-    return [
-      {name:"ChatGPT",bg:"#000",col:"#fff",logo:a.aiSvg(a.P_OPENAI)},
-      {name:"Perplexity",bg:"#20808D",col:"#fff",logo:a.aiSvg(a.P_PPLX)},
-      {name:"Gemini",bg:"#fff",col:"#000",logo:a.GEM_SVG,extra:"border:1px solid #d9dde3"},
-      {name:"Claude",bg:"#D97757",col:"#fff",logo:a.aiSvg(a.P_CLAUDE)}
-    ];
-  }
-  function tile(e){var a=A();return a.aiTile(e.name,e.bg,e.col,e.logo,e.extra);}
-
-  function bar(title,right){return '<div class="aeo-card-bar"><span class="aeo-tl"><i></i><i></i><i></i></span><span class="aeo-card-title">'+(title||'')+'</span>'+(right||'')+'</div>';}
-  var LIVE='<span class="aeo-card-badge"><span class="aeo-live-dot"></span>Live</span>';
-
-  var PLATFORM_HTML=
-  '<div class="aeo-plat-inner">'+
-    '<div class="aeo-plat-intro">'+
-      '<span class="aeo-pill aeo-pill-center">Answer Engine Optimization Agency</span>'+
-      '<h2 class="aeo-h2">How we help customers find your business through AI</h2>'+
-      '<p class="aeo-lead">We optimize your website, content and online presence so you appear when customers search with AI.</p>'+
-    '</div>'+
-    '<div class="aeo-block">'+
-      '<div class="aeo-block-copy"><span class="aeo-pill">Visibility</span><h3 class="aeo-h3">Understand how often AI mentions you</h3><p class="aeo-body">We ask AI the questions your customers ask, hundreds of times a month, and count how often your name comes back.</p></div>'+
-      '<div class="aeo-viz"><div class="aeo-card"><div class="aeo-card-body" id="aeo-viz-vis"></div></div></div>'+
-    '</div>'+
-    '<div class="aeo-block rev">'+
-      '<div class="aeo-block-copy"><span class="aeo-pill">Site Structure</span><h3 class="aeo-h3">Make your site easy for AI to read</h3><p class="aeo-body">We organize your site so AI can clearly read your services, locations and hours.</p></div>'+
-      '<div class="aeo-viz"><div class="aeo-card">'+bar("Site structure")+'<div class="aeo-card-body" id="aeo-viz-web"></div></div></div>'+
-    '</div>'+
-    '<div class="aeo-block">'+
-      '<div class="aeo-block-copy"><span class="aeo-pill">Content</span><h3 class="aeo-h3">Create content that AI quotes</h3><p class="aeo-body">We write the pages AI pulls from when it answers your customers\u2019 questions.</p></div>'+
-      '<div class="aeo-viz"><div class="aeo-card">'+bar("Content")+'<div class="aeo-card-body" id="aeo-viz-content"></div></div></div>'+
-    '</div>'+
-    '<div class="aeo-block rev">'+
-      '<div class="aeo-block-copy"><span class="aeo-pill">Authority</span><h3 class="aeo-h3">Show up in the sources AI checks</h3><p class="aeo-body">We build the reviews, citations and mentions AI looks at before recommending you.</p></div>'+
-      '<div class="aeo-viz"><div class="aeo-card">'+bar("Trust signals",LIVE)+'<div class="aeo-card-body" id="aeo-viz-auth"></div></div></div>'+
-    '</div>'+
-  '</div>';
-
-  function countTo(node,to,dur,suffix){
-    suffix=suffix||"";var from=parseInt(node.textContent,10)||0,t0=null;
-    function step(ts){if(t0==null)t0=ts;var p=Math.min(1,(ts-t0)/dur);var e=1-Math.pow(1-p,3);node.textContent=Math.round(from+(to-from)*e)+suffix;if(p<1)requestAnimationFrame(step);}
-    requestAnimationFrame(step);
-  }
-  function toks(str){return str.match(/\S+\s*|\s+/g)||[];}
-
-  /* ---------------- viz 1: how often AI mentions you (dot grid) ---------------- */
-  function startVisibility(){
-    var root=document.getElementById("aeo-viz-vis");if(!root||!A())return;
-    var scenarios=[
-      {q:'"Best HVAC company in Phoenix"',n:64},
-      {q:'"Top rated dentist near me"',n:71},
-      {q:'"Emergency plumber in Austin"',n:58},
-      {q:'"Best med spa in Dallas"',n:68}
-    ];
-    var dots='';for(var i=0;i<100;i++)dots+='<span class="aeo-dg-dot"></span>';
-    root.innerHTML='<div class="aeo-dg-head"><span class="aeo-dg-q" id="aeo-dg-q"></span><span class="aeo-dg-days">Last 30 days</span></div>'+
-      '<div class="aeo-dg-score"><span class="aeo-dg-num" id="aeo-dg-num">0</span><span class="aeo-dg-cap">of 100 answers name you</span></div>'+
-      '<div class="aeo-dg-grid" id="aeo-dg-grid">'+dots+'</div>';
-    var grid=document.getElementById("aeo-dg-grid"),num=document.getElementById("aeo-dg-num"),qEl=document.getElementById("aeo-dg-q");
-    var cells=grid.querySelectorAll(".aeo-dg-dot");
-    function order(){var a=[],j,k,t;for(j=0;j<100;j++)a.push(j);for(j=99;j>0;j--){k=Math.floor(Math.random()*(j+1));t=a[j];a[j]=a[k];a[k]=t;}return a;}
-    (async function(){
-      var si=0;
-      while(document.body.contains(root)){
-        var sc=scenarios[si%scenarios.length];
-        qEl.textContent=sc.q;
-        var ord=order();
-        for(var c=0;c<cells.length;c++)cells[c].classList.remove("on");
-        num.textContent="0";
-        await sleep(460);if(!document.body.contains(root))return;
-        countTo(num,sc.n,Math.max(760,sc.n*13));
-        for(var d=0;d<sc.n;d++){
-          if(!document.body.contains(root))return;
-          cells[ord[d]].classList.add("on");
-          await sleep(13);
-        }
-        num.textContent=sc.n;
-        await sleep(3400);if(!document.body.contains(root))return;
-        si++;
-      }
-    })();
-  }
-
-  /* ---------------- viz 2: Website Optimization (structured record) ---------------- */
-  function startStructure(){
-    var root=document.getElementById("aeo-viz-web");if(!root||!A())return;
-    var GLOBE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18"/></svg>';
-    var S='stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"';
-    var IC={
-      biz:'<svg viewBox="0 0 24 24" fill="none" '+S+'><path d="M3 21h18"/><path d="M5 21V6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v15"/><path d="M15 21V10h3a1 1 0 0 1 1 1v10"/><path d="M8 9h3M8 13h3"/></svg>',
-      svc:'<svg viewBox="0 0 24 24" fill="none" '+S+'><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
-      loc:'<svg viewBox="0 0 24 24" fill="none" '+S+'><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',
-      hrs:'<svg viewBox="0 0 24 24" fill="none" '+S+'><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>',
-      exp:'<svg viewBox="0 0 24 24" fill="none" '+S+'><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.2l1-5.8L3.5 9.2l5.9-.9z"/></svg>',
-      usr:'<svg viewBox="0 0 24 24" fill="none" '+S+'><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.2a3.2 3.2 0 0 1 0 6M17.5 20a5.5 5.5 0 0 0-3-4.9"/></svg>'
-    };
-    var attrs=[
-      {k:"Business",ic:IC.biz,v:["Your Business"]},
-      {k:"Services",ic:IC.svc,v:["Cleanings","Implants","Whitening"]},
-      {k:"Locations",ic:IC.loc,v:["Austin","Dallas","+2"]},
-      {k:"Hours",ic:IC.hrs,v:["Mon to Sat"]}
-    ];
-    var head='<div class="aeo-rec-head"><span class="aeo-rec-fav">'+GLOBE+'</span><span class="aeo-rec-url">yourbusiness.com</span></div>'+
-      '<div class="aeo-rec-prog"><span>Understood by AI</span><span class="aeo-rec-pct" id="aeo-rec-pct">0%</span></div>'+
-      '<div class="aeo-rec-bar"><span class="aeo-rec-bar-fill" id="aeo-rec-fill"></span></div>';
-    var list='';
-    attrs.forEach(function(a){
-      var chips='';a.v.forEach(function(x){chips+='<span class="aeo-vchip">'+x+'</span>';});
-      list+='<div class="aeo-attr"><span class="aeo-attr-ico">'+a.ic+'</span><span class="aeo-attr-k">'+a.k+'</span><span class="aeo-attr-v">'+chips+'</span><span class="aeo-attr-ic">'+CHECK+'</span></div>';
-    });
-    root.innerHTML=head+list;
-    var arows=root.querySelectorAll(".aeo-attr"),fill=document.getElementById("aeo-rec-fill"),pct=document.getElementById("aeo-rec-pct");
-    (async function(){
-      // one clean reveal, then stays complete (never empties)
-      await sleep(480);if(!document.body.contains(root))return;
-      for(var i=0;i<arows.length;i++){
-        if(!document.body.contains(root))return;
-        arows[i].classList.add("in");
-        var p=Math.round((i+1)/arows.length*100);
-        fill.style.width=p+"%";countTo(pct,p,460,"%");
-        await sleep(520);
-      }
-      // continuous re-scan sweep so it clearly keeps working (never empties)
-      while(document.body.contains(root)){
-        await sleep(3200);if(!document.body.contains(root))return;
-        fill.style.width="88%";countTo(pct,88,380,"%");
-        for(var s=0;s<arows.length;s++){
-          if(!document.body.contains(root))return;
-          var ic=arows[s].querySelector(".aeo-attr-ic");
-          if(ic){ic.style.transform="scale(1.24)";(function(x){setTimeout(function(){x.style.transform="";},300);})(ic);}
-          await sleep(210);
-        }
-        fill.style.width="100%";countTo(pct,100,380,"%");
-      }
-    })();
-  }
-
-  /* ---------------- viz 3: Content (Attio outreach-list style) ---------------- */
-  function startContent(){
-    var root=document.getElementById("aeo-viz-content");if(!root||!A())return;
-    var S='stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"';
-    var ICO={
-      faq:'<svg viewBox="0 0 24 24" fill="none" '+S+'><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 0 1 4.7.9c0 1.5-2.2 2.1-2.2 3.6"/><path d="M12 17h.01"/></svg>',
-      price:'<svg viewBox="0 0 24 24" fill="none" '+S+'><path d="M12 3v18"/><path d="M16.5 7.5c0-1.7-2-3-4.5-3s-4.5 1.3-4.5 3 2 3 4.5 3 4.5 1.3 4.5 3-2 3-4.5 3-4.5-1.3-4.5-3"/></svg>',
-      hours:'<svg viewBox="0 0 24 24" fill="none" '+S+'><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>',
-      page:'<svg viewBox="0 0 24 24" fill="none" '+S+'><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h4"/></svg>'
-    };
-    var pages=[
-      {t:"Emergency care FAQ",m:"Answers same-day availability",ic:ICO.faq},
-      {t:"New patient pricing",m:"Clear first-visit costs",ic:ICO.price},
-      {t:"Weekend hours",m:"When you are open",ic:ICO.hours},
-      {t:"Service areas page",m:"Cities and neighbourhoods you cover",ic:ICO.page}
-    ];
-    var ARROW='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>';
-    // Pre-render full list so card height never grows and pushes the page
-    var listHtml='';
-    pages.forEach(function(p){
-      listHtml+='<div class="aeo-clist-row"><span class="aeo-clist-ico">'+p.ic+'</span><span class="aeo-clist-main"><span class="aeo-clist-t">'+p.t+'</span><span class="aeo-clist-m">'+p.m+'</span></span></div>';
-    });
-    root.innerHTML='<div class="aeo-askbar"><span class="aeo-askbar-ph">What should we write next?</span><span class="aeo-askbar-go">'+ARROW+'</span></div>'+
-      '<div class="aeo-clist-label" id="aeo-clist-label">Finding pages AI needs&hellip;</div><div class="aeo-clist" id="aeo-clist">'+listHtml+'</div>';
-    var rows=root.querySelectorAll(".aeo-clist-row"),label=document.getElementById("aeo-clist-label");
-    (async function(){
-      while(document.body.contains(root)){
-        for(var r=0;r<rows.length;r++)rows[r].classList.remove("in");
-        label.textContent="Finding pages AI needs\u2026";
-        await sleep(700);if(!document.body.contains(root))return;
-        for(var i=0;i<rows.length;i++){
-          if(!document.body.contains(root))return;
-          rows[i].classList.add("in");
-          label.textContent=(i+1)+' pages ready for AI';
-          await sleep(520);
-        }
-        await sleep(3200);
-      }
-    })();
-  }
-
-  /* ---------------- viz 4: Authority Building (trust signals feed) ---------------- */
-  function startAuthority(){
-    var root=document.getElementById("aeo-viz-auth");if(!root||!A())return;
-    var STAR='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7z"/></svg>';
-    var items=[
-      {logo:GOOG,t:"Added to a recommended list",m:"Google",p:5},
-      {logo:FB,t:"Recommended by a customer",m:"Facebook",p:6},
-      {logo:YELP,t:"New 5-star review",m:"Yelp",p:4},
-      {logo:TRUST,t:"Rated Excellent",m:"Trustpilot",p:6}
-    ];
-    var extra=[
-      {logo:GOOG,t:"New 5-star review",m:"Google",p:5},
-      {logo:TRUST,t:"New verified review",m:"Trustpilot",p:5},
-      {logo:FB,t:"Tagged in a local recommendation",m:"Facebook",p:4}
-    ];
-    var stars='';for(var s=0;s<5;s++)stars+=STAR;
-    var head='<div class="aeo-tr-head"><div><div class="aeo-bm-label">Authority score</div><div class="aeo-tr-num" id="aeo-tr-num">0</div><div class="aeo-tr-stars">'+stars+'</div></div><span class="aeo-tr-delta" id="aeo-tr-delta">rising</span></div>';
-    root.innerHTML=head+'<div class="aeo-tr-feed" id="aeo-tr-feed"></div>';
-    var feedEl=document.getElementById("aeo-tr-feed"),num=document.getElementById("aeo-tr-num"),delta=document.getElementById("aeo-tr-delta");
-    function mk(f){return el("div","aeo-tr-item enter",'<span class="aeo-tr-logo">'+f.logo+'</span><span class="aeo-tr-main"><span class="aeo-tr-t">'+f.t+'</span><span class="aeo-tr-m">'+f.m+'</span></span><span class="aeo-tr-pts">+'+f.p+'</span>');}
-    (async function(){
-      countTo(num,100,1100);delta.textContent="rising";
-      for(var k=items.length-1;k>=0;k--){
-        if(!document.body.contains(root))return;
-        feedEl.insertBefore(mk(items[k]),feedEl.firstChild);
-        await sleep(430);
-      }
-      delta.textContent="Top rated";
-      // calm: occasionally slide in a fresh signal and drop the oldest
-      var e=0;
-      while(document.body.contains(root)){
-        await sleep(4200);if(!document.body.contains(root))return;
-        feedEl.insertBefore(mk(extra[e%extra.length]),feedEl.firstChild);
-        while(feedEl.children.length>4)feedEl.removeChild(feedEl.lastChild);
-        e++;
-      }
-    })();
-  }
-
-  var started=false;
-  function findAttioPlatform(){
-    var secs=document.querySelectorAll("section");var best=null;
-    for(var i=0;i<secs.length;i++){
-      if(secs[i].id==="aeo-platform")continue;
-      if(secs[i].textContent.indexOf("The intelligent system that never sleeps")!==-1){
-        if(!best||secs[i].textContent.length<best.textContent.length)best=secs[i];
-      }
-    }
-    return best;
-  }
-  function mountPlatform(){
-    if(document.getElementById("aeo-platform"))return;
-    var attio=findAttioPlatform();if(!attio)return;
-    attio.style.display="none";attio.setAttribute("data-aeo-hidden","1");
-    var sec=el("section","aeo-plat");sec.id="aeo-platform";sec.innerHTML=PLATFORM_HTML;
-    attio.parentNode.insertBefore(sec,attio);
-    if(!started){started=true;startVisibility();startStructure();startContent();startAuthority();}
-  }
-
-  var n=0,iv=setInterval(function(){mountPlatform();if(++n>60)clearInterval(iv);},150);
-  document.addEventListener("DOMContentLoaded",mountPlatform);
-  window.addEventListener("load",mountPlatform);
-  var mo=new MutationObserver(function(){
-    if(!document.getElementById("aeo-platform"))mountPlatform();
-    var a=document.querySelector('[data-aeo-hidden]');if(a&&a.style.display!=="none")a.style.display="none";
-  });
-  try{mo.observe(document.body||document.documentElement,{childList:true,subtree:true});}catch(e){}
-  setTimeout(function(){try{mo.disconnect();}catch(e){}},10000);
-})();
-</script>
-"""
-
-html = html.replace("</body>", INJECT + PLATFORM + "</body>", 1)
+html = fix_next_asset_paths(html)
 
 open(LIVE, "w", encoding="utf-8").write(html)
 print("wrote", LIVE, "(", len(html), "bytes )")
+
+# ============================================================
+#  SUBPAGES (pricing, contact) — same Attio chrome, own content
+# ============================================================
+def build_page(fname, title, frag_path):
+    page = open(SRC, encoding="utf-8").read()
+    page = re.sub(r"<title>.*?</title>", "<title>" + title + "</title>", page, count=1, flags=re.S)
+    page = page.replace("Start for free", "Get your free audit")
+    page = page.replace("Talk to sales", "Book a call")
+    frag = open(frag_path, encoding="utf-8").read()
+    page = page.replace("</body>", CHROME + frag + "</body>", 1)
+    page = fix_next_asset_paths(page)
+    open(fname, "w", encoding="utf-8").write(page)
+    print("wrote", fname, "(", len(page), "bytes )")
+
+build_page("pricing.html", "Pricing — Answered, the AEO agency", "parts/pricing.frag")
+build_page("contact.html", "Get your free audit — Answered", "parts/contact.frag")
