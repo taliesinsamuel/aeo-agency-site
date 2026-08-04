@@ -1,15 +1,84 @@
 <style id="aeo-chrome-style">
-/* ---- shared tokens / classes (available on every page) ---- */
-.aeo-plat{position:relative;background:#fff;font-family:var(--font-inter),"Inter",system-ui,sans-serif;overflow:hidden}
+/* ============================================================
+   DESIGN TOKENS — single source of truth for every aeo-* class.
+   Loaded on every page (home + subpages) before any other frag.
+   ============================================================ */
+:root{
+  --aeo-ink:#1c1d1f;
+  --aeo-ink-2:#3a4150;
+  --aeo-ink-3:#6f7988;
+  --aeo-ink-4:#8f99a8;
+  --aeo-ink-5:#a4adba;
+  --aeo-line:#e9ecf1;
+  --aeo-line-strong:#dee2e7;
+  --aeo-line-dash:#e2e5ea;
+  --aeo-surface:#fff;
+  --aeo-surface-2:#fafafb;
+  --aeo-surface-3:#f3f4f6;
+  --aeo-accent:#266df0;
+  --aeo-accent-lo:#5c8bf5;
+  --aeo-accent-hi:#1f5ad4;
+  --aeo-accent-ink:#245bc2;
+  --aeo-accent-soft:#e8f0ff;
+  --aeo-violet:#8c6ef5;
+  --aeo-teal:#2dbfa8;
+  --aeo-night:#0e0f11;
+  --aeo-night-2:#15171a;
+
+  --aeo-r-sm:10px;
+  --aeo-r-md:12px;
+  --aeo-r-lg:16px;
+  --aeo-r-xl:20px;
+  --aeo-r-2xl:24px;
+
+  /* easing: -out for entrances, -e for interaction, -spring for pops */
+  --aeo-e:cubic-bezier(.22,1,.36,1);
+  --aeo-e-out:cubic-bezier(.33,1,.68,1);
+  --aeo-e-spring:cubic-bezier(.34,1.32,.52,1);
+
+  /* elevation ladder — every aeo surface picks a rung, never a one-off */
+  --aeo-sh-1:0 1px 2px rgba(16,17,20,.05);
+  --aeo-sh-2:0 1px 2px rgba(16,17,20,.05),0 6px 14px -8px rgba(16,17,20,.14);
+  --aeo-sh-3:0 1px 2px rgba(16,17,20,.05),0 14px 30px -14px rgba(16,17,20,.16),0 32px 64px -48px rgba(16,17,20,.24);
+  --aeo-sh-4:0 1px 2px rgba(16,17,20,.05),0 24px 48px -24px rgba(16,17,20,.18),0 64px 120px -72px rgba(16,17,20,.28);
+  --aeo-sh-lift:0 2px 4px rgba(16,17,20,.05),0 30px 60px -28px rgba(38,109,240,.24),0 72px 130px -80px rgba(16,17,20,.30);
+  --aeo-ring:0 0 0 3px rgba(38,109,240,.18);
+
+  --aeo-grad-accent:linear-gradient(135deg,#266df0,#8c6ef5);
+  --aeo-noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+/* Technical display face, self-hosted so it costs one request and never
+   blocks. Only the AEO statistics section uses it. */
+@font-face{
+  font-family:"Geist Mono";
+  src:url("assets/fonts/geistmono.woff2") format("woff2");
+  font-weight:100 900;
+  font-style:normal;
+  font-display:swap;
+}
+:root{--aeo-mono:"Geist Mono",ui-monospace,SFMono-Regular,"SF Mono","JetBrains Mono","IBM Plex Mono",Menlo,monospace}
+html{scroll-padding-top:88px}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+::selection{background:rgba(38,109,240,.16);color:var(--aeo-ink)}
+
+/* ---- shared section shell ---- */
+.aeo-plat{position:relative;background:var(--aeo-surface);font-family:var(--font-inter),"Inter",system-ui,sans-serif;overflow:hidden}
 .aeo-plat *{box-sizing:border-box}
+.aeo-plat-bg{position:absolute;inset:0;pointer-events:none;z-index:0}
 .aeo-plat-inner{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:clamp(64px,8vw,120px) 24px clamp(72px,9vw,128px)}
-.aeo-plat-intro{text-align:center;max-width:860px;margin:0 auto clamp(40px,5vw,66px)}
-.aeo-pill{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;letter-spacing:.01em;color:var(--color-blue-600,#245bc2);background:var(--color-blue-100,#e8f0ff);border:1px solid rgba(38,109,240,.16);padding:5px 12px;border-radius:999px}
-.aeo-pill::before{content:"";width:6px;height:6px;border-radius:999px;background:linear-gradient(135deg,#266df0,#8c6ef5);animation:aeo-pill-pulse 2.4s ease-in-out infinite}
-@keyframes aeo-pill-pulse{0%,100%{opacity:.45;transform:scale(.85)}50%{opacity:1;transform:scale(1)}}
+.aeo-plat-intro{text-align:center;max-width:860px;margin:0 auto clamp(44px,5vw,70px)}
+
+/* ---- eyebrow pill ---- */
+.aeo-pill{position:relative;display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;letter-spacing:.01em;color:var(--aeo-accent-ink);background:linear-gradient(180deg,#f0f5ff,var(--aeo-accent-soft));border:1px solid rgba(38,109,240,.16);padding:5px 12px 5px 11px;border-radius:999px;box-shadow:0 1px 2px rgba(38,109,240,.07),inset 0 1px 0 rgba(255,255,255,.7)}
+.aeo-pill::before{content:"";width:6px;height:6px;border-radius:999px;background:var(--aeo-grad-accent);box-shadow:0 0 0 3px rgba(38,109,240,.14);animation:aeo-pill-pulse 2.4s ease-in-out infinite}
+@keyframes aeo-pill-pulse{0%,100%{opacity:.5;transform:scale(.82);box-shadow:0 0 0 2px rgba(38,109,240,.10)}50%{opacity:1;transform:scale(1);box-shadow:0 0 0 4px rgba(38,109,240,.16)}}
 .aeo-pill-center{margin:0 auto 18px}
-.aeo-h2{font-family:"Inter Display",Inter,sans-serif;font-weight:600;font-size:clamp(32px,4.4vw,54px);line-height:1.02;letter-spacing:-.025em;margin:0;text-wrap:balance;background:linear-gradient(180deg,#1c1d1f 55%,#3d4c66);-webkit-background-clip:text;background-clip:text;color:transparent}
-.aeo-lead{font-size:clamp(17px,1.4vw,20px);line-height:1.4;color:var(--color-black-700,#6f7988);margin:18px auto 0;max-width:60ch;font-weight:500;text-wrap:balance}
+
+/* ---- headings / lead ---- */
+.aeo-h2{font-family:"Inter Display",Inter,sans-serif;font-weight:600;font-size:clamp(32px,4.4vw,54px);line-height:1.04;letter-spacing:-.028em;margin:0;text-wrap:balance;background:linear-gradient(176deg,#131417 42%,#41506a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.aeo-lead{font-size:clamp(16.5px,1.35vw,19.5px);line-height:1.52;color:var(--aeo-ink-3);margin:18px auto 0;max-width:58ch;font-weight:500;letter-spacing:-.008em;text-wrap:balance}
+
+/* ---- ambient blobs ---- */
 .aeo-blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;will-change:transform;display:block;pointer-events:none}
 .aeo-blob-a{width:54vw;height:54vw;background:radial-gradient(circle at 35% 35%,rgba(38,109,240,.20),rgba(38,109,240,0) 62%);top:-14%;left:-16%;animation:aeo-drift-a 26s ease-in-out infinite alternate}
 .aeo-blob-b{width:50vw;height:50vw;background:radial-gradient(circle at 60% 40%,rgba(140,110,245,.16),rgba(140,110,245,0) 62%);bottom:-16%;right:-14%;animation:aeo-drift-b 32s ease-in-out infinite alternate}
@@ -17,47 +86,114 @@
 @keyframes aeo-drift-a{to{transform:translate(9vw,7vh) scale(1.12)}}
 @keyframes aeo-drift-b{to{transform:translate(-7vw,-8vh) scale(1.08)}}
 @keyframes aeo-drift-c{to{transform:translate(-6vw,6vh) scale(1.15)}}
-.aeo-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 22px;border-radius:12px;font-size:14.5px;font-weight:600;text-decoration:none;cursor:pointer;border:1px solid transparent;transition:transform .25s cubic-bezier(.33,1,.68,1),box-shadow .25s,background .2s;font-family:inherit}
-.aeo-btn:hover{transform:translateY(-1px)}
-.aeo-btn--primary{background:linear-gradient(180deg,#2f2f33,#161618);color:#fff;box-shadow:0 1px 2px rgba(16,16,16,.2),inset 0 1px 0 rgba(255,255,255,.08)}
-.aeo-btn--primary:hover{box-shadow:0 6px 18px -6px rgba(28,29,31,.45),inset 0 1px 0 rgba(255,255,255,.08)}
-.aeo-btn--blue{background:linear-gradient(180deg,#3d7bf3,#2260da);color:#fff;box-shadow:0 1px 2px rgba(16,16,16,.18),inset 0 1px 0 rgba(255,255,255,.16)}
-.aeo-btn--blue:hover{box-shadow:0 8px 22px -6px rgba(38,109,240,.55),inset 0 1px 0 rgba(255,255,255,.16)}
-.aeo-btn--ghost{background:#fff;color:#1c1d1f;border-color:var(--color-white-600,#dee2e7);box-shadow:0 1px 2px rgba(16,16,16,.05)}
-.aeo-btn--ghost:hover{background:var(--color-white-200,#fafafb)}
 
-/* ---- hero aurora ---- */
+/* ============================================================
+   BUTTON SYSTEM — one geometry, three skins.
+   Hover = 1.5px rise + shadow bloom + gradient travel + sheen.
+   Gradient travel uses background-position (not a pseudo overlay)
+   so the label always stays above the moving light.
+   ============================================================ */
+.aeo-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 22px;border-radius:var(--aeo-r-md);font-size:14.5px;font-weight:600;letter-spacing:-.006em;text-decoration:none;cursor:pointer;border:1px solid transparent;font-family:inherit;overflow:hidden;-webkit-tap-highlight-color:transparent;background-repeat:no-repeat;transition:transform .3s var(--aeo-e),box-shadow .3s var(--aeo-e),background-color .25s var(--aeo-e),background-position .7s var(--aeo-e),border-color .25s var(--aeo-e),color .2s var(--aeo-e)}
+.aeo-btn::after{content:"";position:absolute;top:0;bottom:0;left:0;width:38%;border-radius:inherit;background:linear-gradient(100deg,transparent,rgba(255,255,255,.4),transparent);transform:translateX(-160%) skewX(-14deg);opacity:0;pointer-events:none}
+.aeo-btn:hover{transform:translateY(-1.5px)}
+.aeo-btn:active{transform:translateY(0) scale(.985);transition-duration:.09s}
+.aeo-btn:focus-visible{outline:none;box-shadow:var(--aeo-ring),var(--aeo-sh-2)}
+@keyframes aeo-sheen{0%{opacity:0;transform:translateX(-160%) skewX(-14deg)}22%{opacity:1}100%{opacity:0;transform:translateX(420%) skewX(-14deg)}}
+
+.aeo-btn--primary{background-image:linear-gradient(112deg,#2c2c31,#141416 44%,#2c2c31);background-size:230% 100%;background-position:0 0;color:#fff;box-shadow:0 1px 2px rgba(16,17,20,.18),0 6px 14px -8px rgba(16,17,20,.32),inset 0 1px 0 rgba(255,255,255,.10)}
+.aeo-btn--primary:hover{background-position:100% 0;box-shadow:0 1px 2px rgba(16,17,20,.18),0 14px 30px -10px rgba(16,17,20,.44),inset 0 1px 0 rgba(255,255,255,.15)}
+
+.aeo-btn--blue{background-image:linear-gradient(112deg,#4b87f6,#2260da 46%,#4079f1 78%,#5d95f8);background-size:230% 100%;background-position:0 0;color:#fff;box-shadow:0 1px 2px rgba(16,17,20,.16),0 8px 20px -10px rgba(38,109,240,.48),inset 0 1px 0 rgba(255,255,255,.24)}
+.aeo-btn--blue:hover{background-position:100% 0;box-shadow:0 2px 4px rgba(16,17,20,.14),0 16px 32px -10px rgba(38,109,240,.6),inset 0 1px 0 rgba(255,255,255,.3)}
+
+.aeo-btn--ghost{background-color:var(--aeo-surface);color:var(--aeo-ink);border-color:var(--aeo-line-strong);box-shadow:var(--aeo-sh-1)}
+.aeo-btn--ghost:hover{background-color:var(--aeo-surface-2);border-color:#ccd3de;box-shadow:var(--aeo-sh-2)}
+
+.aeo-btn--primary:hover::after,.aeo-btn--blue:hover::after{animation:aeo-sheen .9s var(--aeo-e) forwards}
+
+/* The hero CTAs are Attio's own components. Re-skin them in place so the most
+   important buttons on the site share the language above. */
+.aeo-hero .button-primary,.aeo-hero .button-outline{height:44px!important;padding:0 22px!important;border-radius:var(--aeo-r-md)!important;font-size:14.5px!important;font-weight:600!important;letter-spacing:-.006em}
+.aeo-hero .button-primary{background-image:linear-gradient(112deg,#2c2c31,#141416 44%,#2c2c31)!important;background-size:230% 100%!important;background-position:0 0;color:#fff!important;border-color:transparent!important;box-shadow:0 1px 2px rgba(16,17,20,.18),0 6px 14px -8px rgba(16,17,20,.32),inset 0 1px 0 rgba(255,255,255,.10);transition:background-position .7s var(--aeo-e),box-shadow .3s var(--aeo-e),transform .3s var(--aeo-e)!important}
+.aeo-hero .button-primary:hover{background-position:100% 0;transform:translateY(-1.5px);box-shadow:0 1px 2px rgba(16,17,20,.18),0 14px 30px -10px rgba(16,17,20,.44),inset 0 1px 0 rgba(255,255,255,.15)}
+.aeo-hero .button-outline{background-color:var(--aeo-surface)!important;border-color:var(--aeo-line-strong)!important;color:var(--aeo-ink)!important;box-shadow:var(--aeo-sh-1);transition:background-color .25s var(--aeo-e),border-color .25s var(--aeo-e),box-shadow .3s var(--aeo-e),transform .3s var(--aeo-e)!important}
+.aeo-hero .button-outline:hover{background-color:var(--aeo-surface-2)!important;border-color:#ccd3de!important;box-shadow:var(--aeo-sh-2);transform:translateY(-1.5px)}
+.aeo-hero .button-primary:active,.aeo-hero .button-outline:active{transform:translateY(0) scale(.985)}
+.aeo-hero .button-ghost{transition:opacity .2s var(--aeo-e)!important}
+.aeo-hero .button-ghost:hover{opacity:.68}
+.aeo-hero input[type="text"],.aeo-hero input[type="email"]{border-radius:var(--aeo-r-md)!important;transition:border-color .22s var(--aeo-e),box-shadow .22s var(--aeo-e)!important}
+.aeo-hero input[type="text"]:focus,.aeo-hero input[type="email"]:focus{outline:none!important;border-color:var(--aeo-accent)!important;box-shadow:var(--aeo-ring)!important}
+
+/* ============================================================
+   SCROLL REVEAL — opt-in via [data-aeo-rv]; --d carries stagger.
+   ============================================================ */
+[data-aeo-rv]{opacity:0;transform:translateY(18px);transition:opacity .85s var(--aeo-e) var(--aeo-d,0ms),transform .85s var(--aeo-e) var(--aeo-d,0ms)}
+[data-aeo-rv].in{opacity:1;transform:none}
+
+/* ---- hero aurora (--aeo-par is driven by the parallax loop) ---- */
 .aeo-hero{position:relative}
-.aeo-hero::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(42% 46% at 16% 10%,rgba(38,109,240,.10),transparent 70%),radial-gradient(36% 42% at 84% 6%,rgba(140,110,245,.10),transparent 70%),radial-gradient(30% 36% at 55% 58%,rgba(38,190,170,.07),transparent 72%);animation:aeo-hero-hue 20s ease-in-out infinite alternate}
+.aeo-hero h1{letter-spacing:-.032em;text-wrap:balance}
+.aeo-hero::before{content:"";position:absolute;inset:-10% 0 0;z-index:0;pointer-events:none;will-change:transform;transform:translate3d(0,var(--aeo-par,0px),0);background:radial-gradient(42% 46% at 16% 10%,rgba(38,109,240,.11),transparent 70%),radial-gradient(36% 42% at 84% 6%,rgba(140,110,245,.10),transparent 70%),radial-gradient(34% 40% at 52% 52%,rgba(38,190,170,.07),transparent 72%);animation:aeo-hero-hue 20s ease-in-out infinite alternate}
 @keyframes aeo-hero-hue{to{filter:hue-rotate(16deg)}}
 
-/* ---- simplified nav ---- */
-.aeo-nav{display:flex;gap:6px;align-items:center;font-size:14px;font-weight:500}
-.aeo-nav a{color:var(--color-black-300,#232529);text-decoration:none;padding:7px 13px;border-radius:9px;transition:background .18s}
-.aeo-nav a:hover{background:var(--color-white-300,#f3f4f6)}
-.aeo-brand{font-family:"Inter Display",Inter,sans-serif;font-weight:700;font-size:19px;letter-spacing:-.02em;color:#1c1d1f;white-space:nowrap}
-.aeo-brand i{font-style:normal;color:#266df0}
+/* ---- header: turns to glass once you leave the hero ---- */
+header{transition:background-color .35s var(--aeo-e),box-shadow .35s var(--aeo-e),backdrop-filter .35s var(--aeo-e)}
+header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-webkit-backdrop-filter:saturate(180%) blur(16px);backdrop-filter:saturate(180%) blur(16px);box-shadow:0 1px 0 rgba(16,17,20,.06),0 10px 30px -24px rgba(16,17,20,.4)}
 
-/* ---- rebuilt footer ---- */
-.aeo-foot{width:100%;background:#0e0f11;color:#e6e8ec;font-family:var(--font-inter),"Inter",system-ui,sans-serif;position:relative;overflow:hidden}
+/* ---- simplified nav ---- */
+.aeo-nav{display:flex;align-items:center;justify-content:space-between;gap:24px;width:100%;font-size:14px;font-weight:500}
+.aeo-nav-brand{display:inline-flex;align-items:center;text-decoration:none;padding:4px 2px}
+.aeo-nav-brand .aeo-brand{transition:opacity .2s var(--aeo-e)}
+.aeo-nav-brand:hover .aeo-brand{opacity:.72}
+.aeo-nav-links{display:flex;align-items:center;gap:2px}
+.aeo-nav-links a{position:relative;color:var(--aeo-ink-2);text-decoration:none;padding:7px 13px;border-radius:var(--aeo-r-sm);letter-spacing:-.006em;transition:color .2s var(--aeo-e),background-color .2s var(--aeo-e)}
+.aeo-nav-links a::after{content:"";position:absolute;left:13px;right:13px;bottom:3px;height:1.5px;border-radius:2px;background:var(--aeo-grad-accent);transform:scaleX(0);transform-origin:left;opacity:0;transition:transform .32s var(--aeo-e),opacity .32s var(--aeo-e)}
+.aeo-nav-links a:hover{color:var(--aeo-ink);background-color:rgba(16,17,20,.04)}
+.aeo-nav-links a:hover::after{transform:scaleX(1);opacity:.9}
+@media (max-width:560px){
+  .aeo-nav{gap:8px}
+  .aeo-nav-links{gap:0}
+  .aeo-nav-links a{padding:6px 7px;font-size:13px}
+  .aeo-nav-links a:first-child{display:none}
+}
+.aeo-brand{font-family:"Inter Display",Inter,sans-serif;font-weight:700;font-size:19px;letter-spacing:-.025em;color:var(--aeo-ink);white-space:nowrap}
+.aeo-brand i{font-style:normal;color:var(--aeo-accent);text-shadow:0 0 12px rgba(38,109,240,.45)}
+
+/* ============================================================
+   FOOTER — atmospheric dark close with noise + hairline seam.
+   ============================================================ */
+.aeo-foot{width:100%;background:linear-gradient(180deg,#101215,var(--aeo-night) 42%,#0a0b0d);color:#e6e8ec;font-family:var(--font-inter),"Inter",system-ui,sans-serif;position:relative;overflow:hidden}
 .aeo-foot *{box-sizing:border-box}
-.aeo-foot-glow{position:absolute;left:50%;top:-40%;width:80vw;height:60vh;transform:translateX(-50%);background:radial-gradient(50% 60% at 50% 40%,rgba(38,109,240,.16),transparent 70%);filter:blur(60px);pointer-events:none}
-.aeo-foot-inner{position:relative;max-width:1200px;margin:0 auto;padding:64px 24px 36px}
+.aeo-foot::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(38,109,240,.55) 22%,rgba(140,110,245,.5) 55%,transparent);pointer-events:none}
+.aeo-foot::after{content:"";position:absolute;inset:0;background-image:var(--aeo-noise);opacity:.035;mix-blend-mode:overlay;pointer-events:none}
+.aeo-foot-glow{position:absolute;left:50%;top:-40%;width:80vw;height:60vh;transform:translateX(-50%);background:radial-gradient(50% 60% at 50% 40%,rgba(38,109,240,.18),transparent 70%);filter:blur(60px);pointer-events:none;animation:aeo-foot-breathe 14s ease-in-out infinite alternate}
+@keyframes aeo-foot-breathe{to{opacity:.62;transform:translateX(-50%) scale(1.12)}}
+.aeo-foot-inner{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:64px 24px 36px}
 .aeo-foot-top{display:flex;justify-content:space-between;gap:48px;flex-wrap:wrap;padding-bottom:44px;border-bottom:1px solid rgba(255,255,255,.08)}
 .aeo-foot-brand{max-width:320px}
 .aeo-foot-brand .aeo-brand{color:#fff;font-size:22px}
-.aeo-foot-brand p{margin:12px 0 0;font-size:14px;line-height:1.55;color:#9aa2af;font-weight:500}
+.aeo-foot-brand .aeo-brand i{color:#6f9dfa}
+.aeo-foot-brand p{margin:12px 0 0;font-size:14px;line-height:1.58;color:#9aa2af;font-weight:500}
 .aeo-foot-cols{display:flex;gap:clamp(36px,6vw,96px);flex-wrap:wrap}
 .aeo-foot-col h4{margin:0 0 14px;font-size:12.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#8d95a3}
-.aeo-foot-col a{display:block;color:#d3d7de;text-decoration:none;font-size:14px;font-weight:500;padding:5px 0;transition:color .18s}
-.aeo-foot-col a:hover{color:#fff}
+.aeo-foot-col a{display:block;width:fit-content;color:#d3d7de;text-decoration:none;font-size:14px;font-weight:500;padding:5px 0;transition:color .22s var(--aeo-e),transform .28s var(--aeo-e)}
+.aeo-foot-col a:hover{color:#fff;transform:translateX(3px)}
 .aeo-foot-bottom{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding-top:26px;font-size:13px;color:#8d95a3;font-weight:500}
-.aeo-foot-bottom a{color:#c6cbd4;text-decoration:none}
+.aeo-foot-bottom a{color:#c6cbd4;text-decoration:none;transition:color .2s var(--aeo-e)}
 .aeo-foot-bottom a:hover{color:#fff}
-@media (prefers-reduced-motion: reduce){.aeo-blob,.aeo-hero::before,.aeo-pill::before{animation:none}}
+
+@media (prefers-reduced-motion: reduce){
+  .aeo-blob,.aeo-hero::before,.aeo-pill::before,.aeo-foot-glow{animation:none}
+  .aeo-hero::before{transform:none}
+  [data-aeo-rv]{opacity:1;transform:none;transition:none}
+  .aeo-btn::after{animation:none!important}
+}
 </style>
 <script id="aeo-chrome-script">
 (function(){
+  var reduce=false;try{reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;}catch(e){}
+  var fine=true;try{fine=window.matchMedia("(pointer:fine)").matches;}catch(e){}
+
   function fixLinks(){
     var as=document.querySelectorAll("a[href]");
     for(var i=0;i<as.length;i++){
@@ -80,20 +216,17 @@
   }
   function fixNav(){
     var header=document.querySelector("header");if(!header)return;
+    // Attio ships a dark promo bar above the nav. It has no job here, and it is
+    // also the element that used to capture the wordmark, so it goes first.
+    var banner=header.querySelector(".site-banner");
+    if(banner&&banner.style.display!=="none")banner.style.display="none";
     var nav=header.querySelector("nav");
     if(nav&&nav.getAttribute("data-aeo")!=="1"){
       nav.setAttribute("data-aeo","1");
-      nav.innerHTML='<div class="aeo-nav"><a href="./">Home</a><a href="./#aeo-platform">What we do</a><a href="pricing.html">Pricing</a><a href="contact.html">Free audit</a></div>';
-    }
-    // swap Attio logo for wordmark
-    var logo=header.querySelector('a[href="./"] svg, a[href="/"] svg');
-    if(logo){
-      var link=logo.closest("a");
-      if(link&&link.getAttribute("data-aeo")!=="1"){
-        link.setAttribute("data-aeo","1");
-        link.setAttribute("href","./");
-        link.innerHTML='<span class="aeo-brand">Answered<i>.</i></span>';
-      }
+      nav.innerHTML='<div class="aeo-nav">'+
+        '<a class="aeo-nav-brand" href="./"><span class="aeo-brand">Answered<i>.</i></span></a>'+
+        '<div class="aeo-nav-links"><a href="./">Home</a><a href="pricing.html">Pricing</a><a href="contact.html">Free audit</a></div>'+
+      '</div>';
     }
   }
   function fixFooter(){
@@ -114,12 +247,148 @@
       '<div class="aeo-foot-bottom"><span>\u00a9 2026 Answered. All rights reserved.</span><span>Tracking ChatGPT \u00b7 Perplexity \u00b7 Gemini \u00b7 Claude</span></div>'+
     '</div>';
   }
-  function tick(){fixNav();fixFooter();fixLinks();}
-  var n=0,iv=setInterval(function(){tick();if(++n>60)clearInterval(iv);},160);
+
+  /* ---- dead CTAs ----
+     Attio wires its hero and closing CTAs to app logic that no longer exists,
+     so they render as <button>s that go nowhere. On mobile that left the hero
+     with no working call to action at all. */
+  var CTA_RE=/^\s*(book a call|get (your|my) free audit|start for free|talk to sales)\s*$/i;
+  function fixCtas(){
+    var btns=document.querySelectorAll("button");
+    for(var i=0;i<btns.length;i++){
+      var b=btns[i];
+      if((b.getAttribute("type")||"")==="submit")continue;
+      var t=(b.textContent||"").replace(/\s+/g," ").trim();
+      if(!CTA_RE.test(t))continue;
+      var a=document.createElement("a");
+      a.setAttribute("href","contact.html");
+      a.setAttribute("data-aeo-cta","1");
+      a.className=b.className;
+      a.innerHTML=b.innerHTML;
+      b.parentNode.replaceChild(a,b);
+    }
+    var forms=document.querySelectorAll("form");
+    for(var f=0;f<forms.length;f++){
+      var fm=forms[f];
+      if(fm.id==="aeo-audit-form")continue;
+      if(fm.getAttribute("data-aeo-cta"))continue;
+      fm.setAttribute("data-aeo-cta","1");
+      fm.addEventListener("submit",function(ev){
+        ev.preventDefault();
+        window.location.href="contact.html";
+      });
+    }
+  }
+
+  /* ---- header glass state ---- */
+  function wireHeader(){
+    var h=document.querySelector("header");
+    if(!h||h.getAttribute("data-aeo-hdr")==="1")return;
+    h.setAttribute("data-aeo-hdr","1");
+    var last=null;
+    function upd(){
+      var on=(window.pageYOffset||document.documentElement.scrollTop||0)>28?"1":"0";
+      if(on!==last){last=on;h.setAttribute("data-aeo-scrolled",on);}
+    }
+    window.addEventListener("scroll",upd,{passive:true});
+    upd();
+  }
+
+  /* ---- scroll reveal: shared observer, exposed for other frags ---- */
+  var rvIO=null;
+  function revealIO(){
+    if(rvIO||reduce||!("IntersectionObserver" in window))return rvIO;
+    rvIO=new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(!e.isIntersecting)return;
+        rvIO.unobserve(e.target);
+        e.target.classList.add("in");
+      });
+    },{threshold:.15,rootMargin:"0px 0px -6% 0px"});
+    return rvIO;
+  }
+  function observe(list,step,base){
+    var io=revealIO();
+    for(var i=0;i<list.length;i++){
+      var n=list[i];
+      if(!n||!n.getAttribute)continue;
+      if(n.getAttribute("data-aeo-rv"))continue;
+      n.setAttribute("data-aeo-rv","1");
+      var d=(base||0)+i*(step||0);
+      if(d)n.style.setProperty("--aeo-d",d+"ms");
+      if(io)io.observe(n);else n.classList.add("in");
+    }
+  }
+  // Section intros animate in as a staggered group; anything the other
+  // fragments tag with [data-aeo-rv-auto] joins the same choreography.
+  function scanReveal(){
+    var intros=document.querySelectorAll(".aeo-plat-intro");
+    for(var i=0;i<intros.length;i++){
+      if(intros[i].getAttribute("data-aeo-scan"))continue;
+      intros[i].setAttribute("data-aeo-scan","1");
+      observe(intros[i].children,90,0);
+    }
+    var manual=document.querySelectorAll("[data-aeo-rv-auto]:not([data-aeo-rv])");
+    for(var j=0;j<manual.length;j++){
+      manual[j].removeAttribute("data-aeo-rv-auto");
+      observe([manual[j]],0,0);
+    }
+  }
+  window.__aeoReveal=function(nodes,step,base){observe(nodes,step==null?90:step,base||0);};
+
+  /* ============================================================
+     SCROLL ENGINE — one rAF-throttled loop for every scroll-driven
+     effect on the page. Subscribers register a read pass and a write
+     pass; the engine runs every read before any write so no effect can
+     force a second layout inside the same frame.
+     ============================================================ */
+  var subs=[],queued=false,vh=0;
+  function measure(){vh=window.innerHeight||document.documentElement.clientHeight||0;}
+  function frame(){
+    queued=false;
+    var y=window.pageYOffset||document.documentElement.scrollTop||0,i;
+    for(i=0;i<subs.length;i++){if(subs[i].r)try{subs[i].r(y,vh);}catch(e){}}
+    for(i=0;i<subs.length;i++){if(subs[i].w)try{subs[i].w(y,vh);}catch(e){}}
+  }
+  function kick(){if(queued)return;queued=true;requestAnimationFrame(frame);}
+  measure();
+  window.addEventListener("scroll",kick,{passive:true});
+  window.addEventListener("resize",function(){measure();kick();},{passive:true});
+  window.addEventListener("orientationchange",function(){measure();kick();},{passive:true});
+  // Late-loading fonts and images move things; re-run once they land.
+  window.addEventListener("load",function(){measure();kick();});
+  window.__aeoScroll=function(read,write){subs.push({r:read,w:write});kick();};
+  window.__aeoScrollKick=kick;
+
+  /* ---- hero aurora parallax: background drifts slower than content ---- */
+  function wireParallax(){
+    if(reduce)return;
+    var hero=document.querySelector(".aeo-hero");
+    if(!hero||hero.getAttribute("data-aeo-par")==="1")return;
+    hero.setAttribute("data-aeo-par","1");
+    window.__aeoScroll(null,function(y){
+      if(y>1400)return;
+      hero.style.setProperty("--aeo-par",(y*0.14).toFixed(1)+"px");
+    });
+  }
+
+  /* ---- pointer-tracked highlight for card surfaces ---- */
+  window.__aeoSpotlight=function(node){
+    if(!fine||reduce||!node||node.getAttribute("data-aeo-spot")==="1")return;
+    node.setAttribute("data-aeo-spot","1");
+    node.addEventListener("pointermove",function(ev){
+      var r=node.getBoundingClientRect();
+      node.style.setProperty("--aeo-mx",((ev.clientX-r.left)/r.width*100).toFixed(1)+"%");
+      node.style.setProperty("--aeo-my",((ev.clientY-r.top)/r.height*100).toFixed(1)+"%");
+    },{passive:true});
+  };
+
+  function tick(){fixNav();fixFooter();fixLinks();fixCtas();wireHeader();wireParallax();scanReveal();}
+  var n=0,iv=setInterval(function(){tick();if(++n>80)clearInterval(iv);},160);
   document.addEventListener("DOMContentLoaded",tick);
   window.addEventListener("load",tick);
   var mo=new MutationObserver(tick);
   try{mo.observe(document.body||document.documentElement,{childList:true,subtree:true});}catch(e){}
-  setTimeout(function(){try{mo.disconnect();}catch(e){}},10000);
+  setTimeout(function(){try{mo.disconnect();}catch(e){}},13000);
 })();
 </script>

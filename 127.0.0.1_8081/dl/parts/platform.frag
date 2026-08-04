@@ -1,40 +1,33 @@
 <style id="aeo-plat-style">
-.aeo-plat{position:relative;background:#fff;border-top:1px solid var(--color-white-500,#e4e7ec);font-family:var(--font-inter),"Inter",system-ui,sans-serif;overflow:hidden}
-.aeo-plat *{box-sizing:border-box}
-.aeo-plat-bg{position:absolute;inset:0;pointer-events:none;z-index:0}
-.aeo-blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;will-change:transform;display:block}
-.aeo-blob-a{width:54vw;height:54vw;background:radial-gradient(circle at 35% 35%,rgba(38,109,240,.20),rgba(38,109,240,0) 62%);top:-14%;left:-16%;animation:aeo-drift-a 26s ease-in-out infinite alternate}
-.aeo-blob-b{width:50vw;height:50vw;background:radial-gradient(circle at 60% 40%,rgba(140,110,245,.16),rgba(140,110,245,0) 62%);bottom:-16%;right:-14%;animation:aeo-drift-b 32s ease-in-out infinite alternate}
-.aeo-blob-c{width:38vw;height:38vw;background:radial-gradient(circle at 50% 50%,rgba(38,190,170,.13),rgba(38,190,170,0) 60%);top:32%;left:40%;animation:aeo-drift-c 38s ease-in-out infinite alternate}
-@keyframes aeo-drift-a{to{transform:translate(9vw,7vh) scale(1.12)}}
-@keyframes aeo-drift-b{to{transform:translate(-7vw,-8vh) scale(1.08)}}
-@keyframes aeo-drift-c{to{transform:translate(-6vw,6vh) scale(1.15)}}
-.aeo-plat-inner{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:clamp(64px,8vw,120px) 24px clamp(72px,9vw,128px)}
-.aeo-plat-intro{text-align:center;max-width:860px;margin:0 auto clamp(40px,5vw,66px)}
-.aeo-pill{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;letter-spacing:.01em;color:var(--color-blue-600,#245bc2);background:var(--color-blue-100,#e8f0ff);border:1px solid rgba(38,109,240,.16);padding:5px 12px;border-radius:999px}
-.aeo-pill::before{content:"";width:6px;height:6px;border-radius:999px;background:linear-gradient(135deg,#266df0,#8c6ef5);animation:aeo-pill-pulse 2.4s ease-in-out infinite}
-@keyframes aeo-pill-pulse{0%,100%{opacity:.45;transform:scale(.85)}50%{opacity:1;transform:scale(1)}}
-.aeo-pill-center{margin:0 auto 18px}
-.aeo-h2{font-family:"Inter Display",Inter,sans-serif;font-weight:600;font-size:clamp(32px,4.4vw,54px);line-height:1.02;letter-spacing:-.025em;margin:0;text-wrap:balance;background:linear-gradient(180deg,#1c1d1f 55%,#3d4c66);-webkit-background-clip:text;background-clip:text;color:transparent}
-.aeo-lead{font-size:clamp(17px,1.4vw,20px);line-height:1.4;color:var(--color-black-700,#6f7988);margin:18px auto 0;max-width:60ch;font-weight:500;text-wrap:balance}
+/* Shared tokens and the .aeo-plat / .aeo-pill / .aeo-h2 / .aeo-blob
+   primitives all live in chrome.frag, which is injected first. Only
+   platform-specific styles belong below. */
+
+/* Soft seam out of the hero instead of a hard 1px rule. */
+#aeo-platform::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(28,29,31,.10) 25%,rgba(28,29,31,.10) 75%,transparent);z-index:2;pointer-events:none}
 
 /* ---- Profound-style ruled grid ---- */
-.aeo-rows{--ln:#eceef2;--ld:#e2e5ea;position:relative;border-left:1px dashed var(--ld);border-right:1px dashed var(--ld);background-image:radial-gradient(rgba(28,29,31,.045) 1px,transparent 1px);background-size:22px 22px}
-.aeo-row{display:grid;grid-template-columns:minmax(0,0.82fr) minmax(0,1.18fr);border-top:1px solid var(--ln);opacity:0;transform:translateY(26px);transition:opacity .8s cubic-bezier(.33,1,.68,1),transform .8s cubic-bezier(.33,1,.68,1)}
+.aeo-rows{--ln:#eceef2;--ld:#e2e5ea;position:relative;border-left:1px dashed var(--ld);border-right:1px dashed var(--ld);background-image:radial-gradient(rgba(28,29,31,.04) 1px,transparent 1px);background-size:22px 22px}
+.aeo-row{display:grid;grid-template-columns:minmax(0,0.82fr) minmax(0,1.18fr);border-top:1px solid var(--ln);opacity:0;transform:translateY(26px);transition:opacity .85s var(--aeo-e),transform .85s var(--aeo-e)}
 .aeo-row.in{opacity:1;transform:none}
 .aeo-row:last-child{border-bottom:1px solid var(--ln)}
 .aeo-row-copy{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:15px;padding:clamp(34px,4vw,60px) clamp(26px,3vw,46px);border-right:1px dashed var(--ld)}
 .aeo-row-viz{display:flex;align-items:center;justify-content:center;padding:clamp(28px,3vw,46px)}
-.aeo-h3{font-family:"Inter Display",Inter,sans-serif;font-weight:600;font-size:clamp(23px,2.5vw,33px);line-height:1.07;letter-spacing:-.02em;color:var(--color-black-100,#1c1d1f);margin:0;text-wrap:balance}
-.aeo-rtext{font-size:clamp(15px,1.1vw,16.5px);line-height:1.5;color:var(--color-black-700,#6f7988);font-weight:500;margin:0;max-width:42ch}
+.aeo-h3{font-family:"Inter Display",Inter,sans-serif;font-weight:600;font-size:clamp(23px,2.5vw,33px);line-height:1.1;letter-spacing:-.024em;color:var(--aeo-ink);margin:0;text-wrap:balance}
+.aeo-rtext{font-size:clamp(15px,1.1vw,16.5px);line-height:1.55;letter-spacing:-.008em;color:var(--aeo-ink-3);font-weight:500;margin:0;max-width:42ch}
 
 /* ---- shared panel: IDENTICAL dimensions across all four ---- */
-.aeo-panel{position:relative;width:100%;max-width:560px;height:430px;border-radius:16px;overflow:hidden;font-family:var(--font-inter),"Inter",system-ui,sans-serif;text-align:left;box-shadow:0 1px 2px rgba(16,16,16,.04),0 22px 46px -26px rgba(28,29,31,.20),0 60px 110px -80px rgba(28,29,31,.30);transition:transform .5s cubic-bezier(.33,1,.68,1),box-shadow .5s cubic-bezier(.33,1,.68,1)}
-.aeo-panel:hover{transform:translateY(-4px);box-shadow:0 2px 4px rgba(16,16,16,.05),0 30px 60px -28px rgba(38,109,240,.28),0 70px 130px -80px rgba(28,29,31,.35)}
-.aeo-panel::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(135deg,rgba(38,109,240,.35),rgba(140,110,245,.18) 40%,rgba(38,109,240,0) 70%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;pointer-events:none}
+.aeo-panel{position:relative;width:100%;max-width:560px;height:430px;border-radius:var(--aeo-r-xl);overflow:hidden;font-family:var(--font-inter),"Inter",system-ui,sans-serif;text-align:left;box-shadow:var(--aeo-sh-4);transition:transform .55s var(--aeo-e),box-shadow .55s var(--aeo-e)}
+.aeo-panel:hover{transform:translateY(-5px);box-shadow:var(--aeo-sh-lift)}
+/* light that tracks the pointer — the surface reacts, nothing moves */
+.aeo-panel::before{content:"";position:absolute;inset:0;z-index:3;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .5s var(--aeo-e);background:radial-gradient(280px circle at var(--aeo-mx,50%) var(--aeo-my,0%),rgba(38,109,240,.12),transparent 62%)}
+.aeo-panel:hover::before{opacity:1}
+.aeo-panel--code::before{background:radial-gradient(280px circle at var(--aeo-mx,50%) var(--aeo-my,0%),rgba(120,170,255,.15),transparent 62%)}
+.aeo-panel::after{content:"";position:absolute;inset:0;z-index:4;border-radius:inherit;padding:1px;background:linear-gradient(135deg,rgba(38,109,240,.35),rgba(140,110,245,.18) 40%,rgba(38,109,240,0) 70%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;pointer-events:none;transition:background .5s var(--aeo-e)}
+.aeo-panel:hover::after{background:linear-gradient(135deg,rgba(38,109,240,.6),rgba(140,110,245,.34) 42%,rgba(38,109,240,.06) 72%)}
 
 /* ===== viz 1: visibility analytics panel (no window chrome) ===== */
-.aeo-panel--vis{background:#fff;border:1px solid var(--color-white-600,#dee2e7);padding:20px 22px 16px;display:flex;flex-direction:column}
+.aeo-panel--vis{background:linear-gradient(180deg,#fff,#fcfdff);border:1px solid rgba(28,29,31,.09);padding:20px 22px 16px;display:flex;flex-direction:column}
 .aeo-vis-wrap{display:flex;flex-direction:column;flex:1;transition:opacity .4s cubic-bezier(.33,1,.68,1)}
 .aeo-vis-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .aeo-vis-label{font-size:12.5px;font-weight:600;color:var(--color-black-700,#6f7988);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:290px}
@@ -67,12 +60,12 @@
 .aeo-vr.you .aeo-vr-name{color:var(--color-blue-600,#245bc2);font-weight:700}
 .aeo-vr.you .aeo-vr-rank{color:var(--color-blue-600,#245bc2)}
 .aeo-vr.you .aeo-vr-track{background:var(--color-blue-100,#e8f0ff)}
-.aeo-vr.you .aeo-vr-fill{background:linear-gradient(90deg,var(--color-blue-400,#5c8bf5),var(--color-blue-500,#266df0))}
+.aeo-vr.you .aeo-vr-fill{background:linear-gradient(90deg,var(--color-blue-400,#5c8bf5),var(--color-blue-500,#266df0));box-shadow:0 0 12px -2px rgba(38,109,240,.6)}
 .aeo-vr.you .aeo-vr-val{color:var(--color-blue-600,#245bc2)}
 
 /* ===== viz 2: code editor pane ===== */
-.aeo-panel--code{background:#0d1117;border:1px solid #1c2430;display:flex;flex-direction:column}
-.aeo-ed-tab{display:flex;align-items:center;gap:9px;height:42px;padding:0 15px;background:#161b22;border-bottom:1px solid #1f2530;flex:none}
+.aeo-panel--code{background:linear-gradient(180deg,#0e141c,#0b1016);border:1px solid #1c2430;display:flex;flex-direction:column}
+.aeo-ed-tab{display:flex;align-items:center;gap:9px;height:42px;padding:0 15px;background:linear-gradient(180deg,#1a212b,#161b22);border-bottom:1px solid #1f2530;flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
 .aeo-ed-dots{display:flex;gap:7px;margin-right:5px}
 .aeo-ed-dot{width:11px;height:11px;border-radius:999px;display:block}
 .aeo-ed-fname{font-size:12.5px;font-weight:600;color:#9aa4b2;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
@@ -94,7 +87,7 @@
 .aeo-ed-ok svg{width:11px;height:11px}
 
 /* ===== viz 3: ChatGPT conversation ===== */
-.aeo-panel--chat{background:#fff;border:1px solid var(--color-white-600,#dee2e7);display:flex;flex-direction:column;padding:20px 22px 18px}
+.aeo-panel--chat{background:linear-gradient(180deg,#fff,#fcfdff);border:1px solid rgba(28,29,31,.09);display:flex;flex-direction:column;padding:20px 22px 18px}
 .aeo-c3-wrap{flex:1;display:flex;flex-direction:column;min-height:0;transition:opacity .4s cubic-bezier(.33,1,.68,1)}
 .aeo-c3-scroll{flex:1;display:flex;flex-direction:column;gap:16px;overflow:hidden}
 .aeo-c3-user{display:flex;justify-content:flex-end}
@@ -117,7 +110,7 @@
 .aeo-c3-src-m{font-size:12px;color:var(--color-black-800,#8f99a8);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* ===== viz 4: ChatGPT Activity / sources panel ===== */
-.aeo-panel--act{background:#fff;border:1px solid var(--color-white-600,#dee2e7);padding:18px 22px 14px;display:flex;flex-direction:column}
+.aeo-panel--act{background:linear-gradient(180deg,#fff,#fcfdff);border:1px solid rgba(28,29,31,.09);padding:18px 22px 14px;display:flex;flex-direction:column}
 .aeo-act-status{display:flex;align-items:center;gap:11px;font-size:13.5px;font-weight:600;color:var(--color-black-200,#202124);padding-bottom:14px;border-bottom:1px solid var(--color-white-400,#edeff3)}
 .aeo-act-spin{width:15px;height:15px;border-radius:999px;border:2px solid var(--color-white-600,#dee2e7);border-top-color:var(--color-black-500,#3d434d);animation:aeo-spin .7s linear infinite;flex:none}
 @keyframes aeo-spin{to{transform:rotate(360deg)}}
@@ -132,20 +125,44 @@
 .aeo-act-row{display:flex;align-items:center;gap:11px;padding:9px 2px;border-top:1px solid var(--color-white-400,#edeff3);opacity:0;transform:translateY(6px);transition:opacity .4s cubic-bezier(.33,1,.68,1),transform .4s cubic-bezier(.33,1,.68,1)}
 .aeo-act-row:first-child{border-top:none}
 .aeo-act-row.in{opacity:1;transform:none}
-.aeo-act-fav{width:27px;height:27px;border-radius:8px;background:var(--color-white-200,#fafafb);border:1px solid var(--color-white-500,#e4e7ec);display:inline-flex;align-items:center;justify-content:center;flex:none}
+.aeo-act-fav{width:27px;height:27px;border-radius:8px;background:linear-gradient(180deg,#fff,#f6f7f9);border:1px solid var(--color-white-500,#e4e7ec);display:inline-flex;align-items:center;justify-content:center;flex:none;box-shadow:0 1px 2px rgba(16,17,20,.06)}
 .aeo-act-fav svg{width:15px;height:15px;display:block}
 .aeo-act-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
 .aeo-act-dom{font-size:12.5px;font-weight:600;color:var(--color-black-200,#202124)}
 .aeo-act-desc{font-size:11.5px;color:var(--color-black-800,#8f99a8);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 @media (max-width:860px){
-  .aeo-row{grid-template-columns:1fr}
+  /* minmax(0,1fr) not 1fr: the code panel's pre-formatted lines have a wide
+     min-content, and an auto minimum lets them stretch the column past the
+     viewport. */
+  .aeo-row{grid-template-columns:minmax(0,1fr)}
+  .aeo-row-copy,.aeo-row-viz{min-width:0}
   .aeo-row-copy{border-right:none;border-bottom:1px dashed var(--ld)}
   .aeo-rtext{max-width:none}
 }
+@media (max-width:520px){
+  .aeo-row-copy{padding:30px 18px}
+  .aeo-row-viz{padding:20px 16px}
+  .aeo-panel{height:392px;border-radius:var(--aeo-r-lg)}
+  /* four engine names side by side have a wider min-content than a phone,
+     so the model row becomes 2x2 rather than being clipped */
+  .aeo-panel--vis{padding:16px 16px 12px;height:428px}
+  .aeo-vis-models{grid-template-columns:repeat(2,1fr);gap:12px 10px;padding:11px 0;margin-top:7px}
+  .aeo-vis-chart{height:64px;margin-top:10px}
+  .aeo-vis-num{font-size:32px}
+  /* the range toggle is chrome, not information — drop it and give the
+     headline metric the full width instead of squeezing both */
+  .aeo-vis-toggle{display:none}
+  .aeo-vis-top>div:first-child{min-width:0}
+  .aeo-vis-label{max-width:100%}
+  .aeo-vis-score{flex-wrap:wrap}
+  .aeo-vis-rank{margin-top:11px;gap:8px}
+  .aeo-vr-name{width:86px}
+  .aeo-panel--chat,.aeo-panel--act{padding-left:16px;padding-right:16px}
+}
 @media (prefers-reduced-motion: reduce){
-  .aeo-blob{animation:none}
   .aeo-row{opacity:1;transform:none;transition:none}
+  .aeo-panel,.aeo-panel::before,.aeo-panel::after{transition:none}
 }
 </style>
 <script id="aeo-plat-script">
@@ -511,6 +528,7 @@
     if(!started){
       started=true;
       revealRows(sec);
+      if(window.__aeoSpotlight)sec.querySelectorAll(".aeo-panel").forEach(window.__aeoSpotlight);
       onceInView(document.getElementById("aeo-viz-vis"),startVisibility);
       onceInView(document.getElementById("aeo-viz-web"),startStructure);
       onceInView(document.getElementById("aeo-viz-content"),startContent);

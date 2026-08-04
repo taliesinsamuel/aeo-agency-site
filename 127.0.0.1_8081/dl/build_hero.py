@@ -67,14 +67,23 @@ html = html.replace("Start for free", "Get your free audit")
 # --- 1d. final CTA + misc copy for the agency site ---
 html = html.replace("Agentic revenue runs on Attio.", "Be the business AI recommends.")
 html = html.replace("Talk to sales", "Book a call")
+html = html.replace("Send me a demo", "Get my free audit")
 
 # --- 2. injected style + script (mounts chat animation into attio's mockup slot) ---
 INJECT = r"""
 <style id="aeo-style">
-.aeo-window{position:relative;display:flex;flex-direction:column;width:100%;height:clamp(360px,42vw,660px);background:var(--color-white-100,#fff);border:1px solid var(--color-white-600,#dee2e7);border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(16,16,16,.04),0 24px 48px -24px rgba(28,29,31,.22),0 60px 120px -60px rgba(28,29,31,.28);font-family:var(--font-inter),"Inter",system-ui,sans-serif;text-align:left;pointer-events:auto}
-.aeo-titlebar{display:flex;align-items:center;height:46px;padding:0 16px;border-bottom:1px solid var(--color-white-400,#edeff3);flex:none}
+/* stage = the lit volume the product window floats inside */
+.aeo-stage{position:relative;width:100%;animation:aeo-stage-in 1s var(--aeo-e,cubic-bezier(.22,1,.36,1)) both}
+.aeo-stage::before{content:"";position:absolute;left:50%;top:8%;width:88%;height:84%;transform:translateX(-50%);border-radius:50%;background:radial-gradient(50% 50% at 50% 50%,rgba(38,109,240,.20),rgba(140,110,245,.10) 45%,transparent 72%);filter:blur(58px);opacity:.9;pointer-events:none;animation:aeo-stage-breathe 11s ease-in-out infinite alternate}
+@keyframes aeo-stage-in{from{opacity:0;transform:translateY(22px) scale(.975)}to{opacity:1;transform:none}}
+@keyframes aeo-stage-breathe{to{opacity:.55;transform:translateX(-50%) scale(1.08)}}
+.aeo-window{position:relative;display:flex;flex-direction:column;width:100%;height:clamp(360px,42vw,660px);background:var(--color-white-100,#fff);border:1px solid rgba(28,29,31,.09);border-radius:18px;overflow:hidden;box-shadow:0 1px 2px rgba(16,17,20,.05),0 2px 6px -2px rgba(16,17,20,.08),0 26px 52px -22px rgba(28,29,31,.20),0 70px 130px -70px rgba(28,29,31,.34);font-family:var(--font-inter),"Inter",system-ui,sans-serif;text-align:left;pointer-events:auto;animation:aeo-float 11s ease-in-out 1s infinite alternate}
+/* inner rim light — reads as glass thickness, not a border */
+.aeo-window::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px rgba(255,255,255,.5)}
+@keyframes aeo-float{to{transform:translateY(-6px)}}
+.aeo-titlebar{position:relative;display:flex;align-items:center;height:46px;padding:0 16px;background:linear-gradient(180deg,rgba(252,253,255,.86),rgba(246,248,251,.72));-webkit-backdrop-filter:saturate(180%) blur(12px);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid rgba(28,29,31,.07);flex:none;z-index:2}
 .aeo-lights{display:flex;gap:7px}
-.aeo-lights span{width:11px;height:11px;border-radius:999px}
+.aeo-lights span{width:11px;height:11px;border-radius:999px;box-shadow:inset 0 -1px 1px rgba(0,0,0,.14),inset 0 1px 1px rgba(255,255,255,.4)}
 .aeo-lights span:nth-child(1){background:#ff5f57}
 .aeo-lights span:nth-child(2){background:#febc2e}
 .aeo-lights span:nth-child(3){background:#28c840}
@@ -102,21 +111,22 @@ INJECT = r"""
 @keyframes aeo-dot{0%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-2px)}}
 .aeo-tok{white-space:pre-wrap;opacity:0;transform:translateY(3px);animation:aeo-in .2s forwards}
 @keyframes aeo-in{to{opacity:1;transform:none}}
-.aeo-biz{display:inline-block;padding:1px 7px;margin:0 1px;border-radius:6px;background:var(--color-blue-100,#e8f0ff);color:var(--color-blue-600,#245bc2);font-weight:600;box-shadow:inset 0 0 0 1px rgba(38,109,240,.16);opacity:0;transform:scale(.9);animation:aeo-pop .28s cubic-bezier(.33,1,.68,1) forwards}
+.aeo-biz{display:inline-block;padding:1px 7px;margin:0 1px;border-radius:7px;background:linear-gradient(180deg,#f1f6ff,#e3edff);color:var(--color-blue-600,#245bc2);font-weight:600;box-shadow:inset 0 0 0 1px rgba(38,109,240,.18),0 1px 2px rgba(38,109,240,.10),0 6px 16px -8px rgba(38,109,240,.5);opacity:0;transform:scale(.9);animation:aeo-pop .34s var(--aeo-e-spring,cubic-bezier(.34,1.32,.52,1)) forwards}
 @keyframes aeo-pop{to{opacity:1;transform:none}}
 .aeo-sources{margin-top:clamp(14px,1.6vw,20px);opacity:0;transform:translateY(6px);transition:opacity .35s cubic-bezier(.33,1,.68,1),transform .35s cubic-bezier(.33,1,.68,1)}
 .aeo-sources.show{opacity:1;transform:none}
 .aeo-sources-label{font-size:12px;font-weight:600;color:var(--color-black-900,#a4adba);margin-bottom:9px}
 .aeo-chips{display:flex;flex-wrap:wrap;gap:8px}
-.aeo-chip{display:inline-flex;align-items:center;gap:7px;padding:6px 11px 6px 9px;border-radius:9px;border:1px solid var(--color-white-600,#dee2e7);background:var(--color-white-200,#fafafb);font-size:13px;font-weight:600;color:var(--color-black-300,#232529)}
+.aeo-chip{display:inline-flex;align-items:center;gap:7px;padding:6px 11px 6px 9px;border-radius:10px;border:1px solid var(--color-white-600,#dee2e7);background:linear-gradient(180deg,#fff,#f7f8fa);font-size:13px;font-weight:600;color:var(--color-black-300,#232529);box-shadow:0 1px 2px rgba(16,17,20,.05);transition:transform .28s cubic-bezier(.22,1,.36,1),box-shadow .28s cubic-bezier(.22,1,.36,1),border-color .2s}
+.aeo-chip:hover{transform:translateY(-1.5px);border-color:#ccd3de;box-shadow:0 1px 2px rgba(16,17,20,.05),0 8px 18px -8px rgba(16,17,20,.24)}
 .aeo-chip svg{width:15px;height:15px;display:block;flex:none}
 .aeo-yelp{color:#d32323}
 .aeo-inputbar{flex:none;display:flex;justify-content:center;padding:0 clamp(14px,2vw,24px) clamp(14px,1.8vw,22px)}
-.aeo-input{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;max-width:720px;padding:11px 11px 11px 16px;border:1px solid var(--color-white-600,#dee2e7);border-radius:14px;background:var(--color-white-100,#fff);box-shadow:0 1px 2px rgba(16,16,16,.04)}
+.aeo-input{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;max-width:720px;padding:11px 11px 11px 16px;border:1px solid rgba(28,29,31,.10);border-radius:15px;background:linear-gradient(180deg,#fff,#fbfcfe);box-shadow:0 1px 2px rgba(16,17,20,.05),0 10px 24px -18px rgba(16,17,20,.30),inset 0 1px 0 rgba(255,255,255,.9)}
 .aeo-input-ph{font-size:15px;color:var(--color-black-800,#8f99a8)}
 .aeo-input-actions{display:inline-flex;align-items:center;gap:12px}
 .aeo-auto{font-size:13px;font-weight:500;color:var(--color-black-600,#505967)}
-.aeo-send{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:9px;background:var(--color-blue-500,#266df0);color:#fff}
+.aeo-send{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:10px;background:linear-gradient(180deg,#4b87f6,#2260da);color:#fff;box-shadow:0 1px 2px rgba(16,17,20,.16),0 6px 14px -6px rgba(38,109,240,.55),inset 0 1px 0 rgba(255,255,255,.28)}
 .aeo-send svg{width:16px;height:16px}
 /* neutralize attio's sticky-scroll choreography so the hero scrolls normally
    and the chat window never overlaps the headline/subline/CTAs */
@@ -128,17 +138,19 @@ INJECT = r"""
 .aeo-hero [class*="-mb-["]{margin-bottom:0!important}
 /* AI engine logo tiles under the sub-line */
 .aeo-ai-row{display:inline-flex;align-items:center;gap:7px;vertical-align:middle;margin-left:4px}
-.aeo-ai-sq{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;box-shadow:0 1px 2px rgba(16,16,16,.14)}
+.aeo-ai-sq{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;box-shadow:0 1px 2px rgba(16,17,20,.16),0 4px 10px -4px rgba(16,17,20,.28);transition:transform .3s var(--aeo-e-spring,cubic-bezier(.34,1.32,.52,1)),box-shadow .3s cubic-bezier(.22,1,.36,1)}
+.aeo-ai-sq:hover{transform:translateY(-2px) scale(1.06);box-shadow:0 2px 4px rgba(16,17,20,.16),0 10px 20px -6px rgba(16,17,20,.34)}
 .aeo-ai-sq svg{width:15px;height:15px;display:block}
 /* Mobile: Attio swaps to a separate md:hidden scene — keep chat readable there */
 @media (max-width:767px){
-  .aeo-window{height:min(52vh,420px);border-radius:14px}
+  .aeo-window{height:min(52vh,420px);border-radius:15px;animation:none;box-shadow:0 1px 2px rgba(16,17,20,.05),0 18px 36px -20px rgba(28,29,31,.26)}
+  .aeo-stage::before{width:96%;filter:blur(38px);opacity:.6}
   [data-home-hero="mobile-scene"] .aeo-mobile-slot{position:relative;z-index:10;margin:2rem 1rem 1.5rem;pointer-events:auto;opacity:1!important;transform:none!important;filter:none!important;visibility:visible!important}
   [data-home-hero="mobile-scene"] .aeo-window{height:min(48vh,400px);opacity:1!important}
   .aeo-body{font-size:14.5px}
   .aeo-thread{padding:16px 14px 8px}
 }
-@media (prefers-reduced-motion: reduce){.aeo-caret{animation:none}.aeo-think span{animation:none}.aeo-tok,.aeo-biz{animation:none;opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.aeo-caret{animation:none}.aeo-think span{animation:none}.aeo-tok,.aeo-biz{animation:none;opacity:1;transform:none}.aeo-stage,.aeo-stage::before,.aeo-window{animation:none}}
 </style>
 <script id="aeo-script">
 (function(){
@@ -164,17 +176,26 @@ INJECT = r"""
   var P_GEM="M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81";
   var P_CLAUDE="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z";
   function aiSvg(p){return '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="'+p+'"/></svg>';}
-  var GEM_SVG='<svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="aeoGem" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#4285F4"/><stop offset=".52" stop-color="#9168C0"/><stop offset="1" stop-color="#D96570"/></linearGradient></defs><path fill="url(#aeoGem)" d="'+P_GEM+'"/></svg>';
+  // The gradient id must be unique per copy: the markup is mounted into both the
+  // desktop and mobile slots, and url(#id) resolves to the first match in the
+  // document, which may sit inside a display:none subtree and paint nothing.
+  var gemSeq=0;
+  function gemSvg(){
+    var id="aeoGem"+(++gemSeq);
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="'+id+'" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#4285F4"/><stop offset=".52" stop-color="#9168C0"/><stop offset="1" stop-color="#D96570"/></linearGradient></defs><path fill="url(#'+id+')" d="'+P_GEM+'"/></svg>';
+  }
   function aiTile(name,bg,col,inner,extra){return '<span class="aeo-ai-sq" title="'+name+'" style="background:'+bg+';color:'+col+';'+(extra||'')+'">'+inner+'</span>';}
-  var AI_ROW='<span class="aeo-ai-row" data-aeo-ai="1">'+
-    aiTile("ChatGPT","#000","#fff",aiSvg(P_OPENAI))+
-    aiTile("Perplexity","#20808D","#fff",aiSvg(P_PPLX))+
-    aiTile("Gemini","#fff","#000",GEM_SVG,"border:1px solid #d9dde3")+
-    aiTile("Claude","#D97757","#fff",aiSvg(P_CLAUDE))+
-  '</span>';
-  var SUB_HTML='We get local businesses recommended by '+AI_ROW;
+  function aiRow(){
+    return '<span class="aeo-ai-row" data-aeo-ai="1">'+
+      aiTile("ChatGPT","#000","#fff",aiSvg(P_OPENAI))+
+      aiTile("Perplexity","#20808D","#fff",aiSvg(P_PPLX))+
+      aiTile("Gemini","#fff","#000",gemSvg(),"border:1px solid #d9dde3")+
+      aiTile("Claude","#D97757","#fff",aiSvg(P_CLAUDE))+
+    '</span>';
+  }
+  function subHtml(){return 'We get local businesses recommended by '+aiRow();}
   // expose brand logos for the platform section animations
-  window.__AEO={aiSvg:aiSvg,aiTile:aiTile,P_OPENAI:P_OPENAI,P_PPLX:P_PPLX,P_GEM:P_GEM,P_CLAUDE:P_CLAUDE,GEM_SVG:GEM_SVG};
+  window.__AEO={aiSvg:aiSvg,aiTile:aiTile,P_OPENAI:P_OPENAI,P_PPLX:P_PPLX,P_GEM:P_GEM,P_CLAUDE:P_CLAUDE,gemSvg:gemSvg,get GEM_SVG(){return gemSvg();}};
 
   var WINDOW_HTML=
     '<div class="aeo-window">'+
@@ -207,7 +228,7 @@ INJECT = r"""
   function applyText(){
     var s=getHero(); if(!s)return;
     s.querySelectorAll("h1").forEach(function(h){ if(h.innerHTML!==HEAD_HTML)h.innerHTML=HEAD_HTML; });
-    s.querySelectorAll("p").forEach(function(p){ var t=p.textContent||""; if((/recommended by|Attio is the CRM/.test(t))&&!p.querySelector(".aeo-ai-row"))p.innerHTML=SUB_HTML; });
+    s.querySelectorAll("p").forEach(function(p){ var t=p.textContent||""; if((/recommended by|Attio is the CRM/.test(t))&&!p.querySelector(".aeo-ai-row"))p.innerHTML=subHtml(); });
   }
   function findMobileMock(){
     var scene=document.querySelector('[data-home-hero="mobile-scene"]');
@@ -231,7 +252,7 @@ INJECT = r"""
     }
     if(host.querySelector(".aeo-window"))return;
     if(mobile)host.className="aeo-mobile-slot";
-    host.innerHTML=WINDOW_HTML;
+    host.innerHTML='<div class="aeo-stage">'+WINDOW_HTML+'</div>';
     host.style.pointerEvents="auto";
     if(mobile){
       host.style.opacity="1";
@@ -337,8 +358,12 @@ PLATFORM = open("parts/platform.frag", encoding="utf-8").read()
 
 CHROME = open("parts/chrome.frag", encoding="utf-8").read()
 HOMEXTRA = open("parts/home_extra.frag", encoding="utf-8").read()
+# Scroll choreography for the home page: hero focal transfer + the
+# scroll-scrubbed AEO statistics section. Loads after chrome so the
+# shared scroll engine (window.__aeoScroll) already exists.
+STORY = open("parts/story.frag", encoding="utf-8").read()
 
-html = html.replace("</body>", INJECT + CHROME + PLATFORM + HOMEXTRA + "</body>", 1)
+html = html.replace("</body>", INJECT + CHROME + PLATFORM + HOMEXTRA + STORY + "</body>", 1)
 
 html = fix_next_asset_paths(html)
 
