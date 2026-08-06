@@ -27,21 +27,13 @@
 .aeo-field input::placeholder{color:var(--aeo-ink-5)}
 .aeo-field input:focus,.aeo-field select:focus{border-color:var(--aeo-accent);background-color:#fff;box-shadow:var(--aeo-ring),inset 0 1px 2px rgba(16,17,20,.02)}
 .aeo-field select{background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M6 8l4 4 4-4' stroke='%238f99a8' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:16px;cursor:pointer}
-.aeo-field-row{display:grid;grid-template-columns:1fr 1fr;gap:13px}
 .aeo-form-card .aeo-btn{width:100%;margin-top:8px}
 .aeo-form-fine{margin:14px 0 0;text-align:center;font-size:12.5px;color:#a4adba;font-weight:500}
-.aeo-form-done{text-align:center;padding:40px 8px}
-.aeo-form-done-ic{width:56px;height:56px;border-radius:999px;background:linear-gradient(135deg,#16a34a,#0d8a3f);color:#fff;display:inline-flex;align-items:center;justify-content:center;margin-bottom:18px;box-shadow:0 14px 30px -12px rgba(22,163,74,.55);animation:aeo-pop-in .5s cubic-bezier(.33,1.4,.68,1) both}
-.aeo-form-done-ic svg{width:26px;height:26px}
-@keyframes aeo-pop-in{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
-.aeo-form-done h3{font-family:"Inter Display",Inter,sans-serif;font-size:22px;font-weight:600;letter-spacing:-.022em;color:var(--aeo-ink);margin:0 0 8px}
-.aeo-form-done p{font-size:14.5px;line-height:1.6;color:var(--aeo-ink-3);font-weight:500;margin:0}
 .aeo-field input.aeo-invalid,.aeo-field input.aeo-invalid:focus{border-color:#e5484d;box-shadow:0 0 0 3px rgba(229,72,77,.16);animation:aeo-shake .32s var(--aeo-e-out)}
 @keyframes aeo-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 @media (max-width:860px){.aeo-contact-grid{grid-template-columns:1fr}}
 @media (prefers-reduced-motion: reduce){
   .aeo-field input.aeo-invalid{animation:none}
-  .aeo-form-done-ic{animation:none}
 }
 </style>
 <template id="aeo-page-tpl">
@@ -66,15 +58,17 @@
       <div class="aeo-form-card">
         <form id="aeo-audit-form" novalidate>
           <h3 class="aeo-form-h">Request your free audit</h3>
-          <p class="aeo-form-s">Takes 30 seconds. Results in 3&ndash;5 business days.</p>
-          <div class="aeo-field"><label for="af-biz">Business name</label><input id="af-biz" name="biz" type="text" placeholder="e.g. Lakeline Family Dental" required></div>
-          <div class="aeo-field"><label for="af-web">Website</label><input id="af-web" name="web" type="text" placeholder="yourbusiness.com" required></div>
-          <div class="aeo-field-row">
-            <div class="aeo-field"><label for="af-city">City</label><input id="af-city" name="city" type="text" placeholder="Austin, TX" required></div>
-            <div class="aeo-field"><label for="af-ind">Industry</label><select id="af-ind" name="ind"><option>HVAC</option><option>Plumbing</option><option>Dental</option><option>Legal</option><option>Med spa</option><option>Home services</option><option>Other</option></select></div>
+          <p class="aeo-form-s">Takes 30 seconds. Then pick a time for your free walkthrough call.</p>
+          <div class="aeo-field"><label for="af-web">Website URL</label><input id="af-web" name="web" type="text" placeholder="yourbusiness.com" required></div>
+          <div class="aeo-field"><label for="af-email">Business email</label><input id="af-email" name="email" type="email" placeholder="you@yourbusiness.com" required></div>
+          <div class="aeo-field"><label for="af-plan">Desired plan</label>
+            <select id="af-plan" name="plan">
+              <option value="core">Core &mdash; $2,500/mo</option>
+              <option value="premium" selected>Premium &mdash; $5,000/mo</option>
+              <option value="custom">Custom</option>
+            </select>
           </div>
-          <div class="aeo-field"><label for="af-email">Work email</label><input id="af-email" name="email" type="email" placeholder="you@yourbusiness.com" required></div>
-          <button class="aeo-btn aeo-btn--blue" type="submit">Request my free audit</button>
+          <button class="aeo-btn aeo-btn--blue" type="submit">Schedule my free audit call</button>
           <p class="aeo-form-fine">No commitment. We never share your data.</p>
         </form>
       </div>
@@ -90,8 +84,6 @@
     form.setAttribute("data-aeo","1");
     form.addEventListener("submit",function(ev){
       ev.preventDefault();
-      var email=(document.getElementById("af-email")||{}).value||"";
-      var card=form.closest(".aeo-form-card");
       var req=form.querySelectorAll("input[required]");
       for(var i=0;i<req.length;i++){
         if(!req[i].value.trim()){
@@ -104,10 +96,18 @@
           return;
         }
       }
-      card.innerHTML='<div class="aeo-form-done">'+
-        '<span class="aeo-form-done-ic"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'+
-        '<h3>Request received</h3>'+
-        '<p>We&rsquo;re on it. Your audit'+(email?' will land in <b>'+email.replace(/</g,"&lt;")+'</b>':'')+' within 3&ndash;5 business days.</p></div>';
+      // No backend yet: the request itself is just the handoff into
+      // scheduling. Plan/website/email ride along in the URL so the
+      // booking page can show "this call started as a free audit request"
+      // without either page needing to persist anything server-side.
+      var web=(document.getElementById("af-web")||{}).value.trim()||"";
+      var email=(document.getElementById("af-email")||{}).value.trim()||"";
+      var plan=(document.getElementById("af-plan")||{}).value||"";
+      var qs="source=audit";
+      if(plan)qs+="&plan="+encodeURIComponent(plan);
+      if(web)qs+="&website="+encodeURIComponent(web);
+      if(email)qs+="&email="+encodeURIComponent(email);
+      window.location.href="book.html?"+qs;
     });
   }
   function mount(){

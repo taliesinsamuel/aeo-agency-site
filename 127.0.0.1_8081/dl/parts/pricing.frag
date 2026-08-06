@@ -67,47 +67,48 @@
     <div class="aeo-plat-intro">
       <span class="aeo-pill aeo-pill-center">Pricing</span>
       <h1 class="aeo-h2" style="font-size:clamp(38px,5vw,62px)">Plans that pay for themselves</h1>
-      <p class="aeo-lead">Every plan starts with a free AI visibility audit. No long-term contracts &mdash; you stay because it works.</p>
+      <p class="aeo-lead">Straightforward monthly retainers, matched to how much ground you need to cover. No long-term contracts &mdash; you stay because it works.</p>
     </div>
     <div class="aeo-price-grid">
       <div class="aeo-price">
-        <div class="aeo-price-name">Audit</div>
-        <div class="aeo-price-sub">See exactly how AI talks about your business today.</div>
-        <div class="aeo-price-amount"><span class="aeo-price-num">Free</span></div>
+        <div class="aeo-price-name">Core</div>
+        <div class="aeo-price-sub">Get found by AI, measured and moving in the right direction.</div>
+        <div class="aeo-price-amount"><span class="aeo-price-num">$2,500</span><span class="aeo-price-per">/month</span></div>
         <div class="aeo-price-feats">
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Mention-rate baseline across 4 AI engines</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Schema and site readability report</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Competitor comparison for your area</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>30-minute walkthrough call</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>AI visibility baseline across ChatGPT, Perplexity, Gemini &amp; Claude</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Buyer-question research for your market</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Schema markup on core pages (Organization, LocalBusiness, FAQ)</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>3&ndash;5 answer-ready pages optimized every month</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Monthly AI-mention tracking &amp; reporting call</div>
         </div>
-        <a class="aeo-btn aeo-btn--ghost" href="contact.html">Get your free audit</a>
+        <a class="aeo-btn aeo-btn--ghost" href="book.html?plan=core">Start with Core</a>
       </div>
       <div class="aeo-price aeo-price--hot">
         <span class="aeo-price-flag">Most popular</span>
-        <div class="aeo-price-name">Growth</div>
-        <div class="aeo-price-sub">Everything you need to become the answer in your area.</div>
-        <div class="aeo-price-amount"><span class="aeo-price-num">$990</span><span class="aeo-price-per">/month</span></div>
+        <div class="aeo-price-name">Premium</div>
+        <div class="aeo-price-sub">Everything it takes to become the answer in your market.</div>
+        <div class="aeo-price-amount"><span class="aeo-price-num">$5,000</span><span class="aeo-price-per">/month</span></div>
         <div class="aeo-price-feats">
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in Audit</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Schema and site structure fixes</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>4 AI-ready pages every month</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Review and citation building</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Monthly mention-rate reporting</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in Core</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Broader buyer-intent prompt coverage, tracked against named competitors</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>6&ndash;10 pages or content pieces built every month</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Citation &amp; authority building across directories and review platforms</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Weekly AI-mention monitoring, quarterly strategy review</div>
         </div>
-        <a class="aeo-btn aeo-btn--blue" href="contact.html">Start with Growth</a>
+        <a class="aeo-btn aeo-btn--blue" href="book.html?plan=premium">Start with Premium</a>
       </div>
       <div class="aeo-price">
-        <div class="aeo-price-name">Dominate</div>
-        <div class="aeo-price-sub">For businesses that want the whole market, not a share.</div>
-        <div class="aeo-price-amount"><span class="aeo-price-num">$1,990</span><span class="aeo-price-per">/month</span></div>
+        <div class="aeo-price-name">Custom</div>
+        <div class="aeo-price-sub">For multi-location or complex accounts that need a bespoke plan.</div>
+        <div class="aeo-price-amount"><span class="aeo-price-num">Custom</span></div>
         <div class="aeo-price-feats">
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in Growth</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>10 AI-ready pages every month</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Weekly tracking and alerts</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Competitor displacement strategy</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Priority support, quarterly strategy</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in Premium</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Custom AI-search strategy for multi-location or complex accounts</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Website rebuild for AI readability and conversion</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Larger-scale authority &amp; PR-led citation campaigns</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Dedicated strategist and custom reporting cadence</div>
         </div>
-        <a class="aeo-btn aeo-btn--ghost" href="contact.html">Book a call</a>
+        <a class="aeo-btn aeo-btn--ghost" href="book.html?plan=custom">Talk to us</a>
       </div>
     </div>
     <p class="aeo-price-note">Prices in USD. Month to month &mdash; cancel anytime. Everything we build stays yours.</p>

@@ -4,7 +4,6 @@ import glob, os, re
 HEAD = "Be the business that AI recommends"
 HEAD_HTML = "Be the business that AI recommends"
 SUB = "We get local businesses recommended by ChatGPT, Perplexity, Gemini and Claude."
-BADGE = "Best AEO agency 2026"
 
 SRC = "original-attio-backup.html.bak"
 LIVE = [f for f in glob.glob("*.html") if f.startswith("ua=")][0]
@@ -55,7 +54,17 @@ html = html.replace(
     "Attio is the CRM that builds pipeline, advances deals, and grows accounts around the clock.",
     SUB,
 )
-html = html.replace("GTM lessons from Elena Verna and more", BADGE)
+
+# --- 1a. drop Attio's own top-of-hero badge entirely (not just its text) ---
+# it's a flex child of a gap-9 column ahead of <h1>, so removing the node
+# (rather than swapping its label) also removes its reserved gap for free —
+# the headline moves up on its own with no leftover blank space.
+BADGE_RE = re.compile(
+    r'<div style="filter:blur\(1\.5px\);opacity:0"><div data-visual-test="blackout">'
+    r'<a href="https://atlas\.eSOZMHKB8k26\.com".*?</a></div></div>',
+    re.S,
+)
+html = BADGE_RE.sub("", html)
 
 # --- 1b. reveal content that attio hides at opacity:0 until its scroll-animation
 #         JS fires (that JS doesn't run in the static capture) ---
@@ -154,7 +163,7 @@ INJECT = r"""
 </style>
 <script id="aeo-script">
 (function(){
-  var HEAD=%%HEAD%%, HEAD_HTML=%%HEAD_HTML%%, SUB=%%SUB%%, BADGE=%%BADGE%%;
+  var HEAD=%%HEAD%%, HEAD_HTML=%%HEAD_HTML%%, SUB=%%SUB%%;
   var ITEMS=[
     {biz:"dentist",city:"Austin"},
     {biz:"law firm",city:"Miami"},
@@ -349,7 +358,7 @@ INJECT = r"""
 """
 
 import json
-INJECT = INJECT.replace("%%HEAD%%", json.dumps(HEAD)).replace("%%HEAD_HTML%%", json.dumps(HEAD_HTML)).replace("%%SUB%%", json.dumps(SUB)).replace("%%BADGE%%", json.dumps(BADGE))
+INJECT = INJECT.replace("%%HEAD%%", json.dumps(HEAD)).replace("%%HEAD_HTML%%", json.dumps(HEAD_HTML)).replace("%%SUB%%", json.dumps(SUB))
 
 # ============================================================
 #  AEO PLATFORM SECTION  (replaces attio's Platform section)
@@ -386,3 +395,4 @@ def build_page(fname, title, frag_path):
 
 build_page("pricing.html", "Pricing — Answered, the AEO agency", "parts/pricing.frag")
 build_page("contact.html", "Get your free audit — Answered", "parts/contact.frag")
+build_page("book.html", "Book a call — Answered", "parts/book.frag")

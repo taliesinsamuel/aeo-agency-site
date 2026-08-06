@@ -3,16 +3,22 @@
 .aeo-proc .aeo-plat-inner{padding-top:clamp(56px,7vw,104px)}
 /* frosted panel holding the three steps — one object, three faces */
 .aeo-steps{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid rgba(28,29,31,.08);border-radius:var(--aeo-r-xl);background:linear-gradient(180deg,rgba(255,255,255,.82),rgba(255,255,255,.56));-webkit-backdrop-filter:saturate(170%) blur(12px);backdrop-filter:saturate(170%) blur(12px);box-shadow:var(--aeo-sh-3);overflow:hidden}
-.aeo-step{padding:clamp(28px,3vw,44px) clamp(24px,2.6vw,38px);position:relative;opacity:0;transform:translateY(22px);transition:opacity .8s var(--aeo-e),transform .8s var(--aeo-e),background-color .4s var(--aeo-e)}
+.aeo-step{padding:clamp(28px,3vw,44px) clamp(24px,2.6vw,38px);position:relative;opacity:0;transform:translateY(22px);isolation:isolate;transition:opacity .8s var(--aeo-e),transform .8s var(--aeo-e)}
 .aeo-step.in{opacity:1;transform:none}
 .aeo-step+.aeo-step{border-left:1px dashed var(--aeo-line-dash)}
-/* hover lights the top edge of the face you are reading */
-.aeo-step::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--aeo-grad-accent);transform:scaleX(0);transform-origin:left;opacity:0;transition:transform .5s var(--aeo-e),opacity .5s var(--aeo-e)}
-.aeo-step:hover{background-color:rgba(38,109,240,.028)}
-.aeo-step:hover::before{transform:scaleX(1);opacity:1}
-.aeo-step-num{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;padding:0 8px;border-radius:9px;font-family:"Inter Display",Inter,sans-serif;font-size:13px;font-weight:700;letter-spacing:.03em;color:var(--aeo-accent-ink);background:linear-gradient(180deg,#f0f5ff,var(--aeo-accent-soft));box-shadow:inset 0 0 0 1px rgba(38,109,240,.16),0 1px 2px rgba(38,109,240,.08);margin-bottom:18px}
-.aeo-step h3{font-family:"Inter Display",Inter,sans-serif;font-weight:600;font-size:clamp(19px,1.7vw,23px);letter-spacing:-.02em;color:var(--aeo-ink);margin:0 0 10px}
-.aeo-step p{margin:0;font-size:15px;line-height:1.58;letter-spacing:-.006em;color:var(--aeo-ink-3);font-weight:500}
+/* the activated surface is a separate layer that fades in behind the
+   content, so children only ever need to transition color/opacity —
+   never fighting a background-color transition on the same element */
+.aeo-step::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(135deg,var(--aeo-accent-lo),var(--aeo-accent) 46%,var(--aeo-accent-hi));opacity:0;transition:opacity .18s var(--aeo-e)}
+.aeo-step:hover::before{opacity:1}
+.aeo-step-num{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;padding:0 8px;border-radius:9px;font-family:"Inter Display",Inter,sans-serif;font-size:13px;font-weight:700;letter-spacing:.03em;color:var(--aeo-accent-ink);background:linear-gradient(180deg,#f0f5ff,var(--aeo-accent-soft));box-shadow:inset 0 0 0 1px rgba(38,109,240,.16),0 1px 2px rgba(38,109,240,.08);margin-bottom:18px;transition:background .18s var(--aeo-e),color .18s var(--aeo-e),box-shadow .18s var(--aeo-e)}
+.aeo-step h3{font-family:"Inter Display",Inter,sans-serif;font-weight:600;font-size:clamp(19px,1.7vw,23px);letter-spacing:-.02em;color:var(--aeo-ink);margin:0 0 10px;transition:color .18s var(--aeo-e)}
+.aeo-step p{margin:0;font-size:15px;line-height:1.58;letter-spacing:-.006em;color:var(--aeo-ink-3);font-weight:500;transition:color .18s var(--aeo-e)}
+@media (hover:hover) and (pointer:fine){
+  .aeo-step:hover .aeo-step-num{background:rgba(255,255,255,.16);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.32),0 1px 2px rgba(16,17,20,.1)}
+  .aeo-step:hover h3{color:#fff;text-shadow:0 1px 12px rgba(255,255,255,.25)}
+  .aeo-step:hover p{color:rgba(255,255,255,.88)}
+}
 @media (max-width:860px){.aeo-steps{grid-template-columns:1fr}.aeo-step+.aeo-step{border-left:none;border-top:1px dashed var(--aeo-line-dash)}}
 
 /* ---- stats band (dark) ---- */

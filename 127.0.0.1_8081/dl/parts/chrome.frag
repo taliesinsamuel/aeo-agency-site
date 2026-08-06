@@ -62,9 +62,16 @@ html{scroll-padding-top:88px}
 ::selection{background:rgba(38,109,240,.16);color:var(--aeo-ink)}
 
 /* ---- shared section shell ---- */
-.aeo-plat{position:relative;background:var(--aeo-surface);font-family:var(--font-inter),"Inter",system-ui,sans-serif;overflow:hidden}
+/* overflow:hidden lives on the bg decoration layer, not on .aeo-plat
+   itself: an ancestor with overflow other than visible becomes the
+   containing scrollport for any position:sticky descendant (e.g. the
+   stacked-card pin below), which silently turns "sticky" into "stuck at
+   its flow position" instead of "pinned to the viewport". Clipping the
+   ambient blobs one level down gets the same visual result without ever
+   putting a non-viewport scrollport in the ancestor chain. */
+.aeo-plat{position:relative;background:var(--aeo-surface);font-family:var(--font-inter),"Inter",system-ui,sans-serif}
 .aeo-plat *{box-sizing:border-box}
-.aeo-plat-bg{position:absolute;inset:0;pointer-events:none;z-index:0}
+.aeo-plat-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
 .aeo-plat-inner{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:clamp(64px,8vw,120px) 24px clamp(72px,9vw,128px)}
 .aeo-plat-intro{text-align:center;max-width:860px;margin:0 auto clamp(44px,5vw,70px)}
 
@@ -140,21 +147,45 @@ html{scroll-padding-top:88px}
 header{transition:background-color .35s var(--aeo-e),box-shadow .35s var(--aeo-e),backdrop-filter .35s var(--aeo-e)}
 header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-webkit-backdrop-filter:saturate(180%) blur(16px);backdrop-filter:saturate(180%) blur(16px);box-shadow:0 1px 0 rgba(16,17,20,.06),0 10px 30px -24px rgba(16,17,20,.4)}
 
-/* ---- simplified nav ---- */
-.aeo-nav{display:flex;align-items:center;justify-content:space-between;gap:24px;width:100%;font-size:14px;font-weight:500}
-.aeo-nav-brand{display:inline-flex;align-items:center;text-decoration:none;padding:4px 2px}
+/* ---- nav ----
+   A true 3-column grid, not flex space-between: the two outer columns
+   are always equal width (1fr each), so the middle column is genuinely
+   centered on the header's own axis regardless of how wide the brand or
+   the Book a Call button happen to be — not "centered" only because the
+   leftover flex space happened to be even. */
+.aeo-nav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;width:100%;font-size:14px;font-weight:500}
+.aeo-nav-brand{display:inline-flex;align-items:center;justify-self:start;text-decoration:none;padding:4px 2px}
 .aeo-nav-brand .aeo-brand{transition:opacity .2s var(--aeo-e)}
 .aeo-nav-brand:hover .aeo-brand{opacity:.72}
-.aeo-nav-links{display:flex;align-items:center;gap:2px}
-.aeo-nav-links a{position:relative;color:var(--aeo-ink-2);text-decoration:none;padding:7px 13px;border-radius:var(--aeo-r-sm);letter-spacing:-.006em;transition:color .2s var(--aeo-e),background-color .2s var(--aeo-e)}
-.aeo-nav-links a::after{content:"";position:absolute;left:13px;right:13px;bottom:3px;height:1.5px;border-radius:2px;background:var(--aeo-grad-accent);transform:scaleX(0);transform-origin:left;opacity:0;transition:transform .32s var(--aeo-e),opacity .32s var(--aeo-e)}
-.aeo-nav-links a:hover{color:var(--aeo-ink);background-color:rgba(16,17,20,.04)}
-.aeo-nav-links a:hover::after{transform:scaleX(1);opacity:.9}
-@media (max-width:560px){
-  .aeo-nav{gap:8px}
-  .aeo-nav-links{gap:0}
-  .aeo-nav-links a{padding:6px 7px;font-size:13px}
+.aeo-nav-links{position:relative;display:flex;align-items:center;gap:2px;justify-self:center}
+.aeo-nav-links a{position:relative;z-index:1;color:var(--aeo-ink-2);text-decoration:none;padding:8px 15px;border-radius:999px;letter-spacing:-.006em;white-space:nowrap;transition:color .16s var(--aeo-e)}
+/* one shared surface travels between links instead of each owning its own
+   pill — sized/positioned in JS from the hovered link's own rect, so it
+   reads as a single highlight sliding across the bar, not separate boxed
+   buttons flashing on and off */
+.aeo-nav-hl{position:absolute;top:0;left:0;z-index:0;height:100%;width:0;border-radius:999px;background:var(--aeo-grad-accent);opacity:0;pointer-events:none;transition:opacity .16s var(--aeo-e),transform .22s var(--aeo-e),width .22s var(--aeo-e);will-change:transform,width}
+@media (hover:hover) and (pointer:fine){
+  .aeo-nav-links a:hover{color:#fff}
+}
+/* min-width:max-content restores the grid item's natural content size —
+   without it, a grid track shrinks an overflow:hidden child down to 0
+   before it shrinks any sibling that doesn't clip its own overflow,
+   which is what was squeezing the button's label into two lines on
+   narrower widths */
+.aeo-nav-right{justify-self:end;min-width:max-content}
+.aeo-nav-book{height:38px;padding:0 18px;border-radius:999px;font-size:13.5px}
+@media (max-width:760px){
+  .aeo-nav{gap:8px;grid-template-columns:auto 1fr auto}
+  .aeo-nav-links{gap:0;justify-self:end}
+  .aeo-nav-links a{padding:7px 9px;font-size:13px}
   .aeo-nav-links a:first-child{display:none}
+  .aeo-nav-book{height:34px;padding:0 13px;font-size:12.5px}
+}
+.aeo-nav-book-short{display:none}
+@media (max-width:420px){
+  .aeo-nav-book{padding:0 13px}
+  .aeo-nav-book-full{display:none}
+  .aeo-nav-book-short{display:inline}
 }
 .aeo-brand{font-family:"Inter Display",Inter,sans-serif;font-weight:700;font-size:19px;letter-spacing:-.025em;color:var(--aeo-ink);white-space:nowrap}
 .aeo-brand i{font-style:normal;color:var(--aeo-accent);text-shadow:0 0 12px rgba(38,109,240,.45)}
@@ -200,7 +231,7 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
       var a=as[i],h=a.getAttribute("href")||"";
       if(!h)continue;
       if(/^(#|mailto:|tel:)/.test(h))continue;
-      if(/^(\.\/|pricing\.html|contact\.html|index\.html)/.test(h))continue;
+      if(/^(\.\/|pricing\.html|contact\.html|book\.html|index\.html)/.test(h))continue;
       if(h.indexOf("./#")===0)continue;
       var n=null;
       if(/sign-in/i.test(h))n="contact.html";
@@ -225,9 +256,31 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
       nav.setAttribute("data-aeo","1");
       nav.innerHTML='<div class="aeo-nav">'+
         '<a class="aeo-nav-brand" href="./"><span class="aeo-brand">Answered<i>.</i></span></a>'+
-        '<div class="aeo-nav-links"><a href="./">Home</a><a href="pricing.html">Pricing</a><a href="contact.html">Free audit</a></div>'+
+        '<div class="aeo-nav-links"><span class="aeo-nav-hl" aria-hidden="true"></span><a href="./">Home</a><a href="pricing.html">Pricing</a><a href="contact.html">Free audit</a></div>'+
+        '<div class="aeo-nav-right"><a class="aeo-btn aeo-btn--primary aeo-nav-book" href="book.html">'+
+          '<span class="aeo-nav-book-full">Book a Call</span><span class="aeo-nav-book-short" aria-hidden="true">Call</span>'+
+        '</a></div>'+
       '</div>';
     }
+  }
+  /* ---- nav: one highlight surface that travels between links on hover ---- */
+  function wireNavHighlight(){
+    var wrap=document.querySelector(".aeo-nav-links");
+    if(!wrap||!fine||wrap.getAttribute("data-aeo-hl")==="1")return;
+    var hl=wrap.querySelector(".aeo-nav-hl");
+    if(!hl)return;
+    wrap.setAttribute("data-aeo-hl","1");
+    function moveTo(a){
+      var wr=wrap.getBoundingClientRect(),r=a.getBoundingClientRect();
+      hl.style.width=r.width+"px";
+      hl.style.transform="translateX("+(r.left-wr.left)+"px)";
+      hl.style.opacity="1";
+    }
+    var links=wrap.querySelectorAll("a");
+    for(var i=0;i<links.length;i++){
+      links[i].addEventListener("pointerenter",function(){moveTo(this);});
+    }
+    wrap.addEventListener("pointerleave",function(){hl.style.opacity="0";});
   }
   function fixFooter(){
     var f=document.querySelector("footer");
@@ -240,7 +293,7 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
         '<div class="aeo-foot-brand"><span class="aeo-brand">Answered<i>.</i></span><p>The answer engine optimization agency for local businesses. Be the business AI recommends.</p></div>'+
         '<div class="aeo-foot-cols">'+
           '<div class="aeo-foot-col"><h4>What we do</h4><a href="./#aeo-platform">AI visibility tracking</a><a href="./#aeo-platform">Site structure &amp; schema</a><a href="./#aeo-platform">Content AI quotes</a><a href="./#aeo-platform">Reviews &amp; citations</a></div>'+
-          '<div class="aeo-foot-col"><h4>Company</h4><a href="pricing.html">Pricing</a><a href="contact.html">Free audit</a><a href="contact.html">Book a call</a></div>'+
+          '<div class="aeo-foot-col"><h4>Company</h4><a href="pricing.html">Pricing</a><a href="contact.html">Free audit</a><a href="book.html">Book a call</a></div>'+
           '<div class="aeo-foot-col"><h4>Contact</h4><a href="mailto:hello@answered.agency">hello@answered.agency</a><a href="contact.html">Get in touch</a></div>'+
         '</div>'+
       '</div>'+
@@ -253,6 +306,7 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
      so they render as <button>s that go nowhere. On mobile that left the hero
      with no working call to action at all. */
   var CTA_RE=/^\s*(book a call|get (your|my) free audit|start for free|talk to sales)\s*$/i;
+  var CTA_BOOK_RE=/^\s*book a call\s*$/i;
   function fixCtas(){
     var btns=document.querySelectorAll("button");
     for(var i=0;i<btns.length;i++){
@@ -261,7 +315,7 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
       var t=(b.textContent||"").replace(/\s+/g," ").trim();
       if(!CTA_RE.test(t))continue;
       var a=document.createElement("a");
-      a.setAttribute("href","contact.html");
+      a.setAttribute("href",CTA_BOOK_RE.test(t)?"book.html":"contact.html");
       a.setAttribute("data-aeo-cta","1");
       a.className=b.className;
       a.innerHTML=b.innerHTML;
@@ -270,7 +324,7 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
     var forms=document.querySelectorAll("form");
     for(var f=0;f<forms.length;f++){
       var fm=forms[f];
-      if(fm.id==="aeo-audit-form")continue;
+      if(fm.id==="aeo-audit-form"||fm.id==="aeo-book-form")continue;
       if(fm.getAttribute("data-aeo-cta"))continue;
       fm.setAttribute("data-aeo-cta","1");
       fm.addEventListener("submit",function(ev){
@@ -383,7 +437,7 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
     },{passive:true});
   };
 
-  function tick(){fixNav();fixFooter();fixLinks();fixCtas();wireHeader();wireParallax();scanReveal();}
+  function tick(){fixNav();wireNavHighlight();fixFooter();fixLinks();fixCtas();wireHeader();wireParallax();scanReveal();}
   var n=0,iv=setInterval(function(){tick();if(++n>80)clearInterval(iv);},160);
   document.addEventListener("DOMContentLoaded",tick);
   window.addEventListener("load",tick);

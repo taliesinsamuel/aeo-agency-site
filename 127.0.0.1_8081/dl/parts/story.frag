@@ -2,59 +2,51 @@
 /* ============================================================
    FOCAL CHOREOGRAPHY
    --aeo-f is a single 0/1 state, resting or focused, flipped once by
-   an IntersectionObserver when the product window has naturally
-   arrived on screen (see wireFocus). Every property below is a calc()
-   off that number, but since it only ever lands on 0 or 1, the change
-   plays out as one ordinary CSS transition rather than a per-frame
-   scroll interpolation — nothing here is scrubbed, pinned or tied to
-   the scroll wheel. The growth room is still reserved up front, so
-   the document height stays constant and nothing below the hero ever
-   moves when the state flips.
+   an IntersectionObserver purely on how much of the product window is
+   on screen (see wireFocus) — no scroll-pixel maths, no scrubbing, no
+   continuous interpolation while the visitor scrolls.
+
+   The pop itself lives entirely on .aeo-focus-scale: a dedicated wrapper
+   inserted around .aeo-stage that owns exactly one property (scale).
+   A transform never triggers layout, so nothing below the hero needs
+   reserved growth room and nothing reflows when the state flips — the
+   internal chat demo keeps animating its own entrance/typing/token
+   transforms one layer down, completely independently, so the two
+   never compete for the same property on the same element.
    ============================================================ */
-.aeo-hero{--aeo-f:0;--aeo-winh:clamp(360px,42vw,660px);--aeo-wing:44px}
-/* one duration/easing shared by every focus property, so the state
-   reads as a single coherent move rather than several parts arriving
-   on their own schedules */
-.aeo-focus-host,.aeo-focus-host .aeo-window,.aeo-focus-host .aeo-window::after,
-.aeo-focus-host .aeo-stage::before,.aeo-focus-host .aeo-stage::after,
+.aeo-hero{--aeo-f:0}
+
+.aeo-focus-scale{
+  display:block;width:100%;
+  scale:calc(1 + .085 * var(--aeo-f));
+  transform-origin:50% 62%;
+  transition:scale .38s var(--aeo-e-out);
+  will-change:scale;
+}
+.aeo-focus-scale>.aeo-stage{width:100%;isolation:isolate}
+@media (max-width:767px){
+  /* smaller stage, smaller pop — enough to read, never enough to overflow */
+  .aeo-focus-scale{scale:calc(1 + .04 * var(--aeo-f))}
+}
+/* the product demo should hand off to the story section right after it,
+   not float in a void above it */
+.aeo-hero [class~="h-svh"]{padding-bottom:20px!important}
+
+/* supporting cues ride the same --aeo-f signal but stay secondary: same
+   duration/easing bucket, no scale, no movement of their own — they only
+   ever fade or dim, so they can never read as a second "resize." */
 .aeo-focus-lift,.aeo-focus-head,.aeo-hero::before,.aeo-focus-grid,
-.aeo-mobile-slot .aeo-window{
-  transition-duration:.68s;transition-timing-function:var(--aeo-e);
+.aeo-focus-host .aeo-stage::after,.aeo-focus-host .aeo-window::after{
+  transition-duration:.48s;transition-timing-function:var(--aeo-e);
 }
 
-/* the slot the product window lives in: it widens, it never detaches */
-.aeo-focus-host{
-  display:flex;align-items:center;justify-content:center;
-  min-height:calc(var(--aeo-winh) + var(--aeo-wing));
-  width:calc(66.6667% + 9% * var(--aeo-f))!important;
-  max-width:calc(1440px + 190px * var(--aeo-f))!important;
-  transition-property:width,max-width;
-}
-@media (min-width:1024px){
-  /* rest is Attio's 75%; peak lands just under the 80% ceiling */
-  .aeo-focus-host{width:calc(75% + 4.6% * var(--aeo-f))!important}
-}
-/* the reserved growth room is taken back out of the hero's tail padding
-   so the section is exactly as tall as it was before */
-.aeo-hero [class~="h-svh"]{padding-bottom:40px!important}
-.aeo-focus-host>.aeo-stage{width:100%;isolation:isolate}
-
-/* elevation and edge light ride the same number */
-.aeo-focus-host .aeo-window{
-  height:calc(var(--aeo-winh) + var(--aeo-wing) * var(--aeo-f));
-  translate:0 calc(-15px * var(--aeo-f));
-  border-color:rgb(28 29 31 / calc(.09 - .025 * var(--aeo-f)));
-  contain:layout style;
-  transition-property:height,translate,border-color;
-}
-/* The deeper cast shadow is a separate layer rather than a growing box-shadow
-   on the window itself: a wide blur re-rasterises every time its radius moves,
-   whereas fading a pre-rasterised layer in is pure compositor work. */
+/* deeper cast shadow is a separate pre-rasterised layer rather than a
+   growing box-shadow on the window itself, which would re-rasterise on
+   every frame — fading a flat layer in/out is pure compositor work */
 .aeo-focus-lift{
   position:absolute;inset:0;z-index:-1;border-radius:18px;pointer-events:none;
-  translate:0 calc(-15px * var(--aeo-f));
   opacity:var(--aeo-f);will-change:opacity;
-  transition-property:opacity,translate;
+  transition-property:opacity;
   box-shadow:
     0 46px 84px -24px rgb(28 29 31 / .17),
     0 118px 190px -74px rgb(28 29 31 / .40),
@@ -68,8 +60,9 @@
     inset 0 0 0 1px rgb(255 255 255 / calc(.5 + .34 * var(--aeo-f)));
   transition-property:background,box-shadow;
 }
-/* the lit volume behind the window opens up as attention arrives */
-.aeo-focus-host .aeo-stage::before{scale:calc(1 + .13 * var(--aeo-f));transition-property:scale}
+/* the lit volume behind the window opens up as attention arrives — it
+   already scales for free as a descendant of .aeo-focus-scale, so this
+   layer only ever needs to fade, never resize itself */
 .aeo-focus-host .aeo-stage::after{
   content:"";position:absolute;z-index:-1;left:50%;top:2%;width:100%;height:96%;
   transform:translateX(-50%);border-radius:50%;pointer-events:none;
@@ -90,22 +83,11 @@
 .aeo-focus-grid{opacity:calc(1 - .40 * var(--aeo-f))!important;transition-property:opacity}
 
 @media (max-width:767px){
-  /* Attio swaps to a separate scene here: no resizing, just depth */
-  .aeo-focus-host{min-height:0}
-  .aeo-mobile-slot .aeo-window{
-    translate:0 calc(-7px * var(--aeo-f));
-    box-shadow:
-      0 1px 2px rgb(16 17 20 / .05),
-      0 calc(18px + 14px * var(--aeo-f)) calc(36px + 26px * var(--aeo-f)) -20px rgb(28 29 31 / calc(.26 + .09 * var(--aeo-f)));
-    transition-property:translate,box-shadow;
-  }
   .aeo-focus-head{translate:0 calc(6px * var(--aeo-f));opacity:calc(1 - .3 * var(--aeo-f))}
 }
 @media (prefers-reduced-motion:reduce){
-  .aeo-focus-host,.aeo-focus-host .aeo-window,.aeo-focus-host .aeo-window::after,
-  .aeo-focus-host .aeo-stage::before,.aeo-focus-host .aeo-stage::after,
-  .aeo-focus-lift,.aeo-focus-head,.aeo-hero::before,.aeo-focus-grid,
-  .aeo-mobile-slot .aeo-window{transition:none}
+  .aeo-focus-scale,.aeo-focus-lift,.aeo-focus-head,.aeo-hero::before,.aeo-focus-grid,
+  .aeo-focus-host .aeo-stage::after,.aeo-focus-host .aeo-window::after{transition:none}
 }
 
 /* ============================================================
@@ -116,13 +98,15 @@
    zero layout shift. Scroll is the only clock.
    ============================================================ */
 .aeo-story{
-  /* shorter runway and a small landing pad, not a long parked hold: the
-     reader should reach "the shift" soon after the product demo and keep
-     moving soon after the last figure lands */
-  --aeo-scrub:82svh;--aeo-hold:8svh;
+  /* short runway and a near-zero landing pad: the reader should reach
+     "the shift" almost immediately after the product demo, move through
+     it briskly, and be released the instant the last figure lands —
+     never a long parked hold with nothing changing on screen */
+  --aeo-scrub:52svh;--aeo-hold:3svh;
   position:relative;background:transparent;
   font-family:var(--aeo-mono);
   height:calc(100svh + var(--aeo-scrub) + var(--aeo-hold));
+  margin-top:-20px;
 }
 .aeo-story-pin{
   position:sticky;top:0;height:100svh;
@@ -174,7 +158,7 @@
 .aeo-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
 @media (max-width:767px){
-  .aeo-story{--aeo-scrub:74svh;--aeo-hold:6svh}
+  .aeo-story{--aeo-scrub:48svh;--aeo-hold:3svh}
   .aeo-story-pin{padding-left:26px;padding-right:26px}
   .aeo-story-line{font-size:clamp(16.5px,4.6vw,21px);line-height:1.46;letter-spacing:-.012em}
   .aeo-story-item+.aeo-story-item{margin-top:clamp(22px,3.4vh,34px)}
@@ -206,20 +190,28 @@
     if(!stages.length)return;                      // chat window not mounted yet
     hero.setAttribute("data-aeo-focus","1");
 
-    var desk=null,i;
+    var desk=null,mob=null,i;
     for(i=0;i<stages.length;i++){
-      var h=stages[i].parentNode;
-      if(!h||!h.classList||h.classList.contains("aeo-mobile-slot"))continue;
-      h.classList.add("aeo-focus-host");
-      if(!stages[i].querySelector(".aeo-focus-lift")){
+      var st=stages[i],h=st.parentNode;
+      if(!h||!h.classList)continue;
+      var isMobile=h.classList.contains("aeo-mobile-slot");
+      if(!isMobile)h.classList.add("aeo-focus-host");
+      // The pop lives on a dedicated wrapper one level above the stage,
+      // so the outer transform (scale) and the stage's own internal
+      // animation (entrance keyframe, chat typing/tokens) each own a
+      // different element and never fight over the same property.
+      var scaleWrap=document.createElement("div");
+      scaleWrap.className="aeo-focus-scale";
+      h.insertBefore(scaleWrap,st);
+      scaleWrap.appendChild(st);
+      if(!isMobile&&!st.querySelector(".aeo-focus-lift")){
         var lift=document.createElement("i");
         lift.className="aeo-focus-lift";
         lift.setAttribute("aria-hidden","true");
-        stages[i].insertBefore(lift,stages[i].firstChild);
+        st.insertBefore(lift,st.firstChild);
       }
-      if(!desk)desk=h;
+      if(isMobile){if(!mob)mob=h;}else{if(!desk)desk=h;}
     }
-    var mob=hero.querySelector(".aeo-mobile-slot");
 
     // the headline group is the last ancestor of the h1 that does not
     // also contain the product window
@@ -234,57 +226,49 @@
 
     if(reduce)return;
 
-    // two states only: resting (0) or focused (1). The flip is driven by
-    // how much of the product window is actually on screen, not by scroll
-    // position, so nothing here scrubs, pins or tracks the wheel — it is a
-    // single CSS transition (see --aeo-f above) fired at most once per
-    // direction change.
+    // One state, one clean signal: how much of the product window is
+    // actually on screen, straight from IntersectionObserver — no scroll
+    // distance, no pixel thresholds, nothing scrubbed. Separate enter/exit
+    // ratios (rather than one shared value) give the flip a small
+    // hysteresis band so it can't flicker back and forth right at the
+    // boundary, and a short cooldown after every flip stops it being
+    // re-triggered mid-transition.
     //
-    // The page must always paint the resting state first: on short
-    // viewports the window can already be >45% visible before the visitor
-    // has scrolled a single pixel, and snapping straight into "focused" on
-    // load would read as the page loading pre-transformed rather than the
-    // visitor arriving at it. So the very first observer callback (which
-    // only reports the state as it already is at mount time) is allowed to
-    // release the hero into resting position but never to jump it straight
-    // to focused — only a real scroll can do that.
-    var focused=false,scrolled=false;
-    function currentRatio(){
-      var t=(desk&&desk.offsetParent)?desk:((mob&&mob.offsetParent)?mob:null);
-      if(!t)return 0;
-      var r=t.getBoundingClientRect(),vh=window.innerHeight||0;
-      if(!r.height||!vh)return 0;
-      var visible=Math.min(r.bottom,vh)-Math.max(r.top,0);
-      return(visible<0?0:visible)/r.height;
-    }
-    function setFocused(on){
-      if(on&&!scrolled)return;
+    // IntersectionObserver always delivers one synchronous callback the
+    // instant observe() is called, reporting whatever ratio is already
+    // true at that exact moment — on a tall or wide viewport the demo can
+    // already be substantially visible before the visitor has scrolled a
+    // single pixel. That very first callback is deliberately ignored: the
+    // pop is a response to arriving at the section while scrolling, never
+    // a condition that's simply already true on first paint. Every
+    // callback after that first one is a real ratio change (scrolling, or
+    // a resize), and is acted on immediately.
+    var ENTER_RATIO=0.55,EXIT_RATIO=0.3,COOLDOWN=260;
+    var focused=false,lastFlip=0,booted=false;
+    function applyFocused(on){
       if(on===focused)return;
+      var now=Date.now();
+      if(now-lastFlip<COOLDOWN)return;
+      lastFlip=now;
       focused=on;
       hero.style.setProperty("--aeo-f",on?"1":"0");
     }
-    // opening the gate is the moment the visitor first moves at all — the
-    // IntersectionObserver below only reports when the ratio crosses one of
-    // its listed thresholds, which a first, tiny scroll delta may not do,
-    // so the state is evaluated directly right here rather than waiting
-    // for the observer to happen to fire again on its own.
-    window.addEventListener("scroll",function(){
-      if(scrolled)return;
-      scrolled=true;
-      setFocused(currentRatio()>=0.45);
-    },{passive:true,once:true});
     if(!("IntersectionObserver" in window))return;
-
     var io=new IntersectionObserver(function(entries){
-      for(var k=0;k<entries.length;k++){
-        var e=entries[k];
+      var want=null,k,e,r;
+      for(k=0;k<entries.length;k++){
+        e=entries[k];
         // the hidden breakpoint slot (desktop vs. mobile) never accrues a
         // real ratio, so only the one actually on screen ever fires this
         if(e.target.offsetParent===null)continue;
-        // "naturally reached" = the window is roughly 40-50% visible
-        setFocused(e.intersectionRatio>=0.45);
+        r=e.intersectionRatio;
+        if(r>=ENTER_RATIO)want=true;
+        else if(r<=EXIT_RATIO)want=false;
       }
-    },{threshold:[0,.15,.3,.45,.6,.75,.9]});
+      if(!booted){booted=true;return;}
+      if(want===true)applyFocused(true);
+      else if(want===false)applyFocused(false);
+    },{threshold:[0,.1,.2,.3,.4,.55,.7,.85,1]});
     if(desk)io.observe(desk);
     if(mob)io.observe(mob);
   }
@@ -412,14 +396,15 @@
     },function(){
       var vh=box.vh,travel=box.h-vh;
       if(travel<=0||!vh)return;
-      // typing owns almost all of the pinned travel; only a small landing
-      // pad is left afterwards so the last figure doesn't vanish the
-      // instant it lands, not a long parked hold
-      var scrub=travel*(narrow()?0.9257:0.9111);
-      // writing starts well before the section is even pinned, so the
-      // first characters are already forming as it rises into view rather
-      // than after a blank, content-free beat
-      var from=box.top-vh*0.75,span=box.top+scrub-from;
+      // typing owns nearly all of the pinned travel; only a sliver is left
+      // afterwards so the last figure has a breath before the section
+      // releases — never a long parked hold with nothing moving
+      var scrub=travel*(narrow()?0.975:0.965);
+      // writing starts as soon as the section begins rising into view —
+      // by the time it is fully pinned, the first fact is already well
+      // underway, so there is no blank, content-free beat once scrolling
+      // "arrives" at the section
+      var from=box.top-vh*1.05,span=box.top+scrub-from;
       var p=span>0?(box.y-from)/span:0;
       p=p<0?0:(p>1?1:p);
       idx=Math.round(p*total);

@@ -6,13 +6,51 @@
 /* Soft seam out of the hero instead of a hard 1px rule. */
 #aeo-platform::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(28,29,31,.10) 25%,rgba(28,29,31,.10) 75%,transparent);z-index:2;pointer-events:none}
 
-/* ---- Profound-style ruled grid ---- */
-.aeo-rows{--ln:#eceef2;--ld:#e2e5ea;position:relative;border-left:1px dashed var(--ld);border-right:1px dashed var(--ld);background-image:radial-gradient(rgba(28,29,31,.04) 1px,transparent 1px);background-size:22px 22px}
-.aeo-row{display:grid;grid-template-columns:minmax(0,0.82fr) minmax(0,1.18fr);border-top:1px solid var(--ln);opacity:0;transform:translateY(26px);transition:opacity .85s var(--aeo-e),transform .85s var(--aeo-e)}
-.aeo-row.in{opacity:1;transform:none}
-.aeo-row:last-child{border-bottom:1px solid var(--ln)}
-.aeo-row-copy{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:15px;padding:clamp(34px,4vw,60px) clamp(26px,3vw,46px);border-right:1px dashed var(--ld)}
-.aeo-row-viz{display:flex;align-items:center;justify-content:center;padding:clamp(28px,3vw,46px)}
+/* ============================================================
+   STACKED CARDS — the four demonstrations behave like a deck of
+   premium panels. Card 1 rests in place; each following card rises
+   from below and settles on top, covering (not replacing) the one
+   beneath. Scroll position maps to a single 0–1 progress per card via
+   the shared rAF-throttled engine (window.__aeoScroll); every frame
+   only ever touches transform/filter/opacity, so this stays smooth
+   under fast scrolling. The card underneath eases back very slightly
+   (scale + a few px of lift) as the next one arrives, which is what
+   sells the "physical stack" read without any rotation or bounce.
+   ============================================================ */
+.aeo-stack{
+  position:relative;
+  --aeo-stack-slot:54svh;--aeo-stack-hold:4svh;
+  height:calc(100svh + var(--aeo-stack-slot) * 3 + var(--aeo-stack-hold));
+}
+.aeo-stack-pin{
+  position:sticky;top:0;height:100svh;overflow:hidden;
+  box-sizing:border-box;
+}
+.aeo-card{
+  position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  width:min(1180px,calc(100% - 12px));
+  max-height:min(560px,calc(100svh - 128px));
+  will-change:transform;
+  background:linear-gradient(180deg,#fff,#fbfcfe);
+  border:1px solid rgba(28,29,31,.08);
+  border-radius:var(--aeo-r-2xl);
+  box-shadow:var(--aeo-sh-4);
+  transition:box-shadow .3s var(--aeo-e),border-color .3s var(--aeo-e);
+}
+/* thin, sharp brand-blue ring only — no halo, no blur, no soft outer glow */
+.aeo-card::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  opacity:0;transition:opacity .2s var(--aeo-e);
+  box-shadow:0 0 0 1.5px var(--aeo-accent);
+}
+@media (hover:hover) and (pointer:fine){
+  .aeo-card:hover::before{opacity:1}
+}
+.aeo-card-inner{display:grid;grid-template-columns:minmax(0,0.82fr) minmax(0,1.18fr);align-items:center;height:100%;overflow:hidden;border-radius:inherit}
+.aeo-row-copy{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:15px;padding:clamp(28px,3.4vw,52px) clamp(24px,2.8vw,42px);height:100%;box-sizing:border-box}
+.aeo-row-viz{display:flex;align-items:center;justify-content:center;padding:clamp(20px,2.4vw,36px) clamp(24px,2.8vw,42px) clamp(20px,2.4vw,36px) 0;height:100%;box-sizing:border-box;min-width:0}
+@media (prefers-reduced-motion:reduce){.aeo-card{transition:none}}
 .aeo-h3{font-family:"Inter Display",Inter,sans-serif;font-weight:600;font-size:clamp(23px,2.5vw,33px);line-height:1.1;letter-spacing:-.024em;color:var(--aeo-ink);margin:0;text-wrap:balance}
 .aeo-rtext{font-size:clamp(15px,1.1vw,16.5px);line-height:1.55;letter-spacing:-.008em;color:var(--aeo-ink-3);font-weight:500;margin:0;max-width:42ch}
 
@@ -134,15 +172,19 @@
 @media (max-width:860px){
   /* minmax(0,1fr) not 1fr: the code panel's pre-formatted lines have a wide
      min-content, and an auto minimum lets them stretch the column past the
-     viewport. */
-  .aeo-row{grid-template-columns:minmax(0,1fr)}
-  .aeo-row-copy,.aeo-row-viz{min-width:0}
-  .aeo-row-copy{border-right:none;border-bottom:1px dashed var(--ld)}
+     viewport. Stack copy above viz inside the card and let the card grow
+     to fit both rather than clipping either. */
+  .aeo-card{max-height:min(640px,calc(100svh - 96px));overflow-y:auto}
+  .aeo-card-inner{grid-template-columns:minmax(0,1fr);grid-auto-rows:min-content;height:auto;min-height:100%}
+  .aeo-row-copy,.aeo-row-viz{min-width:0;height:auto}
+  .aeo-row-copy{padding-bottom:8px;gap:10px}
+  .aeo-row-viz{padding-top:4px}
   .aeo-rtext{max-width:none}
+  .aeo-stack{--aeo-stack-slot:56svh;--aeo-stack-hold:4svh}
 }
 @media (max-width:520px){
-  .aeo-row-copy{padding:30px 18px}
-  .aeo-row-viz{padding:20px 16px}
+  .aeo-row-copy{padding:22px 18px 6px}
+  .aeo-row-viz{padding:2px 16px 18px}
   .aeo-panel{height:392px;border-radius:var(--aeo-r-lg)}
   /* four engine names side by side have a wider min-content than a phone,
      so the model row becomes 2x2 rather than being clipped */
@@ -160,9 +202,17 @@
   .aeo-vr-name{width:86px}
   .aeo-panel--chat,.aeo-panel--act{padding-left:16px;padding-right:16px}
 }
+/* No-JS / unsupported-observer fallback: lay the cards out normally so the
+   content is never lost, just less choreographed. */
+.aeo-stack.aeo-stack--static{height:auto}
+.aeo-stack.aeo-stack--static .aeo-stack-pin{position:static;height:auto;display:flex;flex-direction:column;gap:28px;padding:32px 0}
+.aeo-stack.aeo-stack--static .aeo-card{position:relative;left:auto;top:auto;width:100%;max-width:1180px;margin:0 auto;transform:none!important;filter:none!important}
+
 @media (prefers-reduced-motion: reduce){
-  .aeo-row{opacity:1;transform:none;transition:none}
-  .aeo-panel,.aeo-panel::before,.aeo-panel::after{transition:none}
+  .aeo-stack{height:auto}
+  .aeo-stack-pin{position:static;height:auto;display:flex;flex-direction:column;gap:28px;padding:32px 0}
+  .aeo-card{position:relative;left:auto;top:auto;width:100%;max-width:1180px;margin:0 auto;transform:none!important;filter:none!important}
+  .aeo-panel,.aeo-panel::before,.aeo-panel::after,.aeo-card::before{transition:none}
 }
 </style>
 <script id="aeo-plat-script">
@@ -232,11 +282,13 @@
       '<h2 class="aeo-h2">How we help customers find your business through AI</h2>'+
       '<p class="aeo-lead">We optimize your website, content and online presence so you appear when customers search with AI.</p>'+
     '</div>'+
-    '<div class="aeo-rows">'+
-      '<div class="aeo-row"><div class="aeo-row-copy"><span class="aeo-pill">Visibility</span><h3 class="aeo-h3">Understand how often AI mentions you</h3><p class="aeo-rtext">We ask AI the questions your customers ask, hundreds of times a month, and count how often your name comes back.</p></div><div class="aeo-row-viz"><div class="aeo-panel aeo-panel--vis" id="aeo-viz-vis"></div></div></div>'+
-      '<div class="aeo-row"><div class="aeo-row-copy"><span class="aeo-pill">Site Structure</span><h3 class="aeo-h3">Make your site easy for AI to read</h3><p class="aeo-rtext">We structure your site with schema so AI can clearly read your services, locations and hours.</p></div><div class="aeo-row-viz"><div class="aeo-panel aeo-panel--code" id="aeo-viz-web"></div></div></div>'+
-      '<div class="aeo-row"><div class="aeo-row-copy"><span class="aeo-pill">Content</span><h3 class="aeo-h3">Create content that AI quotes</h3><p class="aeo-rtext">We write the pages AI pulls from, and cites, when it answers your customers\u2019 questions.</p></div><div class="aeo-row-viz"><div class="aeo-panel aeo-panel--chat" id="aeo-viz-content"></div></div></div>'+
-      '<div class="aeo-row"><div class="aeo-row-copy"><span class="aeo-pill">Authority</span><h3 class="aeo-h3">Show up in the sources AI checks</h3><p class="aeo-rtext">We build the reviews, citations and mentions AI looks at before recommending you.</p></div><div class="aeo-row-viz"><div class="aeo-panel aeo-panel--act" id="aeo-viz-auth"></div></div></div>'+
+    '<div class="aeo-stack" id="aeo-stack">'+
+      '<div class="aeo-stack-pin">'+
+        '<div class="aeo-card" data-card="1"><div class="aeo-card-inner"><div class="aeo-row-copy"><span class="aeo-pill">Visibility</span><h3 class="aeo-h3">Understand how often AI mentions you</h3><p class="aeo-rtext">We ask AI the questions your customers ask, hundreds of times a month, and count how often your name comes back.</p></div><div class="aeo-row-viz"><div class="aeo-panel aeo-panel--vis" id="aeo-viz-vis"></div></div></div></div>'+
+        '<div class="aeo-card" data-card="2"><div class="aeo-card-inner"><div class="aeo-row-copy"><span class="aeo-pill">Site Structure</span><h3 class="aeo-h3">Make your site easy for AI to read</h3><p class="aeo-rtext">We structure your site with schema so AI can clearly read your services, locations and hours.</p></div><div class="aeo-row-viz"><div class="aeo-panel aeo-panel--code" id="aeo-viz-web"></div></div></div></div>'+
+        '<div class="aeo-card" data-card="3"><div class="aeo-card-inner"><div class="aeo-row-copy"><span class="aeo-pill">Content</span><h3 class="aeo-h3">Create content that AI quotes</h3><p class="aeo-rtext">We write the pages AI pulls from, and cites, when it answers your customers\u2019 questions.</p></div><div class="aeo-row-viz"><div class="aeo-panel aeo-panel--chat" id="aeo-viz-content"></div></div></div></div>'+
+        '<div class="aeo-card" data-card="4"><div class="aeo-card-inner"><div class="aeo-row-copy"><span class="aeo-pill">Authority</span><h3 class="aeo-h3">Show up in the sources AI checks</h3><p class="aeo-rtext">We build the reviews, citations and mentions AI looks at before recommending you.</p></div><div class="aeo-row-viz"><div class="aeo-panel aeo-panel--act" id="aeo-viz-auth"></div></div></div></div>'+
+      '</div>'+
     '</div>'+
   '</div>';
 
@@ -501,11 +553,50 @@
     var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&!done){done=true;io.disconnect();fn();}});},{threshold:.3});
     io.observe(elem);
   }
-  function revealRows(sec){
-    var rows=sec.querySelectorAll(".aeo-row");
-    if(reduce||!("IntersectionObserver" in window)){rows.forEach(function(r){r.classList.add("in");});return;}
-    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:.12});
-    rows.forEach(function(r){io.observe(r);});
+  /* ================= stacked-card scroll choreography =================
+     Card 1 is always "arrived" (progress 1). Each later card owns an equal
+     slice of the section's scroll travel; within its slice its own
+     progress runs 0→1 and it slides up from 100vh below to centered. Once
+     a slice is behind the reader (progress pinned at 1) it stays there —
+     recomputed from scroll position every frame, so scrolling back up
+     reverses the exact same path with no extra state to unwind. The card
+     directly underneath a rising one eases back a few px and scales down
+     a hair, which is the only cue given for "being covered" — no fade,
+     no rotation, nothing that reads as the card disappearing. */
+  function wireStack(sec){
+    var cards=[].slice.call(sec.querySelectorAll(".aeo-card"));
+    var n=cards.length;
+    if(!n)return;
+    if(reduce||!window.__aeoScroll||!("IntersectionObserver" in window)||n<2){
+      sec.classList.add("aeo-stack--static");
+      cards.forEach(function(c){c.style.transform="none";});
+      return;
+    }
+    var slots=n-1;
+    var box={top:0,h:0,vh:0,y:0};
+    window.__aeoScroll(function(y,vh){
+      var r=sec.getBoundingClientRect();
+      box.top=r.top+y;box.h=r.height;box.vh=vh;box.y=y;
+    },function(){
+      var vh=box.vh,travel=box.h-vh;
+      if(!vh||travel<=0)return;
+      var g=(box.y-box.top)/travel;
+      g=g<0?0:(g>1?1:g);
+      var i,p,prog=[1];
+      for(i=1;i<n;i++){
+        var s=(i-1)/slots,e=i/slots;
+        p=(g-s)/(e-s);
+        prog.push(p<0?0:(p>1?1:p));
+      }
+      for(i=0;i<n;i++){
+        var slide=(1-prog[i])*100;
+        var nextP=i<n-1?prog[i+1]:0;
+        var scale=(1-0.035*nextP).toFixed(4),lift=(-18*nextP).toFixed(2);
+        cards[i].style.transform="translate(-50%,-50%) translateY("+lift+"px) scale("+scale+") translateY("+slide.toFixed(3)+"vh)";
+        cards[i].style.filter=nextP>0?"brightness("+(1-0.05*nextP).toFixed(3)+")":"";
+        cards[i].style.zIndex=String(i+1);
+      }
+    });
   }
 
   var started=false;
@@ -527,7 +618,8 @@
     attio.parentNode.insertBefore(sec,attio);
     if(!started){
       started=true;
-      revealRows(sec);
+      var stackEl=sec.querySelector("#aeo-stack");
+      if(stackEl)wireStack(stackEl);
       if(window.__aeoSpotlight)sec.querySelectorAll(".aeo-panel").forEach(window.__aeoSpotlight);
       onceInView(document.getElementById("aeo-viz-vis"),startVisibility);
       onceInView(document.getElementById("aeo-viz-web"),startStructure);
