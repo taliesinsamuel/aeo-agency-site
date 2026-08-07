@@ -2159,9 +2159,19 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
       var frac=t<=0?0:(t>=TITLE_FADE?1:t/TITLE_FADE);
       if(frac===titleFrac)return;
       titleFrac=frac;
-      var v=(1-frac).toFixed(3);
-      TITLE_LI.style.opacity=v;
-      TITLE_LI.style.gridTemplateRows="minmax(0,"+v+"fr)";
+      // opacity and the row's height used to shrink together (both driven
+      // off the same v=1-frac), which reads as the line being wiped/swiped
+      // upward rather than fading in place: with overflow:hidden, a
+      // shrinking row height clips the (still-opaque-ish) text from below
+      // as it goes, so the fade and a slide look identical. Decoupled here:
+      // the row stays at its full, un-shrunk height for the entire fade —
+      // opacity alone carries the whole visible transition, so the line
+      // simply dissolves where it sits — and only once it is fully
+      // invisible (frac hits 1) does the row snap to 0 to reclaim the
+      // space, which is imperceptible because there's nothing left on
+      // screen to see move.
+      TITLE_LI.style.opacity=(1-frac).toFixed(3);
+      TITLE_LI.style.gridTemplateRows="minmax(0,"+(frac>=1?0:1)+"fr)";
     }
     function writing(){
       stage.classList.add("writing");
