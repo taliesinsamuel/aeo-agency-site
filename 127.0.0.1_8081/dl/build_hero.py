@@ -371,8 +371,11 @@ HOMEXTRA = open("parts/home_extra.frag", encoding="utf-8").read()
 # scroll-scrubbed AEO statistics section. Loads after chrome so the
 # shared scroll engine (window.__aeoScroll) already exists.
 STORY = open("parts/story.frag", encoding="utf-8").read()
+# Hero-only background: removes Attio's blue/white vertical-line wash
+# and replaces it with a subtle interactive grey mesh.
+HEROGRID = open("parts/hero_grid.frag", encoding="utf-8").read()
 
-html = html.replace("</body>", INJECT + CHROME + PLATFORM + HOMEXTRA + STORY + "</body>", 1)
+html = html.replace("</body>", INJECT + HEROGRID + CHROME + PLATFORM + HOMEXTRA + STORY + "</body>", 1)
 
 html = fix_next_asset_paths(html)
 
