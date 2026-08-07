@@ -140,10 +140,13 @@ html{scroll-padding-top:88px}
 .aeo-plat-inner{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:clamp(64px,8vw,120px) 24px clamp(72px,9vw,128px)}
 .aeo-plat-intro{text-align:center;max-width:860px;margin:0 auto clamp(44px,5vw,70px)}
 
-/* ---- eyebrow pill ---- */
-.aeo-pill{position:relative;display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;letter-spacing:.01em;color:var(--aeo-accent-ink);background:linear-gradient(180deg,#f0f5ff,var(--aeo-accent-soft));border:1px solid rgba(38,109,240,.16);padding:5px 12px 5px 11px;border-radius:999px;box-shadow:0 1px 2px rgba(38,109,240,.07),inset 0 1px 0 rgba(255,255,255,.7)}
-.aeo-pill::before{content:"";width:6px;height:6px;border-radius:999px;background:var(--aeo-grad-accent);box-shadow:0 0 0 3px rgba(38,109,240,.14);animation:aeo-pill-pulse 2.4s ease-in-out infinite}
-@keyframes aeo-pill-pulse{0%,100%{opacity:.5;transform:scale(.82);box-shadow:0 0 0 2px rgba(38,109,240,.10)}50%{opacity:1;transform:scale(1);box-shadow:0 0 0 4px rgba(38,109,240,.16)}}
+/* ---- eyebrow pill ----
+   Reused verbatim from the real Attio badge component (the "Platform" tag
+   above "The intelligent system that never sleeps" in the CRM showcase
+   further down this page): inline-flex, h-6, rounded-lg (8px), bg-blue-100,
+   px-1.5, 14px/500 text-blue-600, leading-5, tracking -0.14px. No icon, no
+   dot, no border, no shadow — just the label. */
+.aeo-pill{display:inline-flex;align-items:center;height:24px;border-radius:8px;background:#e8f0ff;padding:0 6px;font-size:14px;font-weight:500;letter-spacing:-.14px;line-height:20px;color:#245bc2}
 .aeo-pill-center{margin:0 auto 18px}
 
 /* ---- headings / lead ---- */
@@ -218,19 +221,23 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
    centered on the header's own axis regardless of how wide the brand or
    the Book a Call button happen to be — not "centered" only because the
    leftover flex space happened to be even. */
-.aeo-nav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;width:100%;font-size:14px;font-weight:500}
+.aeo-nav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;width:100%;font-size:15px;font-weight:500}
 .aeo-nav-brand{display:inline-flex;align-items:center;justify-self:start;text-decoration:none;padding:4px 2px}
 .aeo-nav-brand .aeo-brand{transition:opacity .2s var(--aeo-e)}
 .aeo-nav-brand:hover .aeo-brand{opacity:.72}
 .aeo-nav-links{position:relative;display:flex;align-items:center;gap:2px;justify-self:center}
-.aeo-nav-links a{position:relative;z-index:1;color:var(--aeo-ink-2);text-decoration:none;padding:8px 15px;border-radius:999px;letter-spacing:-.006em;white-space:nowrap;transition:color .16s var(--aeo-e)}
+/* font size/weight, colour, radius and hover/active tints are lifted
+   verbatim from Attio's own nav (.button-ghost): 15px/500, #2e3238 at
+   rest, a light-grey #f3f4f6 pill with #232529 text on hover, 10px
+   corners, 36px-tall targets — reused as-is, only the copy changed. */
+.aeo-nav-links a{position:relative;z-index:1;color:#2e3238;text-decoration:none;padding:9px 12px;border-radius:10px;letter-spacing:-.006em;white-space:nowrap;transition:color .3s var(--aeo-e)}
 /* one shared surface travels between links instead of each owning its own
    pill — sized/positioned in JS from the hovered link's own rect, so it
    reads as a single highlight sliding across the bar, not separate boxed
    buttons flashing on and off */
-.aeo-nav-hl{position:absolute;top:0;left:0;z-index:0;height:100%;width:0;border-radius:999px;background:var(--aeo-grad-accent);opacity:0;pointer-events:none;transition:opacity .16s var(--aeo-e),transform .22s var(--aeo-e),width .22s var(--aeo-e);will-change:transform,width}
+.aeo-nav-hl{position:absolute;top:0;left:0;z-index:0;height:100%;width:0;border-radius:10px;background:#f3f4f6;opacity:0;pointer-events:none;transition:opacity .16s var(--aeo-e),transform .22s var(--aeo-e),width .22s var(--aeo-e);will-change:transform,width}
 @media (hover:hover) and (pointer:fine){
-  .aeo-nav-links a:hover{color:#fff}
+  .aeo-nav-links a:hover{color:#232529}
 }
 /* min-width:max-content restores the grid item's natural content size —
    without it, a grid track shrinks an overflow:hidden child down to 0
@@ -238,13 +245,23 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
    which is what was squeezing the button's label into two lines on
    narrower widths */
 .aeo-nav-right{justify-self:end;min-width:max-content}
-.aeo-nav-book{height:38px;padding:0 18px;border-radius:999px;font-size:13.5px}
+/* identical box model to "Get your free audit" (.aeo-btn / Attio's own
+   button-primary re-skin): 44px tall, 0 22px, 12px corners, 14.5px — the
+   nav CTA and the hero CTA read as literally the same button. */
+.aeo-nav-book{height:44px;padding:0 22px;border-radius:var(--aeo-r-md);font-size:14.5px}
+/* Its own compositing layer, isolated from the glass header's backdrop-filter
+   behind it — some engines render a faint pale halo around a rounded,
+   overflow:hidden child sitting on a blurred backdrop otherwise. The sheen
+   flourish (::after) is dropped entirely here too: one less moving part on
+   the one button that has to sit rock-solid, un-glitched, in a fixed header. */
+.aeo-nav-book{isolation:isolate;will-change:transform}
+.aeo-nav-book::after{content:none;display:none}
 @media (max-width:760px){
   .aeo-nav{gap:8px;grid-template-columns:auto 1fr auto}
   .aeo-nav-links{gap:0;justify-self:end}
   .aeo-nav-links a{padding:7px 9px;font-size:13px}
   .aeo-nav-links a:first-child{display:none}
-  .aeo-nav-book{height:34px;padding:0 13px;font-size:12.5px}
+  .aeo-nav-book{height:38px;padding:0 16px;font-size:13px}
 }
 .aeo-nav-book-short{display:none}
 @media (max-width:420px){
@@ -279,7 +296,7 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
 .aeo-foot-bottom a:hover{color:#fff}
 
 @media (prefers-reduced-motion: reduce){
-  .aeo-blob,.aeo-hero::before,.aeo-pill::before,.aeo-foot-glow{animation:none}
+  .aeo-blob,.aeo-hero::before,.aeo-foot-glow{animation:none}
   .aeo-hero::before{transform:none}
   [data-aeo-rv]{opacity:1;transform:none;transition:none}
   .aeo-btn::after{animation:none!important}

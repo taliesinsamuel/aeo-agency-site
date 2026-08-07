@@ -1,6 +1,12 @@
 <style id="aeo-home-style">
 /* ---- how it works ---- */
-.aeo-proc .aeo-plat-inner{padding-top:clamp(56px,7vw,104px)}
+.aeo-proc .aeo-plat-inner{padding-top:clamp(24px,2.8vw,40px);padding-bottom:clamp(36px,4vw,60px)}
+/* the dark stats band right below inherits the shared .aeo-stats-inner
+   padding, which was sized for sitting directly under a full section —
+   here it's stacked right under the process cards, so its own top gets a
+   tighter, dedicated value instead (bottom, before the closing CTA, is
+   untouched) */
+#aeo-stats .aeo-stats-inner{padding-top:clamp(32px,3.6vw,54px)}
 /* frosted panel holding the three steps — one object, three faces */
 .aeo-steps{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid rgba(28,29,31,.08);border-radius:var(--aeo-r-xl);background:linear-gradient(180deg,rgba(255,255,255,.82),rgba(255,255,255,.56));-webkit-backdrop-filter:saturate(170%) blur(12px);backdrop-filter:saturate(170%) blur(12px);box-shadow:var(--aeo-sh-3);overflow:hidden}
 .aeo-step{padding:clamp(28px,3vw,44px) clamp(24px,2.6vw,38px);position:relative;opacity:0;transform:translateY(22px);isolation:isolate;transition:opacity .8s var(--aeo-e),transform .8s var(--aeo-e)}

@@ -5,6 +5,12 @@
 
 /* Soft seam out of the hero instead of a hard 1px rule. */
 #aeo-platform::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(28,29,31,.10) 25%,rgba(28,29,31,.10) 75%,transparent);z-index:2;pointer-events:none}
+/* the shared .aeo-plat-inner's default bottom padding (up to 128px) was
+   sized for sitting right above a section's own outer boundary — here it
+   trails the *stack*, which already ends on a sized landing margin of its
+   own (see sizeStackPin below), so the full default doubles up with that
+   and with "From invisible…"'s own top padding right after it */
+#aeo-platform .aeo-plat-inner{padding-bottom:clamp(12px,1.4vw,20px)}
 
 /* ============================================================
    STACKED CARDS — the four demonstrations behave like a deck of
@@ -573,12 +579,20 @@
       return;
     }
     var slots=n-1;
+    var pinEl=sec.querySelector(".aeo-stack-pin");
     var box={top:0,h:0,vh:0,y:0};
     window.__aeoScroll(function(y,vh){
       var r=sec.getBoundingClientRect();
       box.top=r.top+y;box.h=r.height;box.vh=vh;box.y=y;
     },function(){
-      var vh=box.vh,travel=box.h-vh;
+      var vh=box.vh;
+      // measured against the pin's *real* height, not vh directly: once
+      // sizeStackPin can shrink the pin below viewport height, using vh
+      // here would make this progress clock finish before the CSS sticky
+      // actually releases, leaving a dead "g already at 1, still pinned"
+      // pause — exactly the gap the pin sizing above is meant to remove.
+      var pinH=pinEl?pinEl.getBoundingClientRect().height:vh;
+      var travel=box.h-pinH;
       if(!vh||travel<=0)return;
       var g=(box.y-box.top)/travel;
       g=g<0?0:(g>1?1:g);
@@ -597,6 +611,29 @@
         cards[i].style.zIndex=String(i+1);
       }
     });
+  }
+
+  /* Same reasoning as the stats section right above this one: the pin is
+     a flat 100svh so it can stay stuck edge-to-edge while the cards cycle,
+     but each card is centred and nowhere near that tall, so a big band of
+     blank space sits above *and* below it for the whole section — most
+     visible in the very last frame, right before "From invisible…"
+     arrives. Cards are already provably capped below viewport height
+     (max-height:min(560px,calc(100svh-128px))), so shrinking the pin to
+     "tallest card + a fixed landing margin" can never clip a card at any
+     viewport size. .aeo-stack's own height shrinks by the same delta so
+     the sticky "stuck" duration, and therefore the scroll-to-progress
+     mapping every card transition relies on, is untouched. */
+  var STACK_MARGIN=64;
+  function sizeStackPin(sec,pin,cards){
+    var vh=window.innerHeight,i,h,maxH=0;
+    for(i=0;i<cards.length;i++){h=cards[i].getBoundingClientRect().height;if(h>maxH)maxH=h;}
+    if(!maxH)return;
+    var wanted=maxH+STACK_MARGIN*2;
+    var pinH=wanted<vh?wanted:vh;
+    var delta=vh-pinH;
+    pin.style.height=pinH+"px";
+    sec.style.height="calc(100svh - "+delta.toFixed(1)+"px + var(--aeo-stack-slot) * 3 + var(--aeo-stack-hold))";
   }
 
   var started=false;
@@ -619,7 +656,21 @@
     if(!started){
       started=true;
       var stackEl=sec.querySelector("#aeo-stack");
-      if(stackEl)wireStack(stackEl);
+      if(stackEl){
+        wireStack(stackEl);
+        if(!stackEl.classList.contains("aeo-stack--static")){
+          var stackPin=stackEl.querySelector(".aeo-stack-pin");
+          var stackCards=stackEl.querySelectorAll(".aeo-card");
+          if(stackPin&&stackCards.length){
+            sizeStackPin(stackEl,stackPin,stackCards);
+            var stResizeT=null;
+            window.addEventListener("resize",function(){
+              if(stResizeT)clearTimeout(stResizeT);
+              stResizeT=setTimeout(function(){sizeStackPin(stackEl,stackPin,stackCards);},150);
+            });
+          }
+        }
+      }
       if(window.__aeoSpotlight)sec.querySelectorAll(".aeo-panel").forEach(window.__aeoSpotlight);
       onceInView(document.getElementById("aeo-viz-vis"),startVisibility);
       onceInView(document.getElementById("aeo-viz-web"),startStructure);

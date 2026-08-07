@@ -98,11 +98,14 @@
    zero layout shift. Scroll is the only clock.
    ============================================================ */
 .aeo-story{
-  /* short runway and a near-zero landing pad: the reader should reach
-     "the shift" almost immediately after the product demo, move through
-     it briskly, and be released the instant the last figure lands —
-     never a long parked hold with nothing changing on screen */
-  --aeo-scrub:52svh;--aeo-hold:3svh;
+  /* the heading needs real, unmissable pinned scroll room of its own —
+     enough physical scroll distance that even a fast trackpad flick
+     can't blow past its hold/fade before the reader has registered it —
+     so the runway is longer than a bare-minimum "reach the stats
+     briskly" budget would be; see TITLE_HOLD/TITLE_FADE below for how
+     that extra room is split into the 0–30% hold / 30–50% fade / 50–100%
+     stats progression. */
+  --aeo-scrub:70svh;--aeo-hold:3svh;
   position:relative;background:transparent;
   font-family:var(--aeo-mono);
   height:calc(100svh + var(--aeo-scrub) + var(--aeo-hold));
@@ -110,22 +113,36 @@
 }
 .aeo-story-pin{
   position:sticky;top:0;height:100svh;
-  display:flex;align-items:center;justify-content:center;
-  padding:calc(var(--site-header-height,64px) + 12px) 24px 24px;
+  display:flex;align-items:flex-start;justify-content:center;
+  padding:calc(var(--site-header-height,64px) + 36px) 24px 24px;
 }
 .aeo-story-stage{width:100%;max-width:1080px}
-.aeo-story-eyebrow{
-  margin:0 0 clamp(20px,3.4vh,42px);
-  font-size:clamp(11px,1.05vw,13px);font-weight:600;
-  letter-spacing:.22em;text-transform:uppercase;
-  color:var(--aeo-ink-4);opacity:var(--aeo-sin,0);
-}
 .aeo-story-list{list-style:none;margin:0;padding:0}
 .aeo-story-item+.aeo-story-item{margin-top:clamp(22px,3.7vh,46px)}
 .aeo-story-line{
-  margin:0;font-size:clamp(17px,min(2.45vw,3.9vh),36px);line-height:1.4;
+  margin:0;font-size:clamp(19px,min(2.7vw,4.3vh),40px);line-height:1.4;
   font-weight:500;letter-spacing:-.018em;color:#14161a;
 }
+/* the title is just the first beat in the same typewriter sequence as the
+   stats — same line, same font, no separate heading treatment. Once it has
+   finished typing and the reader keeps scrolling it collapses out of flow
+   (grid-rows 1fr -> 0fr) so the stats rise into the exact space it held,
+   rather than leaving a gap or stacking underneath it.
+   Deliberately no CSS `transition` here: the collapse is driven frame-by-
+   frame straight off the scroll index (see updateTitle in the script below),
+   the same as every other beat in this section. A time-based transition
+   would let a fast scroll outrun it, landing the reader mid-fade with the
+   title still ghosted on screen at the same time the first stat has
+   already started typing beneath it — driving it off idx instead makes
+   that impossible at any scroll speed. */
+/* minmax(0,1fr), not a bare 1fr: a plain <flex> track's implicit minimum
+   is auto (content-based), so it never actually shrinks below the title
+   line's own height no matter what fraction updateTitle sets below —
+   opacity would fade it from view but the row's space stays reserved
+   forever, silently keeping every stat sitting lower than it should and
+   padding out exactly the kind of trailing gap this pass is meant to
+   remove. minmax(0,…) drops that floor so 0fr can reach a true 0. */
+.aeo-story-item--title{display:grid;grid-template-rows:minmax(0,1fr);overflow:hidden}
 .aeo-story-src{
   display:block;margin-top:clamp(7px,1.1vh,13px);
   font-size:clamp(9.5px,.8vw,11.5px);font-weight:500;
@@ -158,9 +175,9 @@
 .aeo-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
 @media (max-width:767px){
-  .aeo-story{--aeo-scrub:48svh;--aeo-hold:3svh}
+  .aeo-story{--aeo-scrub:62svh;--aeo-hold:3svh}
   .aeo-story-pin{padding-left:26px;padding-right:26px}
-  .aeo-story-line{font-size:clamp(16.5px,4.6vw,21px);line-height:1.46;letter-spacing:-.012em}
+  .aeo-story-line{font-size:clamp(18px,5vw,23px);line-height:1.46;letter-spacing:-.012em}
   .aeo-story-item+.aeo-story-item{margin-top:clamp(22px,3.4vh,34px)}
   .aeo-story-src{font-size:9.5px;letter-spacing:.1em}
 }
@@ -169,7 +186,6 @@
   .aeo-hero{--aeo-f:0}
   .aeo-story{height:auto;padding:clamp(64px,9vw,120px) 0}
   .aeo-story-pin{position:static;height:auto;padding:0 24px}
-  .aeo-story-eyebrow{opacity:1}
   .aeo-ch{opacity:1}
   .aeo-story-src{opacity:1!important}
   .aeo-ch.cur::after{display:none}
@@ -279,13 +295,26 @@
      under each line.
      ============================================================ */
   var BEAT=16;
+  /* the title's own budget is sized so it lands on a fixed progression
+     through the *whole* sequence, typing + hold + fade included:
+       0%–30%  — heading typed and held at full opacity (unmissable)
+       30%–50% — heading fades out, gradually and smoothly
+       50%–100% — the three stats appear in sequence
+     TITLE_HOLD/TITLE_FADE are picked (given the title's own character
+     count and the stats' combined length below) so those boundaries land
+     almost exactly on 30% and 50% of the total idx range — and because
+     idx maps linearly onto the section's *physical* scroll distance,
+     that's also 30%/50% of the actual scroll-pinned runway above, not
+     just a fraction of wall-clock time. Both are driven straight off idx
+     (see updateTitle), never a CSS transition, so this holds at any
+     scroll speed, including a fast trackpad flick. */
+  var TITLE_HOLD=72,TITLE_FADE=78,TITLE_GAP=TITLE_HOLD+TITLE_FADE;
   var STATS=[
+    {p:[["t","AI is changing how customers discover you..."]],s:null,isTitle:true},
     {p:[["n","45%"],["t"," of consumers now ask AI to find a local business. A year ago it was "],["n","6%"],["t","."]],
      s:"BrightLocal \u00b7 Local Consumer Review Survey 2026"},
     {p:[["n","900 million"],["t"," people use ChatGPT every week."]],
      s:"OpenAI \u00b7 February 2026"},
-    {p:[["n","68%"],["t"," of Google searches now end without a single click."]],
-     s:"SparkToro \u00b7 Similarweb clickstream, 2026"},
     {p:[["t","Visitors who arrive from AI convert "],["n","42%"],["t"," better."]],
      s:"Adobe Analytics \u00b7 March 2026"}
   ];
@@ -296,21 +325,19 @@
     return "rgb("+c[0]+","+c[1]+","+c[2]+")";
   }
 
-  var SEQ=[],ITEMS=[],stage=null,total=0,HOME=null;
+  var SEQ=[],ITEMS=[],stage=null,total=0,HOME=null,TITLE_LI=null,TITLE_END=0;
   function build(){
     var sec=document.createElement("section");
     sec.className="aeo-story";sec.id="aeo-story";
     sec.setAttribute("aria-label","Why answer engine optimization matters");
     var pin=document.createElement("div");pin.className="aeo-story-pin";
     stage=document.createElement("div");stage.className="aeo-story-stage";
-    var eb=document.createElement("p");eb.className="aeo-story-eyebrow";
-    eb.textContent="The shift";eb.setAttribute("aria-hidden","true");
-    stage.appendChild(eb);
     var list=document.createElement("ol");list.className="aeo-story-list";
 
     for(var si=0;si<STATS.length;si++){
       var st=STATS[si],plain="";
       var li=document.createElement("li");li.className="aeo-story-item";
+      if(st.isTitle)li.classList.add("aeo-story-item--title");
       var p=document.createElement("p");p.className="aeo-story-line";
       p.setAttribute("aria-hidden","true");
       if(si===0){
@@ -334,16 +361,20 @@
         }
       }
       li.appendChild(p);
-      var src=document.createElement("span");
-      src.className="aeo-story-src";src.textContent=st.s;
-      src.setAttribute("aria-hidden","true");
-      li.appendChild(src);
+      var src=null;
+      if(st.s){
+        src=document.createElement("span");
+        src.className="aeo-story-src";src.textContent=st.s;
+        src.setAttribute("aria-hidden","true");
+        li.appendChild(src);
+      }
       // one accessible copy of the sentence, free of the per-character spans
       var sr=document.createElement("span");
-      sr.className="aeo-sr";sr.textContent=plain+" Source: "+st.s;
+      sr.className="aeo-sr";sr.textContent=st.s?(plain+" Source: "+st.s):plain;
       li.appendChild(sr);
       ITEMS.push({end:SEQ.length,src:src,a:-1});
-      if(si<STATS.length-1)for(var b=0;b<BEAT;b++)SEQ.push(null);
+      if(st.isTitle){TITLE_LI=li;TITLE_END=SEQ.length;}
+      if(si<STATS.length-1){var gap=st.isTitle?TITLE_GAP:BEAT;for(var b=0;b<gap;b++)SEQ.push(null);}
       list.appendChild(li);
     }
     total=SEQ.length;
@@ -355,7 +386,8 @@
 
   function revealAll(){
     for(var i=0;i<SEQ.length;i++)if(SEQ[i])SEQ[i].classList.add("on");
-    for(var j=0;j<ITEMS.length;j++)ITEMS[j].src.style.opacity="1";
+    for(var j=0;j<ITEMS.length;j++)if(ITEMS[j].src)ITEMS[j].src.style.opacity="1";
+    if(TITLE_LI){TITLE_LI.style.opacity="0";TITLE_LI.style.gridTemplateRows="minmax(0,0fr)";}
   }
 
   function wireStory(sec){
@@ -377,11 +409,30 @@
     }
     function fadeSources(at){
       for(var i=0;i<ITEMS.length;i++){
-        var it=ITEMS[i],a=(at-(it.end-20))/20;
+        var it=ITEMS[i];
+        if(!it.src)continue;
+        var a=(at-(it.end-20))/20;
         a=a<0?0:(a>1?1:a);
         if(it.a===a)continue;
         it.a=a;it.src.style.opacity=a.toFixed(3);
       }
+    }
+    // One single clock (idx) drives everything, in strict order: type the
+    // title, hold it fully visible for a beat, then fade/collapse it away
+    // in exact lockstep with idx over TITLE_FADE units — no CSS transition,
+    // no wall-clock lag — so it always reaches fully gone at the same idx
+    // the first stat's characters start, never overlapping on screen no
+    // matter how fast the reader scrolls.
+    var titleFrac=-1;
+    function updateTitle(at){
+      if(!TITLE_LI)return;
+      var t=at-TITLE_END-TITLE_HOLD;
+      var frac=t<=0?0:(t>=TITLE_FADE?1:t/TITLE_FADE);
+      if(frac===titleFrac)return;
+      titleFrac=frac;
+      var v=(1-frac).toFixed(3);
+      TITLE_LI.style.opacity=v;
+      TITLE_LI.style.gridTemplateRows="minmax(0,"+v+"fr)";
     }
     function writing(){
       stage.classList.add("writing");
@@ -389,22 +440,35 @@
       pulse=setTimeout(function(){stage.classList.remove("writing");},240);
     }
 
+    var pinEl2=sec.querySelector(".aeo-story-pin");
     var box={top:0,h:0,vh:0,y:0};
     window.__aeoScroll(function(y,vh){
       var r=sec.getBoundingClientRect();
       box.top=r.top+y;box.h=r.height;box.vh=vh;box.y=y;
     },function(){
-      var vh=box.vh,travel=box.h-vh;
+      var vh=box.vh;
+      // travel has to be measured against the pin's *actual* height, not
+      // a bare vh: sizeStoryPin can size the pin shorter than the
+      // viewport (see above), and if this used vh directly, the CSS
+      // sticky release (parent height − real pin height) and this
+      // progress clock (parent height − vh) would drift apart the moment
+      // they differ — idx would hit "done" before the section actually
+      // unsticks, reintroducing a dead, nothing-happening pause exactly
+      // where the pin sizing was meant to remove one.
+      var pinH=pinEl2?pinEl2.getBoundingClientRect().height:vh;
+      var travel=box.h-pinH;
       if(travel<=0||!vh)return;
       // typing owns nearly all of the pinned travel; only a sliver is left
       // afterwards so the last figure has a breath before the section
       // releases — never a long parked hold with nothing moving
       var scrub=travel*(narrow()?0.975:0.965);
-      // writing starts as soon as the section begins rising into view —
-      // by the time it is fully pinned, the first fact is already well
-      // underway, so there is no blank, content-free beat once scrolling
-      // "arrives" at the section
-      var from=box.top-vh*1.05,span=box.top+scrub-from;
+      // writing starts just a hair before the section is fully pinned —
+      // enough that there's no single dead frame at the handoff, but not
+      // so much that whole beats (like the title) fly by before the
+      // section has actually settled into its fixed, readable position.
+      // The reader should see genuinely nothing, then the section locks in
+      // place and the title starts typing from scratch.
+      var from=box.top-vh*0.08,span=box.top+scrub-from;
       var p=span>0?(box.y-from)/span:0;
       p=p<0?0:(p>1?1:p);
       idx=Math.round(p*total);
@@ -416,6 +480,7 @@
         shown=idx;
         moveCaret(idx);
         fadeSources(idx);
+        updateTitle(idx);
         writing();
       }
       nextSin=(box.y-(box.top-vh*0.9))/(vh*0.5);
@@ -425,12 +490,60 @@
     moveCaret(0);
   }
 
+  /* The pin is a fixed 100svh so it can stay pinned edge-to-edge while
+     scrolling, but the typewriter content (top-aligned, so it never jumps
+     as lines are added) is nowhere near that tall — left alone that gap
+     just sits there, blank, for the whole section, and reads as a huge
+     dead zone right before the next section (the logo row) arrives.
+     Rather than guess a percentage that might clip text on some viewport,
+     measure the content's own real height (it's already laid out at full
+     size the instant the section mounts — every character span exists in
+     the DOM from the first paint, and the title's grid-rows only ever
+     *shrinks* from here, never grows — so this is provably the tallest
+     the content will ever be) and shrink the pin down to content height
+     plus one fixed, comfortable landing margin. .aeo-story's own height
+     shrinks by the exact same amount so the sticky "stuck" duration
+     (parent height − pin height = scrub + hold) is untouched — only the
+     dead space collapses, the scroll-to-progress mapping doesn't shift. */
+  var LANDING_MARGIN=96;
+  function sizeStoryPin(sec,pin,stageEl){
+    var vh=window.innerHeight;
+    var padTop=parseFloat(getComputedStyle(pin).paddingTop)||0;
+    var padBottom=parseFloat(getComputedStyle(pin).paddingBottom)||0;
+    // measure the *end-state* height, not the as-mounted one: at mount the
+    // title is still fully expanded (grid-template-rows defaults to 1fr,
+    // see the base rule above) since nothing has scrolled yet, but by the
+    // time the reader reaches the last stat the title has collapsed away
+    // — sizing off the taller, expanded figure would under-shrink the pin
+    // and leave exactly the dead space this is meant to remove. Collapse
+    // it, measure, then restore, so what gets measured matches what's
+    // actually on screen right before the section releases.
+    var restore=TITLE_LI?TITLE_LI.style.cssText:null;
+    if(TITLE_LI){TITLE_LI.style.opacity="0";TITLE_LI.style.gridTemplateRows="minmax(0,0fr)";}
+    var contentH=stageEl.getBoundingClientRect().height;
+    if(TITLE_LI)TITLE_LI.style.cssText=restore;
+    var wanted=padTop+contentH+padBottom+LANDING_MARGIN;
+    var pinH=wanted<vh?wanted:vh;
+    var delta=vh-pinH;
+    pin.style.height=pinH+"px";
+    sec.style.height="calc(100svh - "+delta.toFixed(1)+"px + var(--aeo-scrub) + var(--aeo-hold))";
+  }
+
   function mountStory(){
     if(document.getElementById("aeo-story"))return;
     var h1=document.querySelector("main h1");if(!h1)return;
     var hero=h1.closest("section");if(!hero)return;
     var sec=build();
     hero.parentNode.insertBefore(sec,hero.nextSibling);
+    var pinEl=sec.querySelector(".aeo-story-pin");
+    if(pinEl&&stage){
+      sizeStoryPin(sec,pinEl,stage);
+      var resizeT=null;
+      window.addEventListener("resize",function(){
+        if(resizeT)clearTimeout(resizeT);
+        resizeT=setTimeout(function(){sizeStoryPin(sec,pinEl,stage);},150);
+      });
+    }
     wireStory(sec);
     if(window.__aeoScrollKick)window.__aeoScrollKick();
   }
