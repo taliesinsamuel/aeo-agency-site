@@ -11,47 +11,50 @@
    own (see sizeStackPin below), so the full default doubles up with that
    and with "From invisible…"'s own top padding right after it */
 #aeo-platform .aeo-plat-inner{padding-bottom:clamp(12px,1.4vw,20px)}
+/* Square-field pages make #aeo-platform transparent. Hide the legacy
+   blue/violet blob wash so only the monochrome square field shows
+   around the stacked white cards — especially the final Authority card. */
+#aeo-platform .aeo-plat-bg{display:none}
+/* Keep this section above #aeo-process if sticky ranges briefly meet,
+   so dark process cards never paint underneath the white stack. */
+#aeo-platform{z-index:2}
 
 /* ============================================================
    STACKED CARDS — the four demonstrations behave like a deck of
    premium panels. Card 1 rests in place; each following card rises
-   from below and settles on top, covering (not replacing) the one
-   beneath. Scroll position maps to a single 0–1 progress per card via
-   the shared rAF-throttled engine (window.__aeoScroll); every frame
-   only ever touches transform/filter/opacity, so this stays smooth
-   under fast scrolling. The card underneath eases back very slightly
-   (scale + a few px of lift) as the next one arrives, which is what
-   sells the "physical stack" read without any rotation or bounce.
+   from below the browser viewport and settles on top, covering (not
+   replacing) the one beneath. Scroll position maps to a single 0–1
+   progress per card via the shared rAF-throttled engine
+   (window.__aeoScroll); entrance is position-driven (no fade-in).
+   The card underneath eases back very slightly (scale + a few px of
+   lift) as the next one arrives — physical stack, no bounce.
    ============================================================ */
 .aeo-stack{
   position:relative;
-  --aeo-stack-slot:54svh;--aeo-stack-hold:4svh;
+  --aeo-stack-slot:54svh;--aeo-stack-hold:0svh;
   height:calc(100svh + var(--aeo-stack-slot) * 3 + var(--aeo-stack-hold));
 }
 .aeo-stack-pin{
-  position:sticky;top:0;height:100svh;overflow:hidden;
+  /* overflow visible + viewport clip-path (sizeStackPin) so cards rise from
+     the browser bottom while the shrunk pin stays vertically centred. */
+  position:sticky;top:0;height:100svh;overflow:visible;
   box-sizing:border-box;
 }
 .aeo-card{
   position:absolute;left:50%;top:50%;
   transform:translate(-50%,-50%);
+  /* Fit-in-frame: parent-% width, content height, viewport cap.
+     Never use 100vw or a forced height — those overflowed full-page views. */
   width:min(1180px,calc(100% - 12px));
   max-height:min(560px,calc(100svh - 128px));
   will-change:transform;
   background:linear-gradient(180deg,#fff,#fbfcfe);
   border:1px solid rgba(28,29,31,.08);
   border-radius:var(--aeo-r-2xl);
-  box-shadow:var(--aeo-sh-4);
-  transition:box-shadow .3s var(--aeo-e),border-color .3s var(--aeo-e);
-}
-/* thin, sharp brand-blue ring only — no halo, no blur, no soft outer glow */
-.aeo-card::before{
-  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
-  opacity:0;transition:opacity .2s var(--aeo-e);
-  box-shadow:0 0 0 1.5px var(--aeo-accent);
-}
-@media (hover:hover) and (pointer:fine){
-  .aeo-card:hover::before{opacity:1}
+  /* No outer drop-shadow / haze, no hover outline ring. */
+  box-shadow:none;
+  outline:none;
+  transition:border-color .3s var(--aeo-e);
 }
 .aeo-card-inner{display:grid;grid-template-columns:minmax(0,0.82fr) minmax(0,1.18fr);align-items:center;height:100%;overflow:hidden;border-radius:inherit}
 .aeo-row-copy{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:15px;padding:clamp(28px,3.4vw,52px) clamp(24px,2.8vw,42px);height:100%;box-sizing:border-box}
@@ -60,7 +63,7 @@
 .aeo-h3{font-family:"Inter Display",Inter,sans-serif;font-weight:600;font-size:clamp(23px,2.5vw,33px);line-height:1.1;letter-spacing:-.024em;color:var(--aeo-ink);margin:0;text-wrap:balance}
 .aeo-rtext{font-size:clamp(15px,1.1vw,16.5px);line-height:1.55;letter-spacing:-.008em;color:var(--aeo-ink-3);font-weight:500;margin:0;max-width:42ch}
 
-/* ---- shared panel: IDENTICAL dimensions across all four ---- */
+/* ---- shared panel: IDENTICAL dimensions across all four (ORIGINAL sizes) ---- */
 .aeo-panel{position:relative;width:100%;max-width:560px;height:430px;border-radius:var(--aeo-r-xl);overflow:hidden;font-family:var(--font-inter),"Inter",system-ui,sans-serif;text-align:left;box-shadow:var(--aeo-sh-4);transition:transform .55s var(--aeo-e),box-shadow .55s var(--aeo-e)}
 .aeo-panel:hover{transform:translateY(-5px);box-shadow:var(--aeo-sh-lift)}
 /* light that tracks the pointer — the surface reacts, nothing moves */
@@ -186,7 +189,7 @@
   .aeo-row-copy{padding-bottom:8px;gap:10px}
   .aeo-row-viz{padding-top:4px}
   .aeo-rtext{max-width:none}
-  .aeo-stack{--aeo-stack-slot:56svh;--aeo-stack-hold:4svh}
+  .aeo-stack{--aeo-stack-slot:56svh;--aeo-stack-hold:0svh}
 }
 @media (max-width:520px){
   .aeo-row-copy{padding:22px 18px 6px}
@@ -218,7 +221,7 @@
   .aeo-stack{height:auto}
   .aeo-stack-pin{position:static;height:auto;display:flex;flex-direction:column;gap:28px;padding:32px 0}
   .aeo-card{position:relative;left:auto;top:auto;width:100%;max-width:1180px;margin:0 auto;transform:none!important;filter:none!important}
-  .aeo-panel,.aeo-panel::before,.aeo-panel::after,.aeo-card::before{transition:none}
+  .aeo-panel,.aeo-panel::before,.aeo-panel::after{transition:none}
 }
 </style>
 <script id="aeo-plat-script">
@@ -562,13 +565,18 @@
   /* ================= stacked-card scroll choreography =================
      Card 1 is always "arrived" (progress 1). Each later card owns an equal
      slice of the section's scroll travel; within its slice its own
-     progress runs 0→1 and it slides up from 100vh below to centered. Once
-     a slice is behind the reader (progress pinned at 1) it stays there —
-     recomputed from scroll position every frame, so scrolling back up
-     reverses the exact same path with no extra state to unwind. The card
-     directly underneath a rising one eases back a few px and scales down
-     a hair, which is the only cue given for "being covered" — no fade,
-     no rotation, nothing that reads as the card disappearing. */
+     progress runs 0→1 and it rises from fully below the VIEWPORT up to the
+     centered resting position — position-driven, no fade-in. Scroll back
+     reverses the same path. The card underneath eases back a few px and
+     scales down a hair while being covered; z-index keeps the incoming
+     card in front. */
+  // Scroll-driven ease ≈ cubic-bezier(0.22, 1, 0.36, 1): deliberate rise, soft settle.
+  function easeStack(t){
+    if(t<=0)return 0;
+    if(t>=1)return 1;
+    var u=1-t;
+    return 1-u*u*u*u*(1+t*1.15);
+  }
   function wireStack(sec){
     var cards=[].slice.call(sec.querySelectorAll(".aeo-card"));
     var n=cards.length;
@@ -576,6 +584,7 @@
     if(reduce||!window.__aeoScroll||!("IntersectionObserver" in window)||n<2){
       sec.classList.add("aeo-stack--static");
       cards.forEach(function(c){c.style.transform="none";});
+      try{document.documentElement.style.setProperty("--aeo-stack-exit-pull","0px");}catch(e){}
       return;
     }
     var slots=n-1;
@@ -594,7 +603,13 @@
       var pinH=pinEl?pinEl.getBoundingClientRect().height:vh;
       var travel=box.h-pinH;
       if(!vh||travel<=0)return;
-      var g=(box.y-box.top)/travel;
+      // pinEl now sticks at top:<offset> (see sizeStackPin) instead of
+      // top:0, so it starts holding its position <offset> px of scroll
+      // earlier than box.top and lets go the same amount earlier too —
+      // folding that offset back in keeps g hitting exactly 0 at the first
+      // stuck frame and exactly 1 at the last, same as the old top:0 math.
+      var topOff=pinEl?(parseFloat(pinEl.style.top)||0):0;
+      var g=(box.y-box.top+topOff)/travel;
       g=g<0?0:(g>1?1:g);
       var i,p,prog=[1];
       for(i=1;i<n;i++){
@@ -603,12 +618,19 @@
         prog.push(p<0?0:(p>1?1:p));
       }
       for(i=0;i<n;i++){
-        var slide=(1-prog[i])*100;
+        // Start fully below the browser viewport: resting centre is ~vh/2,
+        // so centre must sit at vh + cardH/2 (+ padding) to hide the card.
+        var cardH=cards[i].offsetHeight||0;
+        var startVh=50+(cardH*0.5/vh)*100+6;
+        var t=easeStack(prog[i]);
+        var slide=(1-t)*startVh;
         var nextP=i<n-1?prog[i+1]:0;
         var scale=(1-0.035*nextP).toFixed(4),lift=(-18*nextP).toFixed(2);
         cards[i].style.transform="translate(-50%,-50%) translateY("+lift+"px) scale("+scale+") translateY("+slide.toFixed(3)+"vh)";
         cards[i].style.filter=nextP>0?"brightness("+(1-0.05*nextP).toFixed(3)+")":"";
         cards[i].style.zIndex=String(i+1);
+        // Fully opaque during the visible entrance — position tells the story.
+        cards[i].style.opacity="1";
       }
     });
   }
@@ -633,7 +655,30 @@
     var pinH=wanted<vh?wanted:vh;
     var delta=vh-pinH;
     pin.style.height=pinH+"px";
+    // Keep the active card at true viewport-centre for the whole pinned
+    // duration. A shrunk sticky pin with top:0 would otherwise park cards
+    // at the top of the screen. Centring the pin by half the freed delta
+    // restores mid-page viewing; last card then releases into the next section.
+    var topOff=delta/2;
+    pin.style.top=topOff.toFixed(1)+"px";
+    var expand=topOff.toFixed(1);
+    var clip="inset(-"+expand+"px 0px -"+expand+"px 0px)";
+    pin.style.clipPath=clip;
+    pin.style.webkitClipPath=clip;
     sec.style.height="calc(100svh - "+delta.toFixed(1)+"px + var(--aeo-stack-slot) * 3 + var(--aeo-stack-hold))";
+    // Sticky release leaves ~exitGap of scroll while the pin (and final
+    // Authority card) travel upward off-screen. Only pull #aeo-process
+    // into whatever remains AFTER that card has cleared the top — never
+    // into the exit itself, or both stickies overlap and the dark 1/2/3
+    // cards paint around the white Authority card.
+    var exitGap=topOff+pinH;
+    var cardClear=Math.round(vh*0.5+maxH*0.5+28);
+    var remain=Math.min(exitGap,Math.max(Math.round(vh*0.58),cardClear));
+    // Tiny seam so B begins immediately as A finishes exiting — not a
+    // second blank viewport, and not a simultaneous card collision.
+    var seam=Math.round(Math.min(48,vh*0.05));
+    var pull=Math.max(0,Math.round(exitGap-remain+seam));
+    try{document.documentElement.style.setProperty("--aeo-stack-exit-pull",pull+"px");}catch(e){}
   }
 
   var started=false;

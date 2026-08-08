@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/127.0.0.1_8081/dl/" },
+    { "source": "/index.html", "destination": "/127.0.0.1_8081/dl/" },
+    { "source": "/contact.html", "destination": "/127.0.0.1_8081/dl/contact.html" },
+    { "source": "/pricing.html", "destination": "/127.0.0.1_8081/dl/pricing.html" },
+    { "source": "/book.html", "destination": "/127.0.0.1_8081/dl/book.html" },
+    { "source": "/contact", "destination": "/127.0.0.1_8081/dl/contact.html" },
+    { "source": "/pricing", "destination": "/127.0.0.1_8081/dl/pricing.html" },
+    { "source": "/book", "destination": "/127.0.0.1_8081/dl/book.html" }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" }
+      ]
+    }
+  ]
+}

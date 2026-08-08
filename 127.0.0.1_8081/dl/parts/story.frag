@@ -316,7 +316,9 @@
     {p:[["n","900 million"],["t"," people use ChatGPT every week."]],
      s:"OpenAI \u00b7 February 2026"},
     {p:[["t","Visitors who arrive from AI convert "],["n","42%"],["t"," better."]],
-     s:"Adobe Analytics \u00b7 March 2026"}
+     s:"Adobe Analytics \u00b7 March 2026"},
+    {p:[["n","58%"],["t"," of AI users visit a business\u2019s website after getting an AI recommendation."]],
+     s:"Yext \u00b7 Consumer Search Behaviors Report 2026"}
   ];
   var C0=[74,128,242],C1=[27,79,196];
   function ramp(i,len){

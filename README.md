@@ -1,6 +1,8 @@
-# AEO Agency Site
+# Answered Labs website
 
-This repo **is** the static Attio-based AEO website. That is the default and only active project.
+Production marketing site for [answeredlabs.com](https://answeredlabs.com).
+
+Static Attio-based front end + Vercel serverless `POST /api/free-audit` → HubSpot CRM.
 
 ## Quick start
 
@@ -10,9 +12,11 @@ This repo **is** the static Attio-based AEO website. That is the default and onl
 
 Open [http://127.0.0.1:8081/](http://127.0.0.1:8081/)
 
+Optional CRM testing: copy `.env.example` → `.env` and set `HUBSPOT_ACCESS_TOKEN`.
+
 ## Edit the site
 
-1. Change copy/animations in `127.0.0.1_8081/dl/build_hero.py`
+1. Change copy/animations in `127.0.0.1_8081/dl/parts/` or `build_hero.py`
 2. Rebuild:
 
 ```bash
@@ -25,12 +29,20 @@ Open [http://127.0.0.1:8081/](http://127.0.0.1:8081/)
 
 | Path | Role |
 |------|------|
-| `index.html` | Entry point (opens the live site) |
-| `127.0.0.1_8081/dl/build_hero.py` | Source of truth for site edits |
-| `127.0.0.1_8081/dl/original-attio-backup.html.bak` | Clean Attio backup (builder input) |
-| `127.0.0.1_8081/dl/*.html` | Generated live page |
-| `9rWGDM7ILjb3.com/`, `eSOZMHKB8k26.com/` | Local assets |
-| `_archive/react-mvp/` | Old abandoned React experiment — ignore |
+| `127.0.0.1_8081/dl/parts/*.frag` | Editable page fragments (source of truth) |
+| `127.0.0.1_8081/dl/build_hero.py` | Rebuilds live HTML from fragments |
+| `127.0.0.1_8081/dl/*.html` | Generated pages |
+| `api/free-audit.js` | Vercel serverless Free Audit → HubSpot |
+| `vercel.json` | Clean URLs + headers for production |
+| `eSOZMHKB8k26.com/`, `9rWGDM7ILjb3.com/` | Local assets |
+| `_archive/react-mvp/` | Abandoned — ignore |
+
+## Deploy
+
+1. Push to GitHub
+2. Import the repo in Vercel (framework: Other / static)
+3. Set environment variable `HUBSPOT_ACCESS_TOKEN`
+4. Point Cloudflare DNS for `answeredlabs.com` at Vercel (**do not change MX/SPF/DKIM/DMARC**)
 
 ## Ignore
 

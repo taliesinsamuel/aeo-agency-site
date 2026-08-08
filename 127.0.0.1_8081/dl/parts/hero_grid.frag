@@ -1,15 +1,15 @@
-<style id="aeo-herogrid-style">
+<style id="aeo-sqfield-style">
 /* ============================================================
-   HERO BACKGROUND — subtle interactive grey mesh
+   SQUARE FIELD — one continuous interactive background
    ------------------------------------------------------------
-   Replaces Attio's own hero background (a blue-tinted radial
-   wash + a repeating-linear-gradient of 1px white "rain" lines
-   every 8px, plus a soft vignette used to fade both out) with a
-   quiet, monochrome cross-grid that drifts almost imperceptibly
-   at rest and bends toward the cursor like a mesh under gravity.
-   All of the actual field math lives in the script below; this
-   stylesheet only removes Attio's old layers and positions the
-   canvas that replaces them.
+   Replaces the old hero-only grey mesh with a single dense field
+   of tiny monochrome square cells that spans the hero through the
+   stacked cards and the "From invisible to recommended in 90 days"
+   process section — then stops immediately before the metrics
+   band (#aeo-stats). All of the field math lives in the script
+   below; this stylesheet only removes Attio's old hero background
+   layers, opens up the section backgrounds this field needs to
+   show through, and positions the single canvas.
    ============================================================ */
 
 /* Attio's three hero-background layers, matched by distinctive
@@ -21,51 +21,72 @@
 .aeo-hero [class*="repeating-linear-gradient(90deg"],
 .aeo-hero [style*="106.6667% at 50% 0%"]{display:none!important}
 
-.aeo-hero-grid-mount{position:absolute;inset:0;overflow:hidden}
-.aeo-hero-grid-mount canvas{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+/* Opaque section backgrounds would sit in front of the single
+   fixed, page-level canvas no matter how negative its z-index.
+   Opening these boxes (flat white/surface at rest) lets one shared
+   canvas read as continuous behind the whole pre-metrics region.
+   #aeo-story is already transparent; #aeo-stats keeps its dark band. */
+.aeo-hero,#aeo-platform,#aeo-process,.aeo-proc{background:transparent!important}
+
+#aeo-sqfield{position:fixed;left:0;top:0;width:100%;height:100%;z-index:-1;display:block;pointer-events:none}
 </style>
-<script id="aeo-herogrid-script">
+<script id="aeo-sqfield-script">
 (function(){
-  if(window.__aeoHeroGridBooted)return;
-  window.__aeoHeroGridBooted=true;
+  if(window.__aeoSqFieldBooted)return;
+  window.__aeoSqFieldBooted=true;
 
   var reduce=false; try{reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;}catch(e){}
-  // "fine" = a real mouse/trackpad. On touch devices the cursor-gravity
-  // field never engages at all — ambient drift is all mobile ever gets.
+  // "fine" = a real mouse/trackpad. Touch devices only ever get the
+  // ambient flicker — no repulsion physics, and no listeners that could
+  // fight a scroll gesture.
   var fine=true; try{fine=window.matchMedia("(pointer:fine)").matches;}catch(e){}
 
-  /* ------------------------------------------------------------
-     Every tunable the field depends on, in one place, so the whole
-     effect can be re-balanced without hunting through the math.
-     ------------------------------------------------------------ */
+  /* Every tunable the field depends on, in one place.
+     Physics gains below are framed as per-tick@60fps values and scaled
+     by dt*60 inside the integrator so behaviour stays stable across rates. */
   var CFG={
-    spacingDesktop:52,        // px between grid lines, viewport >=1024
-    spacingTablet:64,         // 768-1023
-    spacingMobile:78,         // <768 — sparser: cheaper, and cleaner on a small screen
-    lineColor:"164,173,186",  // matches this site's own --aeo-ink-5 token (chrome.frag)
-    baseAlphaOpen:0.26,       // grid strength over open background — deliberately faint
-    baseAlphaMin:0.045,       // grid strength once fully suppressed near text/UI
-    safeFalloff:120,          // px over which suppression eases back out to baseAlphaOpen
-    ambientAmp:1.6,           // px, idle sway amplitude — kept tiny on purpose
-    ambientSpeed:0.00016,     // rad/ms for the slow primary sway component (~39s/cycle)
-    cursorRadius:230,         // px, Gaussian falloff radius of the gravity field (no hard edge)
-    cursorStrength:34,        // px, pull at the field's exact center before capping
-    cursorMaxPullRatio:0.55,  // fraction of the current grid spacing — the hard displacement cap,
-                               // so lines can bend but never cross over their neighbours
-    posSmoothing:0.10,        // 0-1/frame, how fast the tracked point chases the raw cursor (inertia)
-    influenceInSpeed:0.09,    // 0-1/frame, how fast gravity "switches on" when the cursor arrives
-    influenceOutSpeed:0.045,  // 0-1/frame, how fast it releases when the cursor leaves (slower = lingers)
-    safeRecalcMs:500,         // how often text-safe rects are re-measured (cheap, but no need every frame)
-    alphaBins:12              // batches strokes into this many alpha buckets so a frame only ever
-                               // issues ~12 canvas state changes, regardless of grid density
+    spacingDesktop:8.5,      // px between cell centers, viewport >=1024
+    spacingTablet:9.2,       // 768-1023
+    spacingMobile:10.0,      // <768
+    size:4.0,                // px, square side
+    color:"0,0,0",
+    // Nuanced grayscale ladder — many intermediate steps, no harsh jumps.
+    // Clear step lighter: resting field sits in very light grey so copy
+    // leads; charcoal accents remain, but rarer and softer.
+    aMin:0.020,aMax:0.052,   // majority of squares — very light grey
+    aRareMin:0.14,aRareMax:0.21, // soft charcoal accents only
+    rareChance:0.08,         // fewer simultaneous dark accents
+    sparkleSpawn:0.95,       // keep current quantity of active sparkles
+    sparkleDurMin:0.38,      // linger longer through grey ladder
+    sparkleDurMax:0.85,
+    ambientRetarget:0.55,    // gentle field-wide tonal drift
+    ambientLerp:1.35,        // slower ease → smoother gradation
+    cursorRadius:125,        // tighter local influence (~34% smaller)
+    maxDisplace:18,          // restrained bend — lattice stays legible
+    springK:0.045,           // a touch tighter than the chaotic pass
+    damping:0.940,           // ~12% softer recovery / less jitter
+    coupleK:0.055,           // light mesh coupling — no liquid waves
+    repulse:1.7,             // gentler part-around-cursor
+    impulseK:0.00019,        // slightly softer wake impulses
+    trailLen:4,              // short, restrained trail
+    trailDecay:0.42,         // older samples die quickly
+    wakeMaxSpeed:1600,       // needs faster motion before wake boosts
+    wakeRadiusBoost:0.18,    // modest radius bloom when moving fast
+    wakeDisplaceBoost:0.22,  // modest displace bloom
+    settleEps:0.025,
+    pointerSmooth:1.35,      // light position lag (~10–15% smoother, not mushy)
+    velSmooth:1.05,          // soften abrupt velocity / direction flips
+    alphaBins:40             // finer grayscale steps for tonal smoothness
   };
 
   function clamp(v,a,b){return v<a?a:(v>b?b:v);}
-  function lerp(a,b,t){return a+(b-a)*t;}
-  function smoothstep(a,b,x){
-    if(a===b)return x<a?0:1;
-    var t=clamp((x-a)/(b-a),0,1);
-    return t*t*(3-2*t);
+  function rand(a,b){return a+Math.random()*(b-a);}
+  // Poisson-ish count from a small expected value (avoids round-to-zero).
+  function countFromRate(expected){
+    var n=0;
+    while(expected>=1){n++;expected-=1;}
+    if(Math.random()<expected)n++;
+    return n;
   }
   function spacingFor(vw){
     if(vw<768)return CFG.spacingMobile;
@@ -73,233 +94,423 @@
     return CFG.spacingDesktop;
   }
 
-  /* One instance per mounted canvas (desktop hero + mobile hero each
-     get their own — see boot() below). Everything about a single
-     mesh's geometry, ambient drift, cursor field and text-safe
-     dimming is self-contained here. */
-  function makeGrid(canvas){
-    var ctx=canvas.getContext("2d");
-    var w=0,h=0,dpr=1,spacing=CFG.spacingDesktop,cols=0,rows=0;
-    var baseX=[],baseY=[],px=null,py=null;
-    var safeRects=[],lastSafeCalc=0;
-    var target={x:-9999,y:-9999},cur={x:-9999,y:-9999},influence=0,hovering=false;
-    var t0=performance.now();
-    var phaseSeed=Math.random()*1000; // decorrelates multiple grid instances from each other
+  var canvas=document.createElement("canvas");
+  canvas.id="aeo-sqfield";
+  canvas.setAttribute("aria-hidden","true");
+  document.body.appendChild(canvas);
+  var ctx=canvas.getContext("2d");
 
-    function size(){
-      var host=canvas.parentElement;
-      var r=host.getBoundingClientRect();
-      w=Math.max(1,r.width); h=Math.max(1,r.height);
-      dpr=Math.min(window.devicePixelRatio||1,2);
-      canvas.width=Math.round(w*dpr); canvas.height=Math.round(h*dpr);
-      ctx.setTransform(dpr,0,0,dpr,0,0);
-      spacing=spacingFor(window.innerWidth);
-      cols=Math.ceil(w/spacing)+2; rows=Math.ceil(h/spacing)+2;
-      // center the (slightly overscanned) grid on the box so the ambient
-      // sway and cursor pull never reveal a gap at any edge
-      var offX=(w-(cols-1)*spacing)/2, offY=(h-(rows-1)*spacing)/2;
-      baseX=new Array(cols); baseY=new Array(rows);
-      for(var i=0;i<cols;i++)baseX[i]=offX+i*spacing;
-      for(var j=0;j<rows;j++)baseY[j]=offY+j*spacing;
-      px=new Float32Array(cols*rows); py=new Float32Array(cols*rows);
-    }
-    size();
+  var w=0,h=0,dpr=1,spacing=CFG.spacingDesktop,cols=0,rows=0,offX=0,offY=0;
+  var homeX=null,homeY=null,curA=null,tgtA=null;
+  var dx=null,dy=null,vx=null,vy=null,activeFlag=null;
+  var spkT=null,spkDur=null,spkPeak=null; // sparkle envelope per cell
+  var activeList=[];
+  var binsPool=new Array(CFG.alphaBins);
+  for(var _b=0;_b<CFG.alphaBins;_b++)binsPool[_b]=null;
+  // Scratch buffers for neighbour coupling (read previous displacements).
+  var prevDx=null,prevDy=null;
 
-    // Text-safe zones: headline, sub-line, hero CTAs and the ChatGPT
-    // mock — measured live off the real DOM so this tracks any
-    // viewport/typography reflow with zero hardcoded coordinates.
-    function collectSafeRects(){
-      var hero=canvas.closest(".aeo-hero");
-      if(!hero){safeRects=[];return;}
-      var host=canvas.parentElement.getBoundingClientRect();
-      var els=[];
-      var h1=hero.querySelector("h1"); if(h1)els.push(h1);
-      hero.querySelectorAll("p").forEach(function(p){
-        if(/recommended by/i.test(p.textContent||""))els.push(p);
-      });
-      hero.querySelectorAll('a[class*="button-primary"],a[class*="button-ghost"]').forEach(function(a){
-        els.push(a);
-      });
-      var win=hero.querySelector(".aeo-window"); if(win)els.push(win);
-      safeRects=els.map(function(el){
-        var r=el.getBoundingClientRect();
-        return {left:r.left-host.left,top:r.top-host.top,right:r.right-host.left,bottom:r.bottom-host.top};
-      });
-    }
-
-    // Returns 0..1: how much of the base opacity should survive at
-    // (x,y). 1 = open space, floors out near any safe rect. Uses the
-    // *nearest* rect's suppression (the strongest one wins) so the
-    // falloff reads as one continuous field, never a rectangular cutout.
-    function safeFactor(x,y){
-      if(!safeRects.length)return 1;
-      var floor=CFG.baseAlphaMin/CFG.baseAlphaOpen;
-      var min=1;
-      for(var k=0;k<safeRects.length;k++){
-        var rc=safeRects[k];
-        var dx=Math.max(rc.left-x,0,x-rc.right);
-        var dy=Math.max(rc.top-y,0,y-rc.bottom);
-        var d=Math.sqrt(dx*dx+dy*dy);
-        var f=floor+(1-floor)*smoothstep(0,CFG.safeFalloff,d);
-        if(f<min)min=f;
-      }
-      return min;
-    }
-
-    function update(now){
-      if(canvas.offsetWidth===0)return; // current breakpoint hides this variant — skip all work
-      var elapsed=now-t0;
-      if(now-lastSafeCalc>CFG.safeRecalcMs){lastSafeCalc=now;collectSafeRects();}
-
-      influence=lerp(influence,hovering?1:0,hovering?CFG.influenceInSpeed:CFG.influenceOutSpeed);
-      cur.x=lerp(cur.x,target.x,CFG.posSmoothing);
-      cur.y=lerp(cur.y,target.y,CFG.posSmoothing);
-
-      var doCursor=fine&&!reduce&&influence>0.002;
-      var ambientAmp=reduce?0:CFG.ambientAmp;
-      var maxPull=spacing*CFG.cursorMaxPullRatio;
-
-      for(var j=0;j<rows;j++){
-        for(var i=0;i<cols;i++){
-          var bx=baseX[i],by=baseY[j],ax=0,ay=0;
-          if(ambientAmp>0){
-            // two summed sines per axis, phase-shifted per grid point —
-            // ripples irregularly across the mesh instead of the whole
-            // thing bobbing in lockstep like one obvious sine wave
-            var p1=phaseSeed+i*0.53+j*0.31, p2=phaseSeed+i*0.21-j*0.44;
-            ax=ambientAmp*(Math.sin(elapsed*CFG.ambientSpeed+p1)*0.6+Math.sin(elapsed*CFG.ambientSpeed*1.37+p2)*0.4);
-            ay=ambientAmp*(Math.cos(elapsed*CFG.ambientSpeed*0.83+p2)*0.6+Math.cos(elapsed*CFG.ambientSpeed*1.21+p1)*0.4);
-          }
-          var gx=bx+ax, gy=by+ay;
-          if(doCursor){
-            var dx=cur.x-gx, dy=cur.y-gy;
-            var dist=Math.sqrt(dx*dx+dy*dy)||0.0001;
-            // Gaussian falloff — smooth to zero with no visible radius/edge
-            var g=Math.exp(-(dist*dist)/(2*CFG.cursorRadius*CFG.cursorRadius));
-            var pull=Math.min(CFG.cursorStrength*influence*g,maxPull);
-            gx+=(dx/dist)*pull; gy+=(dy/dist)*pull;
-          }
-          var idx=j*cols+i;
-          px[idx]=gx; py[idx]=gy;
-        }
-      }
-      draw();
-    }
-
-    // Binning every segment's alpha into a fixed number of buckets
-    // means a frame only ever issues CFG.alphaBins stroke() calls —
-    // the geometry (moveTo/lineTo, no rasterization cost) can scale
-    // with grid density for free.
-    function draw(){
-      ctx.clearRect(0,0,w,h);
-      var bins=new Array(CFG.alphaBins);
-      function addSeg(x0,y0,x1,y1,factor){
-        if(factor<=0.02)return;
-        var bi=Math.min(CFG.alphaBins-1,Math.floor(factor*CFG.alphaBins));
-        var path=bins[bi]||(bins[bi]=new Path2D());
-        path.moveTo(x0,y0); path.lineTo(x1,y1);
-      }
-      var i,j,i0,i1,j0,j1,mx,my;
-      for(j=0;j<rows;j++){
-        for(i=0;i<cols-1;i++){
-          i0=j*cols+i; i1=i0+1;
-          mx=(px[i0]+px[i1])*0.5; my=(py[i0]+py[i1])*0.5;
-          addSeg(px[i0],py[i0],px[i1],py[i1],safeFactor(mx,my));
-        }
-      }
+  function buildField(){
+    dpr=Math.min(window.devicePixelRatio||1,2);
+    w=window.innerWidth; h=window.innerHeight;
+    canvas.width=Math.round(w*dpr); canvas.height=Math.round(h*dpr);
+    canvas.style.width=w+"px"; canvas.style.height=h+"px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    spacing=spacingFor(w);
+    cols=Math.ceil(w/spacing)+2; rows=Math.ceil(h/spacing)+2;
+    offX=(w-(cols-1)*spacing)/2; offY=(h-(rows-1)*spacing)/2;
+    var n=cols*rows;
+    homeX=new Float32Array(n); homeY=new Float32Array(n);
+    curA=new Float32Array(n); tgtA=new Float32Array(n);
+    dx=new Float32Array(n); dy=new Float32Array(n);
+    vx=new Float32Array(n); vy=new Float32Array(n);
+    prevDx=new Float32Array(n); prevDy=new Float32Array(n);
+    spkT=new Float32Array(n); spkDur=new Float32Array(n); spkPeak=new Float32Array(n);
+    activeFlag=new Uint8Array(n);
+    activeList.length=0;
+    var i,j,idx,base;
+    for(j=0;j<rows;j++){
       for(i=0;i<cols;i++){
-        for(j=0;j<rows-1;j++){
-          j0=j*cols+i; j1=j0+cols;
-          mx=(px[j0]+px[j1])*0.5; my=(py[j0]+py[j1])*0.5;
-          addSeg(px[j0],py[j0],px[j1],py[j1],safeFactor(mx,my));
-        }
-      }
-      ctx.lineWidth=1;
-      for(var b=0;b<CFG.alphaBins;b++){
-        if(!bins[b])continue;
-        var alpha=((b+0.5)/CFG.alphaBins)*CFG.baseAlphaOpen;
-        ctx.strokeStyle="rgba("+CFG.lineColor+","+alpha.toFixed(3)+")";
-        ctx.stroke(bins[b]);
+        idx=j*cols+i;
+        homeX[idx]=offX+i*spacing; homeY[idx]=offY+j*spacing;
+        base=rand(CFG.aMin,CFG.aMax);
+        curA[idx]=base; tgtA[idx]=base;
+        spkT[idx]=0; spkDur[idx]=0; spkPeak[idx]=0;
       }
     }
-
-    var resizeT=null;
-    window.addEventListener("resize",function(){
-      if(resizeT)clearTimeout(resizeT);
-      resizeT=setTimeout(size,150);
-    });
-
-    return{
-      update:update,
-      onPointer:function(clientX,clientY){
-        var r=canvas.getBoundingClientRect();
-        if(clientX>=r.left&&clientX<=r.right&&clientY>=r.top&&clientY<=r.bottom){
-          hovering=true; target.x=clientX-r.left; target.y=clientY-r.top;
-        }else{
-          hovering=false;
-        }
-      },
-      onLeaveWindow:function(){hovering=false;}
-    };
   }
 
-  var grids=[];
-  function mountInto(container,afterEl){
-    if(!container||container.querySelector(".aeo-hero-grid-mount"))return;
-    var mount=document.createElement("div");
-    mount.className="aeo-hero-grid-mount";
-    mount.setAttribute("aria-hidden","true");
-    var canvas=document.createElement("canvas");
-    mount.appendChild(canvas);
-    if(afterEl&&afterEl.parentElement===container){
-      // some layouts (the mobile hero scene) have an *opaque* fill div
-      // as the container's own first child, painted purely to guarantee
-      // a solid backdrop — inserting before it would just get silently
-      // painted over, so this drops the mesh in right after it instead
-      container.insertBefore(mount,afterEl.nextSibling);
-    }else{
-      // first child = painted behind every real sibling already in this
-      // container, matching the z-0 layering Attio's own background sat in
-      container.insertBefore(mount,container.firstChild);
+  // ---- ambient luminance + asynchronous dark sparkles ----
+  // Idle cells stay at home; only opacity shimmer/sparkles. Positions
+  // move from cursor physics alone.
+  function updateIdle(dt){
+    var n=cols*rows,i,idx,env,u;
+    var ambLerp=1-Math.exp(-CFG.ambientLerp*dt);
+    for(i=0;i<n;i++){
+      curA[i]+=(tgtA[i]-curA[i])*ambLerp;
+      if(spkDur[i]>0){
+        spkT[i]+=dt;
+        if(spkT[i]>=spkDur[i]){spkDur[i]=0;spkPeak[i]=0;spkT[i]=0;}
+      }
     }
-    grids.push(makeGrid(canvas));
-  }
-
-  function boot(){
-    var h1=document.querySelector("main h1")||document.querySelector("h1");
-    var hero=h1?h1.closest("section"):null;
-    if(!hero)return false;
-    hero.classList.add("aeo-hero");
-    // Both the desktop and mobile hero variants carry their own copy of
-    // Attio's decorative wash div (see the CSS hide-rules above) — using
-    // that same fingerprint to locate each variant's mount point keeps
-    // this in lockstep with whichever nesting each layout happens to use,
-    // rather than hardcoding two separate, fragile class-name guesses.
-    var washes=hero.querySelectorAll('[style*="90% 80% at 50% 100%"]');
-    if(washes[0])mountInto(washes[0].parentElement); // desktop: bg layer has no opaque fill sibling
-    if(washes[1]){
-      var innerWrap=washes[1].parentElement.parentElement; // mobile: wash -> masked wrapper -> real container
-      mountInto(innerWrap,innerWrap?innerWrap.firstElementChild:null);
+    // Slow ambient retargets — pick from a continuous grayscale band.
+    var ambPicks=countFromRate(n*0.10*dt);
+    for(i=0;i<ambPicks;i++){
+      idx=(Math.random()*n)|0;
+      if(spkDur[idx]>0)continue;
+      // Bias toward mid-tones so the field feels layered, not binary.
+      var u=Math.random();
+      tgtA[idx]=CFG.aMin+(CFG.aMax-CFG.aMin)*(u*u*0.35+u*0.65);
     }
-    return grids.length>0;
+    // Sparkle spawns: brief darken with smooth ease in/out.
+    var spawns=countFromRate(n*CFG.sparkleSpawn*dt);
+    for(i=0;i<spawns;i++){
+      idx=(Math.random()*n)|0;
+      if(spkDur[idx]>0)continue;
+      spkT[idx]=0;
+      spkDur[idx]=rand(CFG.sparkleDurMin,CFG.sparkleDurMax);
+      if(Math.random()<CFG.rareChance){
+        // Occasional charcoal peak — still eased via envelope, never near-black.
+        spkPeak[idx]=rand(CFG.aRareMin,CFG.aRareMax)-curA[idx];
+      }else if(Math.random()<0.45){
+        // Mid sparkles — visible but softer than before.
+        spkPeak[idx]=rand(0.050,0.105);
+      }else{
+        // Light sparkles — subtle flicker in the light-grey band.
+        spkPeak[idx]=rand(0.020,0.060);
+      }
+      if(spkPeak[idx]<0.008)spkPeak[idx]=0.008;
+    }
   }
 
-  var tries=0,bootIv=setInterval(function(){
-    if(boot()||++tries>60)clearInterval(bootIv);
-  },150);
+  function cellAlpha(idx){
+    var a=curA[idx];
+    if(spkDur[idx]>0){
+      var u=spkT[idx]/spkDur[idx];
+      // Smoothstep envelope — softer shoulders than a raw sine flash.
+      var s=u*u*(3-2*u);
+      var env=s*(1-s)*4; // 0→1→0, peaked mid-life
+      a+=spkPeak[idx]*env;
+    }
+    return a;
+  }
+
+  // ---- pointer tracking + short trail (physics input only) ----
+  // raw* = latest OS sample; mouse* = lightly smoothed drive for forces.
+  var rawPtr={x:-9999,y:-9999,vx:0,vy:0};
+  var mouse={x:-9999,y:-9999,active:false,vx:0,vy:0};
+  var lastMouse={x:0,y:0,t:0};
+  var wake=0;
+  var trail=new Array(CFG.trailLen);
+  var trailCount=0;
+  var trailWrite=0;
+  for(var ti=0;ti<CFG.trailLen;ti++)trail[ti]={x:0,y:0,w:0};
+
+  function pushTrail(x,y,weight){
+    trail[trailWrite].x=x; trail[trailWrite].y=y; trail[trailWrite].w=weight;
+    trailWrite=(trailWrite+1)%CFG.trailLen;
+    if(trailCount<CFG.trailLen)trailCount++;
+  }
 
   if(fine){
     window.addEventListener("pointermove",function(e){
-      for(var k=0;k<grids.length;k++)grids[k].onPointer(e.clientX,e.clientY);
+      var t=performance.now();
+      var mvx=0,mvy=0;
+      if(lastMouse.t){
+        var dtMs=Math.max(1,t-lastMouse.t);
+        mvx=(e.clientX-lastMouse.x)/dtMs*1000;
+        mvy=(e.clientY-lastMouse.y)/dtMs*1000;
+        var sp=Math.hypot(mvx,mvy);
+        // Ease wake up so fast flicks don't snap the force field.
+        var wakeTarget=clamp(sp/CFG.wakeMaxSpeed,0,1);
+        wake=clamp(Math.max(wake,wake+(wakeTarget-wake)*0.35),0,1);
+      }
+      lastMouse.x=e.clientX; lastMouse.y=e.clientY; lastMouse.t=t;
+      rawPtr.x=e.clientX; rawPtr.y=e.clientY; rawPtr.vx=mvx; rawPtr.vy=mvy;
+      mouse.active=true;
     },{passive:true});
-    window.addEventListener("pointerleave",function(){
-      for(var k=0;k<grids.length;k++)grids[k].onLeaveWindow();
-    });
+    window.addEventListener("pointerdown",function(e){
+      rawPtr.x=e.clientX; rawPtr.y=e.clientY;
+      mouse.x=e.clientX; mouse.y=e.clientY; mouse.active=true;
+      pushTrail(e.clientX,e.clientY,1);
+    },{passive:true});
+    // Leave stops *new* forces only — velocities keep decaying naturally.
+    window.addEventListener("pointerleave",function(){mouse.active=false;});
+    window.addEventListener("blur",function(){mouse.active=false;});
   }
 
+  var prevTrailX=-9999,prevTrailY=-9999;
+  function smoothPointer(dt){
+    if(!fine||!mouse.active)return;
+    if(mouse.x<-9000){
+      mouse.x=rawPtr.x; mouse.y=rawPtr.y;
+      mouse.vx=rawPtr.vx; mouse.vy=rawPtr.vy;
+      prevTrailX=mouse.x; prevTrailY=mouse.y;
+      pushTrail(mouse.x,mouse.y,1);
+      return;
+    }
+    // Frame-rate independent exponential lerp — small lag, continuous force.
+    var pK=1-Math.exp(-CFG.pointerSmooth*60*dt);
+    var vK=1-Math.exp(-CFG.velSmooth*60*dt);
+    mouse.x+=(rawPtr.x-mouse.x)*pK;
+    mouse.y+=(rawPtr.y-mouse.y)*pK;
+    mouse.vx+=(rawPtr.vx-mouse.vx)*vK;
+    mouse.vy+=(rawPtr.vy-mouse.vy)*vK;
+    // Trail only on real motion — idle hover must not keep re-charging the wake.
+    var tdx=mouse.x-prevTrailX, tdy=mouse.y-prevTrailY;
+    if(tdx*tdx+tdy*tdy>0.64){
+      prevTrailX=mouse.x; prevTrailY=mouse.y;
+      pushTrail(mouse.x,mouse.y,1);
+    }
+  }
+
+  function activate(idx){
+    if(!activeFlag[idx]){activeFlag[idx]=1;activeList.push(idx);}
+  }
+
+  // Marks every cell within the (wake-widened) radius as active so the
+  // physics pass below picks it up — cheap because it only ever touches
+  // a small rectangle of the grid, never the whole field.
+  function markCandidates(effR){
+    var pad=effR+spacing*2;
+    var i0=clamp(Math.floor((mouse.x-pad-offX)/spacing),0,cols-1);
+    var i1=clamp(Math.ceil((mouse.x+pad-offX)/spacing),0,cols-1);
+    var j0=clamp(Math.floor((mouse.y-pad-offY)/spacing),0,rows-1);
+    var j1=clamp(Math.ceil((mouse.y+pad-offY)/spacing),0,rows-1);
+    for(var j=j0;j<=j1;j++){
+      var base=j*cols;
+      for(var i=i0;i<=i1;i++)activate(base+i);
+    }
+  }
+
+  // Expand active set by one ring so neighbour coupling can propagate
+  // a soft elastic wave without all-to-all work. Only cells with real
+  // motion seed the halo — avoids waking the entire grid.
+  function expandActiveRing(){
+    var len=activeList.length,k,idx,c,r;
+    for(k=0;k<len;k++){
+      idx=activeList[k];
+      if(Math.abs(dx[idx])<0.2&&Math.abs(dy[idx])<0.2&&
+         Math.abs(vx[idx])<0.2&&Math.abs(vy[idx])<0.2)continue;
+      c=idx%cols; r=(idx-c)/cols;
+      if(c>0)activate(idx-1);
+      if(c<cols-1)activate(idx+1);
+      if(r>0)activate(idx-cols);
+      if(r<rows-1)activate(idx+cols);
+    }
+  }
+
+  // Soft Gaussian influence from a sample point → cell.
+  function sampleForce(cx,cy,sx,sy,effR,out){
+    var ddx=cx-sx, ddy=cy-sy;
+    var d2=ddx*ddx+ddy*ddy;
+    var sig=effR*0.55;
+    var g=Math.exp(-d2/(2*sig*sig));
+    if(g<0.01){out.g=0;return;}
+    var dist=Math.sqrt(d2)||0.0001;
+    out.g=g; out.nx=ddx/dist; out.ny=ddy/dist;
+  }
+
+  var _sf={g:0,nx:0,ny:0};
+
+  // Underdamped spring + repulsion + pointer momentum + neighbour
+  // Laplacian. Displacement is continuous; nothing snaps or zeros on
+  // pointer leave — motion decays through damping alone.
+  function stepActive(dt,effR,maxD){
+    var doPush=fine&&mouse.active;
+    var farR=effR*2.6, farR2=farR*farR;
+    var tick=dt*60; // ~1 at 60fps; keeps CFG gains in per-tick units
+    var damp=Math.pow(CFG.damping,tick);
+    var i,idx,cx,cy,fx,fy,far,c,r,nCount,avgX,avgY,mag,s;
+    var tIdx,tq,impulseScale,spd,push;
+
+    // Snapshot displacements for stable neighbour reads this frame.
+    for(i=0;i<activeList.length;i++){
+      idx=activeList[i];
+      prevDx[idx]=dx[idx]; prevDy[idx]=dy[idx];
+    }
+
+    // One-cell halo so coupling can carry a soft ripple outward.
+    if(doPush||activeList.length)expandActiveRing();
+
+    i=0;
+    while(i<activeList.length){
+      idx=activeList[i];
+      cx=homeX[idx]+dx[idx]; cy=homeY[idx]+dy[idx];
+
+      // Soft spring home — lower strength, longer recovery.
+      fx=-CFG.springK*dx[idx];
+      fy=-CFG.springK*dy[idx];
+
+      // Lightweight discrete Laplacian vs 4-neighbours (elastic fabric).
+      c=idx%cols; r=(idx-c)/cols;
+      nCount=0; avgX=0; avgY=0;
+      if(c>0){avgX+=prevDx[idx-1];avgY+=prevDy[idx-1];nCount++;}
+      if(c<cols-1){avgX+=prevDx[idx+1];avgY+=prevDy[idx+1];nCount++;}
+      if(r>0){avgX+=prevDx[idx-cols];avgY+=prevDy[idx-cols];nCount++;}
+      if(r<rows-1){avgX+=prevDx[idx+cols];avgY+=prevDy[idx+cols];nCount++;}
+      if(nCount){
+        avgX/=nCount; avgY/=nCount;
+        fx+=CFG.coupleK*(avgX-dx[idx]);
+        fy+=CFG.coupleK*(avgY-dy[idx]);
+      }
+
+      far=true;
+      if(doPush){
+        // Trail samples: newest strongest, older decay fast — fluid wake.
+        tq=1;
+        for(tIdx=0;tIdx<trailCount;tIdx++){
+          var sample=trail[(trailWrite-1-tIdx+CFG.trailLen)%CFG.trailLen];
+          if(sample.w<=0)continue;
+          sampleForce(cx,cy,sample.x,sample.y,effR,_sf);
+          if(_sf.g>0){
+            // (A) Soft Gaussian repulsion — no hard circular rim.
+            push=maxD*CFG.springK*CFG.repulse*_sf.g*tq;
+            fx+=_sf.nx*push;
+            fy+=_sf.ny*push;
+            far=false;
+          }
+          tq*=CFG.trailDecay;
+        }
+
+        // (B) Momentum from pointer travel — impulse in travel direction.
+        spd=Math.hypot(mouse.vx,mouse.vy);
+        if(spd>12){
+          sampleForce(cx,cy,mouse.x,mouse.y,effR*1.2,_sf);
+          if(_sf.g>0){
+            impulseScale=CFG.impulseK*_sf.g*(0.3+0.7*wake)*tick;
+            fx+=mouse.vx*impulseScale;
+            fy+=mouse.vy*impulseScale;
+            far=false;
+          }
+        }
+
+        var ddx=cx-mouse.x, ddy=cy-mouse.y;
+        if(ddx*ddx+ddy*ddy<farR2)far=false;
+      }
+
+      vx[idx]=(vx[idx]+fx*tick)*damp;
+      vy[idx]=(vy[idx]+fy*tick)*damp;
+      dx[idx]+=vx[idx]*tick;
+      dy[idx]+=vy[idx]*tick;
+
+      mag=Math.sqrt(dx[idx]*dx[idx]+dy[idx]*dy[idx]);
+      if(mag>maxD){
+        s=maxD/mag; dx[idx]*=s; dy[idx]*=s;
+        // Soft clamp — bleed speed, don't kill it.
+        vx[idx]*=0.75; vy[idx]*=0.75;
+      }
+
+      if(far&&Math.abs(dx[idx])<CFG.settleEps&&Math.abs(dy[idx])<CFG.settleEps&&
+         Math.abs(vx[idx])<CFG.settleEps&&Math.abs(vy[idx])<CFG.settleEps){
+        dx[idx]=0;dy[idx]=0;vx[idx]=0;vy[idx]=0;activeFlag[idx]=0;
+        activeList[i]=activeList[activeList.length-1];
+        activeList.pop();
+        continue;
+      }
+      i++;
+    }
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    var n=cols*rows,b;
+    for(b=0;b<CFG.alphaBins;b++)binsPool[b]=null;
+    var half=CFG.size/2, range=CFG.aRareMax;
+    for(var idx=0;idx<n;idx++){
+      var a=cellAlpha(idx);
+      if(a<=0.004)continue;
+      if(a>range)a=range;
+      var bi=Math.min(CFG.alphaBins-1,(a/range*CFG.alphaBins)|0);
+      var path=binsPool[bi]||(binsPool[bi]=new Path2D());
+      path.rect(homeX[idx]+dx[idx]-half,homeY[idx]+dy[idx]-half,CFG.size,CFG.size);
+    }
+    for(b=0;b<CFG.alphaBins;b++){
+      if(!binsPool[b])continue;
+      var alpha=((b+0.5)/CFG.alphaBins)*range;
+      ctx.fillStyle="rgba("+CFG.color+","+alpha.toFixed(3)+")";
+      ctx.fill(binsPool[b]);
+    }
+  }
+
+  // ---- one continuous field: measure hero-top → metrics-top ----
+  var heroEl=null,endEl=null;
+  var bounds={heroTop:0,endTop:1e9},boundsReady=false;
+  function measureBounds(){
+    if(!heroEl){
+      var h1=document.querySelector("main h1")||document.querySelector("h1");
+      heroEl=h1?h1.closest("section"):null;
+    }
+    var stats=document.getElementById("aeo-stats");
+    var proc=document.getElementById("aeo-process");
+    var plat=document.getElementById("aeo-platform");
+    var end=stats||proc||plat;
+    if(end)endEl=end;
+    if(!heroEl||!endEl)return;
+    var sy=window.pageYOffset||document.documentElement.scrollTop||0;
+    var hr=heroEl.getBoundingClientRect(), er=endEl.getBoundingClientRect();
+    bounds.heroTop=hr.top+sy;
+    // Clip at the top of the terminator: stats (preferred) or process
+    // fallback. Platform-only fallback uses its bottom so the field still
+    // covers the stack when later sections have not mounted yet.
+    bounds.endTop=(endEl===plat?er.bottom:er.top)+sy;
+    boundsReady=true;
+  }
+
+  var lastClip="";
+  function applyClip(heroVY,endVY,vh){
+    var top=clamp(heroVY,0,vh);
+    var bottom=clamp(vh-endVY,0,vh);
+    var val="inset("+top.toFixed(1)+"px 0px "+bottom.toFixed(1)+"px 0px)";
+    if(val!==lastClip){canvas.style.clipPath=val;canvas.style.webkitClipPath=val;lastClip=val;}
+  }
+
+  var resizeT=null;
+  function onResize(){
+    if(resizeT)clearTimeout(resizeT);
+    resizeT=setTimeout(function(){buildField();measureBounds();draw();},150);
+  }
+  window.addEventListener("resize",onResize);
+
+  buildField();
+  var boot=0,bootIv=setInterval(function(){
+    measureBounds();
+    if(++boot>60)clearInterval(bootIv); // ~15s of settling: async section mounts + pin resizing
+  },250);
+
+  var lastT=performance.now();
   function frame(now){
-    for(var k=0;k<grids.length;k++)grids[k].update(now);
     requestAnimationFrame(frame);
+    if(!boundsReady)return;
+    var sy=window.pageYOffset||document.documentElement.scrollTop||0;
+    var vh=window.innerHeight;
+    var heroVY=bounds.heroTop-sy, endVY=bounds.endTop-sy;
+    if(endVY<=0||heroVY>=vh){lastT=now;return;} // fully out of view
+    applyClip(heroVY,endVY,vh);
+
+    var dt=Math.min(0.033,(now-lastT)/1000);
+    lastT=now;
+    if(dt<=0)dt=1/60;
+
+    if(!reduce){
+      wake*=Math.pow(0.90,dt*60);
+      // Pointer velocity decays when the cursor idles so impulses don't stick.
+      mouse.vx*=Math.pow(0.88,dt*60);
+      mouse.vy*=Math.pow(0.88,dt*60);
+      rawPtr.vx*=Math.pow(0.88,dt*60);
+      rawPtr.vy*=Math.pow(0.88,dt*60);
+      // Decay trail weights so old samples lose influence quickly.
+      for(var t=0;t<CFG.trailLen;t++)trail[t].w*=Math.pow(0.82,dt*60);
+
+      smoothPointer(dt);
+      updateIdle(dt);
+      var effR=CFG.cursorRadius*(1+CFG.wakeRadiusBoost*wake);
+      var maxD=CFG.maxDisplace*(1+CFG.wakeDisplaceBoost*wake);
+      if(fine&&mouse.active)markCandidates(effR);
+      // Keep simulating while anything is still moving — no binary off switch.
+      if(activeList.length)stepActive(dt,effR,maxD);
+    }
+    draw();
   }
   requestAnimationFrame(frame);
 })();

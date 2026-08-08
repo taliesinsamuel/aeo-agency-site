@@ -142,6 +142,9 @@ html{scroll-padding-top:88px}
 
 /* ---- hero aurora (--aeo-par is driven by the parallax loop) ---- */
 .aeo-hero{position:relative}
+/* Attio's border-b / border-subtle-stroke on the hero section drew a hairline
+   under the ChatGPT stage — kill only that edge, leave spacing untouched. */
+.aeo-hero{border-bottom:none!important}
 .aeo-hero h1{letter-spacing:-.032em;text-wrap:balance}
 .aeo-hero::before{content:"";position:absolute;inset:-10% 0 0;z-index:0;pointer-events:none;will-change:transform;transform:translate3d(0,var(--aeo-par,0px),0);background:radial-gradient(42% 46% at 16% 10%,rgba(38,109,240,.11),transparent 70%),radial-gradient(36% 42% at 84% 6%,rgba(140,110,245,.10),transparent 70%),radial-gradient(34% 40% at 52% 52%,rgba(38,190,170,.07),transparent 72%);animation:aeo-hero-hue 20s ease-in-out infinite alternate}
 @keyframes aeo-hero-hue{to{filter:hue-rotate(16deg)}}
@@ -188,8 +191,20 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
    behind it — some engines render a faint pale halo around a rounded,
    overflow:hidden child sitting on a blurred backdrop otherwise. The sheen
    flourish (::after) is dropped entirely here too: one less moving part on
-   the one button that has to sit rock-solid, un-glitched, in a fixed header. */
-.aeo-nav-book{isolation:isolate;will-change:transform}
+   the one button that has to sit rock-solid, un-glitched, in a fixed header.
+   Solid fill (no gradient / inset highlight) so the black reads edge-to-edge
+   with no pale horizontal bands from the primary button sheen layers. */
+.aeo-nav-book{
+  isolation:isolate;will-change:transform;
+  background-image:none!important;background-color:#141416!important;
+  border-color:#141416;background-clip:border-box;
+  box-shadow:0 1px 2px rgba(16,17,20,.18),0 6px 14px -8px rgba(16,17,20,.32);
+}
+.aeo-nav-book:hover{
+  background-image:none!important;background-color:#141416!important;background-position:0 0;
+  border-color:#141416;
+  box-shadow:0 1px 2px rgba(16,17,20,.18),0 14px 30px -10px rgba(16,17,20,.44);
+}
 .aeo-nav-book::after{content:none;display:none}
 @media (max-width:760px){
   .aeo-nav{gap:8px;grid-template-columns:auto 1fr auto}
@@ -242,6 +257,72 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
   var reduce=false;try{reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;}catch(e){}
   var fine=true;try{fine=window.matchMedia("(pointer:fine)").matches;}catch(e){}
 
+  /* ============================================================
+     LEAD-GEN INTEGRATIONS — public IDs only (no private tokens).
+     Free Audit CRM capture is POST /api/free-audit (Vercel → HubSpot).
+     ============================================================ */
+  var AEO_I={
+    hsPortalId:"149056836",
+    hsRegion:"eu1",
+    freeAuditApi:"/api/free-audit",
+    calendlyUrl:"https://calendly.com/tali-answeredlabs/30min"
+  };
+  window.__aeoIntegrations=AEO_I;
+
+  /* Secure Free Audit submit → Vercel backend → HubSpot CRM upsert.
+     Callback: done(err, data). Never treat CRM failure as success. */
+  window.__aeoSubmitFreeAudit=function(payload,done){
+    var cb=typeof done==="function"?done:function(){};
+    var url=(AEO_I.freeAuditApi||"/api/free-audit");
+    var body={
+      email:payload&&payload.email?String(payload.email):"",
+      website:payload&&payload.website?String(payload.website):"",
+      company_name:payload&&payload.company_name?String(payload.company_name):""
+    };
+    fetch(url,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(body),
+      credentials:"same-origin"
+    }).then(function(res){
+      return res.json().catch(function(){return {};}).then(function(data){
+        if(!res.ok||!data||data.ok!==true){
+          var code=(data&&data.error)||("HTTP_"+res.status);
+          throw new Error(code);
+        }
+        return data;
+      });
+    }).then(function(data){cb(null,data);})
+     .catch(function(err){console.warn("[Answered] Free Audit submit failed:",err&&err.message?err.message:err);cb(err||new Error("submit_failed"),null);});
+  };
+
+  /* Load Calendly widget.js once (booking/audit pages only call this). */
+  window.__aeoLoadCalendly=function(cb){
+    var done=typeof cb==="function"?cb:function(){};
+    if(window.Calendly&&typeof window.Calendly.initInlineWidget==="function"){done();return;}
+    var existing=document.getElementById("aeo-calendly-js");
+    if(existing){
+      existing.addEventListener("load",function(){done();});
+      // already loaded but Calendly global not ready yet
+      var n=0,iv=setInterval(function(){
+        if(window.Calendly&&typeof window.Calendly.initInlineWidget==="function"){clearInterval(iv);done();}
+        else if(++n>80){clearInterval(iv);done(new Error("calendly_timeout"));}
+      },50);
+      return;
+    }
+    var s=document.createElement("script");
+    s.id="aeo-calendly-js";
+    s.src="https://assets.calendly.com/assets/external/widget.js";
+    s.async=true;
+    s.onload=function(){done();};
+    s.onerror=function(){done(new Error("calendly_load_failed"));};
+    document.head.appendChild(s);
+  };
+
+  window.__aeoIsCalendlyEvent=function(e){
+    return e&&e.origin==="https://calendly.com"&&e.data&&typeof e.data.event==="string"&&e.data.event.indexOf("calendly.")===0;
+  };
+
   function fixLinks(){
     var as=document.querySelectorAll("a[href]");
     for(var i=0;i<as.length;i++){
@@ -250,6 +331,8 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
       if(/^(#|mailto:|tel:)/.test(h))continue;
       if(/^(\.\/|pricing\.html|contact\.html|book\.html|index\.html)/.test(h))continue;
       if(h.indexOf("./#")===0)continue;
+      // Never rewrite third-party integration destinations
+      if(/calendly\.com|hubspot\.com|hs-scripts\.com|hsforms\.com|hubapi\.com/i.test(h))continue;
       var n=null;
       if(/sign-in/i.test(h))n="contact.html";
       else if(/app\.eSOZMHKB8k26|app\.attio/i.test(h))n="contact.html";
@@ -341,7 +424,7 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
     var forms=document.querySelectorAll("form");
     for(var f=0;f<forms.length;f++){
       var fm=forms[f];
-      if(fm.id==="aeo-audit-form"||fm.id==="aeo-book-form")continue;
+      if(fm.id==="aeo-audit-form")continue;
       if(fm.getAttribute("data-aeo-cta"))continue;
       fm.setAttribute("data-aeo-cta","1");
       fm.addEventListener("submit",function(ev){
@@ -463,3 +546,17 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
   setTimeout(function(){try{mo.disconnect();}catch(e){}},13000);
 })();
 </script>
+<!-- Start of HubSpot Embed Code — portal 149056836 (EU1). Public tracking ID only. -->
+<script>
+(function(){
+  if(document.getElementById("hs-script-loader"))return;
+  var s=document.createElement("script");
+  s.type="text/javascript";
+  s.id="hs-script-loader";
+  s.async=true;
+  s.defer=true;
+  s.src="https://js-eu1.hs-scripts.com/149056836.js";
+  document.body.appendChild(s);
+})();
+</script>
+<!-- End of HubSpot Embed Code -->

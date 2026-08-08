@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 import glob, os, re
 
+# Always resolve paths from this script's directory so `npm run build`
+# (repo root) and `./build.sh` (cd into dl/) both work on Vercel/local.
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 HEAD = "Be the business that AI recommends"
 HEAD_HTML = "Be the business that AI recommends"
 SUB = "We get local businesses recommended by ChatGPT, Perplexity, Gemini and Claude."
@@ -374,7 +378,16 @@ STORY = open("parts/story.frag", encoding="utf-8").read()
 # Hero-only background: removes Attio's blue/white vertical-line wash
 # and replaces it with a subtle interactive grey mesh.
 HEROGRID = open("parts/hero_grid.frag", encoding="utf-8").read()
+# Secondary-page-only floating square field (never injected on home).
+FLOATFIELD = open("parts/float_field.frag", encoding="utf-8").read()
 
+html = re.sub(
+    r"<title>.*?</title>",
+    "<title>Answered — Be the business that AI recommends</title>",
+    html,
+    count=1,
+    flags=re.S,
+)
 html = html.replace("</body>", INJECT + HEROGRID + CHROME + PLATFORM + HOMEXTRA + STORY + "</body>", 1)
 
 html = fix_next_asset_paths(html)
@@ -391,7 +404,9 @@ def build_page(fname, title, frag_path):
     page = page.replace("Start for free", "Get your free audit")
     page = page.replace("Talk to sales", "Book a call")
     frag = open(frag_path, encoding="utf-8").read()
-    page = page.replace("</body>", CHROME + frag + "</body>", 1)
+    # CHROME + FLOATFIELD + page content. Homepage build above never
+    # receives FLOATFIELD — keeps home square field untouched.
+    page = page.replace("</body>", CHROME + FLOATFIELD + frag + "</body>", 1)
     page = fix_next_asset_paths(page)
     open(fname, "w", encoding="utf-8").write(page)
     print("wrote", fname, "(", len(page), "bytes )")
