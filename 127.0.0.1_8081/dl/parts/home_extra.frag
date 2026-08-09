@@ -3,16 +3,13 @@
 .aeo-proc{overflow-x:clip;background:transparent}
 .aeo-proc .aeo-plat-bg{display:none}
 .aeo-proc .aeo-plat-inner{display:none}
-/* Pull this section into the stack's sticky-exit distance (set by
-   sizeStackPin as --aeo-stack-exit-pull) so "From invisible…" arrives
-   after a short pause instead of ~1 viewport of blank scroll. */
+/* The stack's sticky-exit pull (--aeo-stack-exit-pull, set by
+   sizeStackPin) is applied to #aeo-seo now, since that section is the
+   stack's immediate next sibling — see seo_section.frag. #aeo-process
+   just needs its own normal positioning here. */
 #aeo-process{
-  margin-top:calc(-1 * var(--aeo-stack-exit-pull,0px));
   position:relative;
   z-index:1;
-}
-@media (prefers-reduced-motion:reduce){
-  #aeo-process{margin-top:0}
 }
 /* stats band sits directly under the process section */
 #aeo-stats .aeo-stats-inner{padding-top:clamp(36px,4vw,64px)}
@@ -856,7 +853,8 @@
     var plat=document.getElementById("aeo-platform");if(!plat)return;
     var tpl=document.getElementById("aeo-home-tpl");if(!tpl)return;
     var frag=tpl.content.cloneNode(true);
-    plat.parentNode.insertBefore(frag,plat.nextSibling);
+    var anchor=document.getElementById("aeo-seo")||plat;
+    anchor.parentNode.insertBefore(frag,anchor.nextSibling);
     wire(document.getElementById("aeo-process"));
   }
   var n=0,iv=setInterval(function(){mount();if(++n>70)clearInterval(iv);},150);

@@ -47,28 +47,28 @@ body > div.flex,
   var fine=true; try{fine=window.matchMedia("(pointer:fine)").matches;}catch(e){}
 
   /* Visual constants — density/size/physics stay independent.
-     Non-home: deeper dark accents + slightly livelier sparkle. */
+     Non-home: homepage tonal ladder (hero_grid.frag); sparkle timing stays non-home. */
   var CFG={
     size:4.0,
     color:"0,0,0",
-    // Tonal ladder: light majority, mid, charcoal, near-black accents
-    aMin:0.04,aMax:0.11,
-    aMidMin:0.14,aMidMax:0.26,
-    aRareMin:0.42,aRareMax:0.62,
-    aBlackMin:0.78,aBlackMax:0.94,
+    // Homepage grayscale ladder — source of truth: parts/hero_grid.frag
+    aMin:0.020,aMax:0.052,   // majority of squares — very light grey
+    aMidMin:0.050,aMidMax:0.105, // light-medium (homepage mid-sparkle band)
+    aRareMin:0.14,aRareMax:0.21, // soft charcoal accents only
+    aBlackMin:0.14,aBlackMax:0.21, // former near-black tier → homepage charcoal
     midChance:0.22,
     rareChance:0.11,
     blackChance:0.06,
-    aCeil:0.95,
-    // Sparkle — a bit more lively than homepage, still restrained
+    aCeil:0.21, // homepage draw range (= aRareMax)
+    // Sparkle — timing/rate unchanged; peak shades use homepage palette
     sparkleSpawn:1.35,
     sparkleDurMin:0.42,
     sparkleDurMax:0.95,
     ambientLerp:1.45,
     // Density — unchanged from current non-home field
-    areaPerParticle:1500,
-    countMin:460,
-    countMax:980,
+    areaPerParticle:780,
+    countMin:885,
+    countMax:1880,
     // Ambient drift (px/s) — unchanged idle look/feel
     driftMin:22,
     driftMax:42,
@@ -171,11 +171,8 @@ body > div.flex,
   var ptrInfluence=0;
 
   function pickAlpha(){
-    // Majority light; minority mid / charcoal / near-black for contrast
-    var r=Math.random();
-    if(r<CFG.blackChance)return rand(CFG.aBlackMin,CFG.aBlackMax);
-    if(r<CFG.blackChance+CFG.rareChance)return rand(CFG.aRareMin,CFG.aRareMax);
-    if(r<CFG.blackChance+CFG.rareChance+CFG.midChance)return rand(CFG.aMidMin,CFG.aMidMax);
+    // Homepage resting field: continuous very-light band only.
+    // Darker accents arrive via sparkle peaks (same as hero_grid).
     return rand(CFG.aMin,CFG.aMax);
   }
 
@@ -508,20 +505,17 @@ body > div.flex,
       }
     }
 
-    // Slow ambient retargets — light/mid only; leave dark accents alone
+    // Slow ambient retargets — homepage continuous light-grey band
     var ambPicks=countFromRate(count*0.13*dt);
     for(i=0;i<ambPicks;i++){
       p=parts[(Math.random()*count)|0];
-      if(p.spkDur>0||p.curA>0.35)continue;
+      if(p.spkDur>0)continue;
       u=Math.random();
-      if(Math.random()<0.28){
-        p.tgtA=rand(CFG.aMidMin,CFG.aMidMax);
-      }else{
-        p.tgtA=CFG.aMin+(CFG.aMax-CFG.aMin)*(u*u*0.35+u*0.65);
-      }
+      // Bias toward mid-tones so the field feels layered, not binary.
+      p.tgtA=CFG.aMin+(CFG.aMax-CFG.aMin)*(u*u*0.35+u*0.65);
     }
 
-    // Sparkle spawns: soft darken pulses (stronger than before, still restrained)
+    // Sparkle spawns: same rates/rolls; peak shades = homepage palette
     var spawns=countFromRate(count*CFG.sparkleSpawn*dt);
     for(i=0;i<spawns;i++){
       p=parts[(Math.random()*count)|0];
@@ -530,15 +524,18 @@ body > div.flex,
       p.spkDur=rand(CFG.sparkleDurMin,CFG.sparkleDurMax);
       var roll=Math.random();
       if(roll<CFG.blackChance){
-        p.spkPeak=rand(CFG.aBlackMin,CFG.aBlackMax)-p.curA;
+        // Occasional charcoal peak — homepage aRare band (was near-black)
+        p.spkPeak=rand(CFG.aRareMin,CFG.aRareMax)-p.curA;
       }else if(roll<CFG.blackChance+CFG.rareChance){
         p.spkPeak=rand(CFG.aRareMin,CFG.aRareMax)-p.curA;
       }else if(Math.random()<0.48){
-        p.spkPeak=rand(0.14,0.26);
+        // Mid sparkles — homepage values
+        p.spkPeak=rand(0.050,0.105);
       }else{
-        p.spkPeak=rand(0.06,0.15);
+        // Light sparkles — homepage values
+        p.spkPeak=rand(0.020,0.060);
       }
-      if(p.spkPeak<0.014)p.spkPeak=0.014;
+      if(p.spkPeak<0.008)p.spkPeak=0.008;
     }
 
     for(i=0;i<count;i++){

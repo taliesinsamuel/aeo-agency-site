@@ -386,6 +386,9 @@ INJECT = INJECT.replace("%%HEAD%%", json.dumps(HEAD)).replace("%%HEAD_HTML%%", j
 PLATFORM = open("parts/platform.frag", encoding="utf-8").read()
 
 CHROME = open("parts/chrome.frag", encoding="utf-8").read()
+# Homepage-only "Search foundations" SEO section, inserted between the
+# stacked-cards platform section and "How it works" (never on subpages).
+SEO = open("parts/seo_section.frag", encoding="utf-8").read()
 HOMEXTRA = open("parts/home_extra.frag", encoding="utf-8").read()
 # Scroll choreography for the home page: hero focal transfer + the
 # scroll-scrubbed AEO statistics section. Loads after chrome so the
@@ -404,7 +407,7 @@ html = re.sub(
     count=1,
     flags=re.S,
 )
-html = html.replace("</body>", INJECT + HEROGRID + CHROME + PLATFORM + HOMEXTRA + STORY + "</body>", 1)
+html = html.replace("</body>", INJECT + HEROGRID + CHROME + PLATFORM + SEO + HOMEXTRA + STORY + "</body>", 1)
 
 html = fix_next_asset_paths(html)
 
