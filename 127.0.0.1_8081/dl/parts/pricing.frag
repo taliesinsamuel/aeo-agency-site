@@ -67,7 +67,7 @@
     <div class="aeo-plat-intro">
       <span class="aeo-pill aeo-pill-center">Pricing</span>
       <h1 class="aeo-h2" style="font-size:clamp(38px,5vw,62px)">Plans that pay for themselves</h1>
-      <p class="aeo-lead">Straightforward monthly retainers, matched to how much ground you need to cover. No long-term contracts &mdash; you stay because it works.</p>
+      <p class="aeo-lead">Straightforward monthly retainers, matched to how much ground you need to cover. No long-term contracts. You stay because it works.</p>
     </div>
     <div class="aeo-price-grid">
       <div class="aeo-price">
@@ -111,19 +111,19 @@
         <a class="aeo-btn aeo-btn--ghost" href="book.html?plan=custom">Talk to us</a>
       </div>
     </div>
-    <p class="aeo-price-note">Prices in USD. Month to month &mdash; cancel anytime. Everything we build stays yours.</p>
+    <p class="aeo-price-note">Prices in USD. Month to month. Cancel anytime. Everything we build stays yours.</p>
     <div class="aeo-faq">
       <div class="aeo-faq-h"><span class="aeo-pill aeo-pill-center">FAQ</span><h2 class="aeo-h2" style="font-size:clamp(26px,3vw,38px)">Questions, answered</h2></div>
-      <details open><summary>What is answer engine optimization?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">When customers ask ChatGPT, Perplexity, Gemini or Claude &ldquo;who&rsquo;s the best plumber near me?&rdquo;, those engines pick a handful of businesses to recommend. AEO is the work of making sure your business is one of them &mdash; structured data, content the engines want to quote, and the reviews and citations they check before recommending anyone.</div></div></details>
+      <details open><summary>What is answer engine optimization?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">When customers ask ChatGPT, Perplexity, Gemini or Claude &ldquo;who&rsquo;s the best plumber near me?&rdquo;, those engines pick a handful of businesses to recommend. AEO is the work of making sure your business is one of them: structured data, content the engines want to quote, and the reviews and citations they check before recommending anyone.</div></div></details>
       <details><summary>How long until I see results?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Most clients see their mention rate start moving within 30&ndash;60 days. The full effect typically lands around 90 days, once new pages and citations have been crawled and picked up by the engines.</div></div></details>
-      <details><summary>How do you measure &ldquo;recommended by AI&rdquo;?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Every month we run hundreds of real customer questions through each AI engine and count how often your business is named. That gives you a mention rate &mdash; a single number you can watch climb, benchmarked against your competitors.</div></div></details>
-      <details><summary>Do I need a new website?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">No. We work with your existing site &mdash; we add structured data, fix what AI can&rsquo;t read, and publish new pages inside your current setup. You keep full ownership of everything.</div></div></details>
+      <details><summary>How do you measure &ldquo;recommended by AI&rdquo;?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Every month we run hundreds of real customer questions through each AI engine and count how often your business is named. That gives you a mention rate: a single number you can watch climb, benchmarked against your competitors.</div></div></details>
+      <details><summary>Do I need a new website?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">No. We work with your existing site. We add structured data, fix what AI can&rsquo;t read, and publish new pages inside your current setup. You keep full ownership of everything.</div></div></details>
       <details><summary>What happens if I cancel?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Everything stays yours: the schema, the pages, the citations and the reviews. There are no lock-ins and nothing is removed. Most of the work keeps compounding after we stop.</div></div></details>
     </div>
     <div class="aeo-cta-band">
       <div class="bg"><i></i><i></i></div>
       <h2>Be the business AI recommends.</h2>
-      <p>Start with a free audit &mdash; see your mention rate, your competitors&rsquo;, and exactly what it takes to win.</p>
+      <p>Start with a free audit. See your mention rate, your competitors&rsquo;, and exactly what it takes to win.</p>
       <a class="aeo-btn aeo-btn--blue" href="contact.html">Get your free audit</a>
     </div>
   </div>

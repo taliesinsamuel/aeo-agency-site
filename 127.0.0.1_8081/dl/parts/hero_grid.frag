@@ -110,6 +110,32 @@
   // Scratch buffers for neighbour coupling (read previous displacements).
   var prevDx=null,prevDy=null;
 
+  /* Shared lattice for other effects (How-it-works pixel resolve).
+     Viewport-fixed: cell centres are in CSS viewport coordinates. */
+  window.__aeoSqField={
+    size:CFG.size,
+    spacingDesktop:CFG.spacingDesktop,
+    spacingTablet:CFG.spacingTablet,
+    spacingMobile:CFG.spacingMobile,
+    spacingFor:spacingFor,
+    get:function(){
+      return {
+        size:CFG.size,
+        spacing:spacing,
+        gap:spacing-CFG.size,
+        offX:offX,
+        offY:offY,
+        cols:cols,
+        rows:rows,
+        ready:!!(homeX&&cols&&rows)
+      };
+    },
+    /* Viewport CSS centre of lattice cell (gi, gj). */
+    cellCenter:function(gi,gj){
+      return {x:offX+gi*spacing,y:offY+gj*spacing};
+    }
+  };
+
   function buildField(){
     dpr=Math.min(window.devicePixelRatio||1,2);
     w=window.innerWidth; h=window.innerHeight;
@@ -119,6 +145,10 @@
     spacing=spacingFor(w);
     cols=Math.ceil(w/spacing)+2; rows=Math.ceil(h/spacing)+2;
     offX=(w-(cols-1)*spacing)/2; offY=(h-(rows-1)*spacing)/2;
+    if(window.__aeoSqField){
+      window.__aeoSqField.size=CFG.size;
+      window.__aeoSqField.spacing=spacing;
+    }
     var n=cols*rows;
     homeX=new Float32Array(n); homeY=new Float32Array(n);
     curA=new Float32Array(n); tgtA=new Float32Array(n);

@@ -75,10 +75,10 @@
     <div class="aeo-contact-grid">
       <div class="aeo-cbenefits">
         <h2>What you get in your audit</h2>
-        <p>Delivered in 3&ndash;5 business days. No commitment, no sales pressure &mdash; the data is yours either way.</p>
+        <p>Delivered in 3&ndash;5 business days. No commitment, no sales pressure. The data is yours either way.</p>
         <div class="aeo-cb"><span class="aeo-cb-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 4 6-8 3 4"/></svg></span><div><div class="aeo-cb-t">Your mention rate, measured</div><div class="aeo-cb-m">We run hundreds of real customer questions across ChatGPT, Perplexity, Gemini and Claude and count how often you come up.</div></div></div>
         <div class="aeo-cb"><span class="aeo-cb-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.2a3.2 3.2 0 0 1 0 6M17.5 20a5.5 5.5 0 0 0-3-4.9"/></svg></span><div><div class="aeo-cb-t">Competitor comparison</div><div class="aeo-cb-m">Who AI recommends instead of you right now, and why they win.</div></div></div>
-        <div class="aeo-cb"><span class="aeo-cb-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><div><div class="aeo-cb-t">Site readability report</div><div class="aeo-cb-m">Everything on your site AI can&rsquo;t read today &mdash; schema, structure and missing pages.</div></div></div>
+        <div class="aeo-cb"><span class="aeo-cb-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg></span><div><div class="aeo-cb-t">Site readability report</div><div class="aeo-cb-m">Everything on your site AI can&rsquo;t read today: schema, structure and missing pages.</div></div></div>
         <div class="aeo-cb"><span class="aeo-cb-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span><div><div class="aeo-cb-t">30-minute walkthrough</div><div class="aeo-cb-m">A plain-English call on what the numbers mean and the fastest path to moving them.</div></div></div>
         <p class="aeo-cmail">Prefer email? <a href="mailto:hello@answered.agency">hello@answered.agency</a></p>
       </div>
@@ -154,7 +154,7 @@
     card.innerHTML='<div class="aeo-audit-done">'+
       '<span class="aeo-audit-done-ic">'+CHECK+'</span>'+
       '<h3>You\u2019re booked</h3>'+
-      '<p>Your free audit call is confirmed'+(email?' for <b>'+esc(email)+'</b>':'')+'. Check your email for the calendar invite — we\u2019ll review your site before we meet.</p></div>';
+      '<p>Your free audit call is confirmed'+(email?' for <b>'+esc(email)+'</b>':'')+'. Check your email for the calendar invite. We\u2019ll review your site before we meet.</p></div>';
   }
 
   function mountCalendly(email,website){

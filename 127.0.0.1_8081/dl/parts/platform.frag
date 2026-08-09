@@ -3,8 +3,6 @@
    primitives all live in chrome.frag, which is injected first. Only
    platform-specific styles belong below. */
 
-/* Soft seam out of the hero instead of a hard 1px rule. */
-#aeo-platform::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(28,29,31,.10) 25%,rgba(28,29,31,.10) 75%,transparent);z-index:2;pointer-events:none}
 /* the shared .aeo-plat-inner's default bottom padding (up to 128px) was
    sized for sitting right above a section's own outer boundary — here it
    trails the *stack*, which already ends on a sized landing margin of its
@@ -31,7 +29,10 @@
    ============================================================ */
 .aeo-stack{
   position:relative;
+  isolation:isolate;
   --aeo-stack-slot:54svh;--aeo-stack-hold:0svh;
+  --aeo-stack-peek:18px;
+  --aeo-stack-radius:var(--aeo-r-2xl);
   height:calc(100svh + var(--aeo-stack-slot) * 3 + var(--aeo-stack-hold));
 }
 .aeo-stack-pin{
@@ -39,6 +40,7 @@
      the browser bottom while the shrunk pin stays vertically centred. */
   position:sticky;top:0;height:100svh;overflow:visible;
   box-sizing:border-box;
+  isolation:isolate;
 }
 .aeo-card{
   position:absolute;left:50%;top:50%;
@@ -47,16 +49,39 @@
      Never use 100vw or a forced height — those overflowed full-page views. */
   width:min(1180px,calc(100% - 12px));
   max-height:min(560px,calc(100svh - 128px));
-  will-change:transform;
-  background:linear-gradient(180deg,#fff,#fbfcfe);
-  border:1px solid rgba(28,29,31,.08);
-  border-radius:var(--aeo-r-2xl);
-  /* No outer drop-shadow / haze, no hover outline ring. */
-  box-shadow:none;
+  will-change:transform,clip-path;
+  /* Solid opaque surface so covered cards cannot ghost through. */
+  background:#fff;
+  background-image:linear-gradient(180deg,#fff,#fbfcfe);
+  /* Inset stroke stays inside the clipped surface (no outer halo). */
+  border:none;
+  border-radius:var(--aeo-stack-radius);
+  box-shadow:inset 0 0 0 1px rgba(28,29,31,.08);
   outline:none;
-  transition:border-color .3s var(--aeo-e);
+  overflow:hidden;
+  -webkit-backface-visibility:hidden;
+  backface-visibility:hidden;
+  transition:none;
 }
-.aeo-card-inner{display:grid;grid-template-columns:minmax(0,0.82fr) minmax(0,1.18fr);align-items:center;height:100%;overflow:hidden;border-radius:inherit}
+/* Outer drop-shadows stay off on the card shell (matches prior look).
+   Covered cards keep the inset stroke only. */
+.aeo-card.aeo-card--front,
+.aeo-card.aeo-card--covered{
+  box-shadow:inset 0 0 0 1px rgba(28,29,31,.08);
+}
+.aeo-card.aeo-card--covered{
+  /* Must win over the mobile overflow-y:auto rule so clipped regions
+     cannot scroll or paint outside the visible strip. */
+  overflow:hidden!important;
+}
+/* Inner demo panels carry large drop-shadows; kill them on covered cards so
+   they cannot paint a halo past the clip edge into the foreground card. */
+.aeo-card.aeo-card--covered .aeo-panel,
+.aeo-card.aeo-card--covered .aeo-panel:hover{
+  box-shadow:none!important;
+  transform:none!important;
+}
+.aeo-card-inner{display:grid;grid-template-columns:minmax(0,0.82fr) minmax(0,1.18fr);align-items:center;height:100%;overflow:hidden;border-radius:inherit;background:transparent}
 .aeo-row-copy{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:15px;padding:clamp(28px,3.4vw,52px) clamp(24px,2.8vw,42px);height:100%;box-sizing:border-box}
 .aeo-row-viz{display:flex;align-items:center;justify-content:center;padding:clamp(20px,2.4vw,36px) clamp(24px,2.8vw,42px) clamp(20px,2.4vw,36px) 0;height:100%;box-sizing:border-box;min-width:0}
 @media (prefers-reduced-motion:reduce){.aeo-card{transition:none}}
@@ -253,7 +278,7 @@
      areas:["Phoenix","Scottsdale","Mesa"],hours:"Mo-Su 07:00-21:00",tel:"+1-602-555-0184",
      rate:71,delta:"+18 in last 30 days",m:[78,69,64,58],path:0,
      q:"who does same-day AC repair in Phoenix on weekends?",
-     pre:"Yes \u2014 ",mid:" offers same-day AC repair across Phoenix, including weekends, with no weekend call-out fee and a typical response time of about two hours.",
+     pre:"Yes. ",mid:" offers same-day AC repair across Phoenix, including weekends, with no weekend call-out fee and a typical response time of about two hours.",
      srcT:"Weekend and emergency AC service",srcM:"Same-day availability, response times and service areas across Phoenix.",
      worked:4,
      srcs:["5-star review: \u201cfixed our AC on a Sunday in under two hours\u201d","Local listing \u00b7 4.9 (312 reviews) \u00b7 Open now","r/phoenix thread recommending them for weekend callouts","41 recommendations in Phoenix neighborhood groups","Rated Excellent \u00b7 286 verified reviews"]},
@@ -272,13 +297,13 @@
      pre:"",mid:" runs 24/7 emergency callouts across Charlotte with a 90-minute average response time and upfront, flat-rate pricing.",
      srcT:"24/7 emergency plumbing",srcM:"Response times, flat-rate pricing and after-hours coverage in Charlotte.",
      worked:5,
-     srcs:["5-star review: \u201cburst pipe at 11pm \u2014 there by midnight\u201d","Local listing \u00b7 4.9 (441 reviews) \u00b7 Open 24 hours","r/Charlotte thread on reliable emergency plumbers","57 recommendations in Charlotte community groups","Rated Excellent \u00b7 352 verified reviews"]},
+     srcs:["5-star review: \u201cburst pipe at 11pm. There by midnight\u201d","Local listing \u00b7 4.9 (441 reviews) \u00b7 Open 24 hours","r/Charlotte thread on reliable emergency plumbers","57 recommendations in Charlotte community groups","Rated Excellent \u00b7 352 verified reviews"]},
     {ind:"Legal",city:"Miami",biz:"Rivera & Marsh Injury Law",dom:"riveramarsh.com",type:"Attorney",
      areas:["Miami","Coral Gables","Hialeah"],hours:"Mo-Fr 08:00-19:00",tel:"+1-305-555-0117",
      rate:67,delta:"+14 in last 30 days",m:[74,63,60,52],path:0,
      q:"personal injury lawyer in Miami with a free consultation?",
-     pre:"Yes \u2014 ",mid:" offers free consultations across Miami and works on a no-win, no-fee basis, with over $40M recovered for clients.",
-     srcT:"Free consultation \u2014 personal injury",srcM:"Case types, fee structure and consultation booking for Miami clients.",
+     pre:"Yes. ",mid:" offers free consultations across Miami and works on a no-win, no-fee basis, with over $40M recovered for clients.",
+     srcT:"Free consultation: personal injury",srcM:"Case types, fee structure and consultation booking for Miami clients.",
      worked:4,
      srcs:["5-star review: \u201cthey handled everything after my accident\u201d","Local listing \u00b7 4.9 (188 reviews)","r/Miami thread on trustworthy injury lawyers","29 recommendations in Miami community groups","Rated Excellent \u00b7 143 verified reviews"]}
   ];
@@ -567,9 +592,12 @@
      slice of the section's scroll travel; within its slice its own
      progress runs 0→1 and it rises from fully below the VIEWPORT up to the
      centered resting position — position-driven, no fade-in. Scroll back
-     reverses the same path. The card underneath eases back a few px and
-     scales down a hair while being covered; z-index keeps the incoming
-     card in front. */
+     reverses the same path.
+
+     Occlusion: the incoming card always paints above (z-index = index).
+     Covered cards are CLIPPED to only the strip still geometrically above
+     the next card — borders/shadows in the covered region cannot leak.
+     No scale-down of covered cards (that created concentric border arcs). */
   // Scroll-driven ease ≈ cubic-bezier(0.22, 1, 0.36, 1): deliberate rise, soft settle.
   function easeStack(t){
     if(t<=0)return 0;
@@ -583,13 +611,59 @@
     if(!n)return;
     if(reduce||!window.__aeoScroll||!("IntersectionObserver" in window)||n<2){
       sec.classList.add("aeo-stack--static");
-      cards.forEach(function(c){c.style.transform="none";});
+      cards.forEach(function(c){
+        c.style.transform="none";
+        c.style.clipPath="";
+        c.style.webkitClipPath="";
+        c.classList.remove("aeo-card--covered");
+        c.classList.add("aeo-card--front");
+      });
       try{document.documentElement.style.setProperty("--aeo-stack-exit-pull","0px");}catch(e){}
       return;
     }
     var slots=n-1;
     var pinEl=sec.querySelector(".aeo-stack-pin");
     var box={top:0,h:0,vh:0,y:0};
+    var STACK_PEEK=18; /* intentional exposed strip when a card is covered */
+    function stackRadiusPx(){
+      try{
+        var raw=getComputedStyle(cards[0]).borderRadius||"24px";
+        var n=parseFloat(raw);
+        return isFinite(n)?n:24;
+      }catch(e){return 24;}
+    }
+    function clearClip(c){
+      c.style.clipPath="";
+      c.style.webkitClipPath="";
+    }
+    /* Clip card A so only the part NOT covered by card B can paint.
+       Geometry is direction-agnostic: same overlap → same clip. */
+    function clipCoveredByNext(card,next){
+      var a=card.getBoundingClientRect();
+      var b=next.getBoundingClientRect();
+      var localH=card.offsetHeight||a.height;
+      if(!localH){clearClip(card);return;}
+      /* Next card still fully below this one: show complete surface. */
+      if(b.top>=a.bottom-0.5){clearClip(card);return;}
+      /* Visible strip = region of A still above B's top edge. */
+      var visibleH=Math.max(0,Math.min(localH,b.top-a.top));
+      var bottomInset=Math.max(0,localH-visibleH);
+      if(bottomInset<0.5){clearClip(card);return;}
+      /* Fully covered with no peek: hide entirely (no border/shadow leak). */
+      if(visibleH<0.5){
+        var hide="inset(0 0 "+localH.toFixed(2)+"px 0)";
+        card.style.clipPath=hide;
+        card.style.webkitClipPath=hide;
+        return;
+      }
+      var r=stackRadiusPx();
+      /* Round ONLY the top corners of the remaining strip. Rounding the
+         clipped bottom edge created a second grey arc just above the
+         foreground card (the main leftover artifact). */
+      var cp="inset(0px 0px "+bottomInset.toFixed(2)+"px 0px round "+r+"px "+r+"px 0px 0px)";
+      card.style.clipPath=cp;
+      card.style.webkitClipPath=cp;
+    }
     window.__aeoScroll(function(y,vh){
       var r=sec.getBoundingClientRect();
       box.top=r.top+y;box.h=r.height;box.vh=vh;box.y=y;
@@ -617,6 +691,9 @@
         p=(g-s)/(e-s);
         prog.push(p<0?0:(p>1?1:p));
       }
+      /* Frontmost card = highest index that has begun arriving. */
+      var front=0;
+      for(i=0;i<n;i++)if(prog[i]>0.02)front=i;
       for(i=0;i<n;i++){
         // Start fully below the browser viewport: resting centre is ~vh/2,
         // so centre must sit at vh + cardH/2 (+ padding) to hide the card.
@@ -625,12 +702,33 @@
         var t=easeStack(prog[i]);
         var slide=(1-t)*startVh;
         var nextP=i<n-1?prog[i+1]:0;
-        var scale=(1-0.035*nextP).toFixed(4),lift=(-18*nextP).toFixed(2);
-        cards[i].style.transform="translate(-50%,-50%) translateY("+lift+"px) scale("+scale+") translateY("+slide.toFixed(3)+"vh)";
-        cards[i].style.filter=nextP>0?"brightness("+(1-0.05*nextP).toFixed(3)+")":"";
+        /* Peek lift only — no scale (scale made covered borders stick out). */
+        var lift=(-STACK_PEEK*nextP).toFixed(2);
+        cards[i].style.transform="translate(-50%,-50%) translateY("+lift+"px) translateY("+slide.toFixed(3)+"vh)";
+        cards[i].style.filter="";
         cards[i].style.zIndex=String(i+1);
-        // Fully opaque during the visible entrance — position tells the story.
         cards[i].style.opacity="1";
+        cards[i].classList.toggle("aeo-card--front",i===front);
+        cards[i].classList.toggle("aeo-card--covered",nextP>0.02);
+      }
+      /* Second pass: clip from post-transform geometry.
+         Only the immediate previous card may keep an intentional peek above
+         the front card. Cards deeper in the stack are fully hidden so their
+         borders cannot stack into multiple grey arcs. */
+      for(i=0;i<n;i++){
+        if(i>front){clearClip(cards[i]);continue;}
+        if(i===front){clearClip(cards[i]);continue;}
+        if(i<front-1){
+          var hHide=cards[i].offsetHeight||0;
+          if(hHide>0){
+            var hide="inset(0 0 "+hHide.toFixed(2)+"px 0)";
+            cards[i].style.clipPath=hide;
+            cards[i].style.webkitClipPath=hide;
+          }else clearClip(cards[i]);
+          continue;
+        }
+        /* i === front - 1 */
+        clipCoveredByNext(cards[i],cards[front]);
       }
     });
   }

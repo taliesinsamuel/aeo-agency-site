@@ -399,7 +399,7 @@ FLOATFIELD = open("parts/float_field.frag", encoding="utf-8").read()
 
 html = re.sub(
     r"<title>.*?</title>",
-    "<title>Answered — Be the business that AI recommends</title>",
+    "<title>Answered: Be the business that AI recommends</title>",
     html,
     count=1,
     flags=re.S,
@@ -427,6 +427,6 @@ def build_page(fname, title, frag_path):
     open(fname, "w", encoding="utf-8").write(page)
     print("wrote", fname, "(", len(page), "bytes )")
 
-build_page("pricing.html", "Pricing — Answered, the AEO agency", "parts/pricing.frag")
-build_page("contact.html", "Get your free audit — Answered", "parts/contact.frag")
-build_page("book.html", "Book a call — Answered", "parts/book.frag")
+build_page("pricing.html", "Pricing: Answered, the AEO agency", "parts/pricing.frag")
+build_page("contact.html", "Get your free audit | Answered", "parts/contact.frag")
+build_page("book.html", "Book a call | Answered", "parts/book.frag")

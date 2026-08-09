@@ -38,7 +38,7 @@
       <div class="aeo-book-head" data-aeo-rv-auto>
         <span class="aeo-pill aeo-pill-center">Book a call</span>
         <h1>Let&rsquo;s talk about getting you recommended</h1>
-        <p>Pick a time that works. 30 minutes, no pressure &mdash; just your numbers and a plan.</p>
+        <p>Pick a time that works. 30 minutes, no pressure. Just your numbers and a plan.</p>
         <div class="aeo-book-ctx" id="aeo-book-ctx"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12.5l2.5 2.5L16 9"/><circle cx="12" cy="12" r="9.5"/></svg><span id="aeo-book-ctx-text"></span></div>
       </div>
       <div class="aeo-book-card" data-aeo-rv-auto id="aeo-book-card">
@@ -73,7 +73,7 @@
     card.innerHTML='<div class="aeo-book-done">'+
       '<span class="aeo-book-done-ic">'+CHECK+'</span>'+
       '<h3>You\u2019re booked</h3>'+
-      '<p>Thanks — your call is confirmed. Check your email for the calendar invite and details.</p></div>';
+      '<p>Thanks. Your call is confirmed. Check your email for the calendar invite and details.</p></div>';
   }
 
   function wireBooking(root){
