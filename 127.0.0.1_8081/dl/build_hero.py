@@ -70,6 +70,22 @@ BADGE_RE = re.compile(
 )
 html = BADGE_RE.sub("", html)
 
+# --- 1a2. drop Attio's own "people we've worked with" customer-logo wall ---
+# It's Attio's native next-sibling section right after the hero (desktop grid
+# + a duplicated mobile crossfade grid of the same logos, no heading of its
+# own), sitting between the hero and Attio's own "Platform" section (which we
+# already replace with #aeo-platform). We're not replacing it with anything —
+# just removing the node outright so #aeo-story's square-field background
+# flows straight into #aeo-platform with no leftover white band/seam and no
+# empty container. A carousel may take this slot in a future pass.
+LOGO_WALL_RE = re.compile(
+    r'<section class="border-subtle-stroke border-b bg-secondary-background">.*?</section>',
+    re.S,
+)
+html, _n_logo_wall = LOGO_WALL_RE.subn("", html, count=1)
+if _n_logo_wall != 1:
+    print("WARNING: customer-logo wall section not found/removed — check LOGO_WALL_RE against SRC")
+
 # --- 1b. reveal content that attio hides at opacity:0 until its scroll-animation
 #         JS fires (that JS doesn't run in the static capture) ---
 html = html.replace("filter:blur(1.5px);opacity:0", "")
@@ -88,7 +104,7 @@ INJECT = r"""
 /* stage = the lit volume the product window floats inside */
 .aeo-stage{position:relative;width:100%;animation:aeo-stage-in 1s var(--aeo-e,cubic-bezier(.22,1,.36,1)) both}
 .aeo-stage::before{content:"";position:absolute;left:50%;top:8%;width:88%;height:84%;transform:translateX(-50%);border-radius:50%;background:radial-gradient(50% 50% at 50% 50%,rgba(38,109,240,.20),rgba(140,110,245,.10) 45%,transparent 72%);filter:blur(58px);opacity:.9;pointer-events:none;animation:aeo-stage-breathe 11s ease-in-out infinite alternate}
-@keyframes aeo-stage-in{from{opacity:0;transform:translateY(22px) scale(.975)}to{opacity:1;transform:none}}
+@keyframes aeo-stage-in{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
 @keyframes aeo-stage-breathe{to{opacity:.55;transform:translateX(-50%) scale(1.08)}}
 .aeo-window{position:relative;display:flex;flex-direction:column;width:100%;height:clamp(360px,42vw,660px);background:var(--color-white-100,#fff);border:1px solid rgba(28,29,31,.09);border-radius:18px;overflow:hidden;box-shadow:0 1px 2px rgba(16,17,20,.05),0 2px 6px -2px rgba(16,17,20,.08),0 26px 52px -22px rgba(28,29,31,.20),0 70px 130px -70px rgba(28,29,31,.34);font-family:var(--font-inter),"Inter",system-ui,sans-serif;text-align:left;pointer-events:auto;animation:aeo-float 11s ease-in-out 1s infinite alternate}
 /* inner rim light — reads as glass thickness, not a border */
@@ -124,8 +140,8 @@ INJECT = r"""
 @keyframes aeo-dot{0%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-2px)}}
 .aeo-tok{white-space:pre-wrap;opacity:0;transform:translateY(3px);animation:aeo-in .2s forwards}
 @keyframes aeo-in{to{opacity:1;transform:none}}
-.aeo-biz{display:inline-block;padding:1px 7px;margin:0 1px;border-radius:7px;background:linear-gradient(180deg,#f1f6ff,#e3edff);color:var(--color-blue-600,#245bc2);font-weight:600;box-shadow:inset 0 0 0 1px rgba(38,109,240,.18),0 1px 2px rgba(38,109,240,.10),0 6px 16px -8px rgba(38,109,240,.5);opacity:0;transform:scale(.9);animation:aeo-pop .34s var(--aeo-e-spring,cubic-bezier(.34,1.32,.52,1)) forwards}
-@keyframes aeo-pop{to{opacity:1;transform:none}}
+.aeo-biz{display:inline-block;padding:1px 7px;margin:0 1px;border-radius:7px;background:linear-gradient(180deg,#f1f6ff,#e3edff);color:var(--color-blue-600,#245bc2);font-weight:600;box-shadow:inset 0 0 0 1px rgba(38,109,240,.18),0 1px 2px rgba(38,109,240,.10),0 6px 16px -8px rgba(38,109,240,.5);opacity:0;animation:aeo-pop .3s var(--aeo-e-out,cubic-bezier(.33,1,.68,1)) forwards}
+@keyframes aeo-pop{to{opacity:1}}
 .aeo-sources{margin-top:clamp(14px,1.6vw,20px);opacity:0;transform:translateY(6px);transition:opacity .35s cubic-bezier(.33,1,.68,1),transform .35s cubic-bezier(.33,1,.68,1)}
 .aeo-sources.show{opacity:1;transform:none}
 .aeo-sources-label{font-size:12px;font-weight:600;color:var(--color-black-900,#a4adba);margin-bottom:9px}

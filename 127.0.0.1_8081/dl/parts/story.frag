@@ -6,28 +6,22 @@
    on screen (see wireFocus) — no scroll-pixel maths, no scrubbing, no
    continuous interpolation while the visitor scrolls.
 
-   The pop itself lives entirely on .aeo-focus-scale: a dedicated wrapper
-   inserted around .aeo-stage that owns exactly one property (scale).
-   A transform never triggers layout, so nothing below the hero needs
-   reserved growth room and nothing reflows when the state flips — the
-   internal chat demo keeps animating its own entrance/typing/token
-   transforms one layer down, completely independently, so the two
-   never compete for the same property on the same element.
+   .aeo-focus-scale is a dedicated wrapper inserted around .aeo-stage so
+   the outer transform and the internal chat demo's own entrance/typing/
+   token transforms never compete for the same property on the same
+   element. It previously also scaled up on focus (the "pop"); that
+   scale has been removed on request — the wrapper is now inert and
+   only exists to keep that separation intact for the secondary cues
+   below (lift shadow, glass rim, headline settle, grid dim), which are
+   opacity/translate-driven and unaffected by this change.
    ============================================================ */
 .aeo-hero{--aeo-f:0}
 
 .aeo-focus-scale{
   display:block;width:100%;
-  scale:calc(1 + .085 * var(--aeo-f));
-  transform-origin:50% 62%;
-  transition:scale .38s var(--aeo-e-out);
-  will-change:scale;
+  scale:1;
 }
 .aeo-focus-scale>.aeo-stage{width:100%;isolation:isolate}
-@media (max-width:767px){
-  /* smaller stage, smaller pop — enough to read, never enough to overflow */
-  .aeo-focus-scale{scale:calc(1 + .04 * var(--aeo-f))}
-}
 /* the product demo should hand off to the story section right after it,
    not float in a void above it */
 .aeo-hero [class~="h-svh"]{padding-bottom:20px!important}
@@ -113,10 +107,15 @@
 }
 .aeo-story-pin{
   position:sticky;top:0;height:100svh;
-  display:flex;align-items:flex-start;justify-content:center;
+  width:100%;box-sizing:border-box;
   padding:calc(var(--site-header-height,64px) + 36px) 24px 24px;
 }
-.aeo-story-stage{width:100%;max-width:1080px}
+/* Bulletproof, viewport-relative centering: a block-level max-width
+   column with symmetrical inline margins, not a flex justify-content
+   trick — mathematically centered at any viewport width, independent
+   of content length. The text inside stays left-aligned by design;
+   only this outer column is centered. */
+.aeo-story-stage{width:100%;max-width:1080px;margin-inline:auto}
 .aeo-story-list{list-style:none;margin:0;padding:0}
 .aeo-story-item+.aeo-story-item{margin-top:clamp(22px,3.7vh,46px)}
 .aeo-story-line{
