@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "description": "Answered Labs production marketing site (static + Vercel API)",
   "scripts": {
-    "build": "cd 127.0.0.1_8081/dl && python3 build_hero.py && python3 ../../scripts/generate-seo-assets.py",
+    "build": "cd 127.0.0.1_8081/dl && python3 build_hero.py",
+    "generate:seo-assets": "python3 scripts/generate-seo-assets.py",
     "serve": "./serve.sh",
     "test:api": "node scripts/test-free-audit.js",
     "test:hubspot": "node scripts/live-hubspot-e2e.js",
