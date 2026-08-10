@@ -204,8 +204,10 @@
      min-content, and an auto minimum lets them stretch the column past the
      viewport. Stack copy above viz inside the card and let the card grow
      to fit both rather than clipping either. */
-  .aeo-card{max-height:min(640px,calc(100svh - 96px));overflow-y:auto}
-  .aeo-card-inner{grid-template-columns:minmax(0,1fr);grid-auto-rows:min-content;height:auto;min-height:100%}
+  /* Shell keeps overflow:hidden (same as desktop) so the inset outline
+     is not clipped. Scroll tall stacked content on the inner instead. */
+  .aeo-card{max-height:min(640px,calc(100svh - 96px));overflow:hidden;background:#fff;background-image:none}
+  .aeo-card-inner{grid-template-columns:minmax(0,1fr);grid-auto-rows:min-content;height:100%;min-height:100%;max-height:100%;overflow-x:hidden;overflow-y:auto;background:transparent;-webkit-overflow-scrolling:touch}
   .aeo-row-copy,.aeo-row-viz{min-width:0;height:auto}
   .aeo-row-copy{padding-bottom:8px;gap:10px}
   .aeo-row-viz{padding-top:4px}
@@ -654,7 +656,10 @@
     }
     /* Clip card A so only the part NOT covered by card B can paint.
        Pure geometry: as B slides up, A's visible strip shrinks continuously
-       until B fully covers A — no peek, no abrupt threshold hide. */
+       until B fully covers A — no peek, no abrupt threshold hide.
+       Equalized card heights (see equalizeStackCards) keep resting footprints
+       identical so a shorter front card cannot leave a taller back card
+       peeking above or below the shared stack centre. */
     function clipCoveredByNext(card,next){
       var a=card.getBoundingClientRect();
       var b=next.getBoundingClientRect();
@@ -662,6 +667,13 @@
       if(!localH){clearClip(card);return;}
       /* Next card still fully below this one: show complete surface. */
       if(b.top>=a.bottom-0.5){clearClip(card);return;}
+      /* Fully occluded (same footprint, or next taller and covering). */
+      if(b.top<=a.top+0.5&&b.bottom>=a.bottom-0.5){
+        var hideFull="inset(0 0 "+localH.toFixed(2)+"px 0)";
+        card.style.clipPath=hideFull;
+        card.style.webkitClipPath=hideFull;
+        return;
+      }
       /* Visible strip = region of A still above B's top edge. */
       var visibleH=Math.max(0,Math.min(localH,b.top-a.top));
       var bottomInset=Math.max(0,localH-visibleH);
@@ -813,8 +825,28 @@
   };
 
   var STACK_MARGIN=64;
+  /* Mobile cards stack copy above viz and end up different natural heights.
+     Force a shared resting footprint so each arriving card can fully cover
+     the previous one at the same centre point (desktop already matches). */
+  function equalizeStackCards(cards){
+    var i,h,maxH=0;
+    for(i=0;i<cards.length;i++){
+      cards[i].style.minHeight="";
+      cards[i].style.height="";
+    }
+    for(i=0;i<cards.length;i++){
+      h=cards[i].getBoundingClientRect().height;
+      if(h>maxH)maxH=h;
+    }
+    if(!maxH)return 0;
+    for(i=0;i<cards.length;i++){
+      cards[i].style.minHeight=maxH+"px";
+    }
+    return maxH;
+  }
   function sizeStackPin(sec,pin,cards){
     var vh=window.innerHeight,i,h,maxH=0;
+    equalizeStackCards(cards);
     for(i=0;i<cards.length;i++){h=cards[i].getBoundingClientRect().height;if(h>maxH)maxH=h;}
     if(!maxH)return;
     var wanted=maxH+STACK_MARGIN*2;
@@ -849,6 +881,11 @@
 
   var started=false;
   function findAttioPlatform(){
+    var marked=document.querySelector('[data-aeo-legacy-marker="The intelligent system that never sleeps"]');
+    if(marked){
+      var host=marked.closest?marked.closest("section"):null;
+      if(host)return host;
+    }
     var secs=document.querySelectorAll("section");var best=null;
     for(var i=0;i<secs.length;i++){
       if(secs[i].id==="aeo-platform")continue;
@@ -858,36 +895,44 @@
     }
     return best;
   }
+  function initPlatform(sec){
+    if(!sec||started)return;
+    started=true;
+    var stackEl=sec.querySelector("#aeo-stack");
+    if(stackEl){
+      wireStack(stackEl);
+      if(!stackEl.classList.contains("aeo-stack--static")){
+        var stackPin=stackEl.querySelector(".aeo-stack-pin");
+        var stackCards=stackEl.querySelectorAll(".aeo-card");
+        if(stackPin&&stackCards.length){
+          sizeStackPin(stackEl,stackPin,stackCards);
+          var stResizeT=null;
+          window.addEventListener("resize",function(){
+            if(stResizeT)clearTimeout(stResizeT);
+            stResizeT=setTimeout(function(){sizeStackPin(stackEl,stackPin,stackCards);},150);
+          });
+        }
+      }
+    }
+    onceInView(document.getElementById("aeo-viz-vis"),startVisibility);
+    onceInView(document.getElementById("aeo-viz-web"),startStructure);
+    onceInView(document.getElementById("aeo-viz-content"),startContent);
+    onceInView(document.getElementById("aeo-viz-auth"),startAuthority);
+    if(window.__aeoAfterPlatform)try{window.__aeoAfterPlatform(sec);}catch(e){}
+  }
   function mountPlatform(){
-    if(document.getElementById("aeo-platform"))return;
+    var existing=document.getElementById("aeo-platform");
+    if(existing){
+      var legacy=document.querySelector('[data-aeo-hidden="1"]');
+      if(legacy&&legacy.style.display!=="none")legacy.style.display="none";
+      initPlatform(existing);
+      return;
+    }
     var attio=findAttioPlatform();if(!attio)return;
     attio.style.display="none";attio.setAttribute("data-aeo-hidden","1");
     var sec=el("section","aeo-plat");sec.id="aeo-platform";sec.innerHTML=PLATFORM_HTML;
     attio.parentNode.insertBefore(sec,attio);
-    if(!started){
-      started=true;
-      var stackEl=sec.querySelector("#aeo-stack");
-      if(stackEl){
-        wireStack(stackEl);
-        if(!stackEl.classList.contains("aeo-stack--static")){
-          var stackPin=stackEl.querySelector(".aeo-stack-pin");
-          var stackCards=stackEl.querySelectorAll(".aeo-card");
-          if(stackPin&&stackCards.length){
-            sizeStackPin(stackEl,stackPin,stackCards);
-            var stResizeT=null;
-            window.addEventListener("resize",function(){
-              if(stResizeT)clearTimeout(stResizeT);
-              stResizeT=setTimeout(function(){sizeStackPin(stackEl,stackPin,stackCards);},150);
-            });
-          }
-        }
-      }
-      onceInView(document.getElementById("aeo-viz-vis"),startVisibility);
-      onceInView(document.getElementById("aeo-viz-web"),startStructure);
-      onceInView(document.getElementById("aeo-viz-content"),startContent);
-      onceInView(document.getElementById("aeo-viz-auth"),startAuthority);
-      if(window.__aeoAfterPlatform)try{window.__aeoAfterPlatform(sec);}catch(e){}
-    }
+    initPlatform(sec);
   }
 
   var n=0,iv=setInterval(function(){mountPlatform();if(++n>60)clearInterval(iv);},150);

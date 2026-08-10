@@ -415,7 +415,7 @@
 </template>
 <script id="aeo-home-script">
 (function(){
-  var HIDE=["Live from day one","Universal Context","All of the signals","SDK. API.","Run at any scale","Trusted by 30,000+","Better as you grow"];
+  var HIDE=["Live from day one","Universal Context","All of the signals","SDK. API.","Run at any scale","Trusted by 30,000+","Better as you grow","Margaret Shen","next generation of CRM","Head of Business Operations"];
   var reduce=false;try{reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;}catch(e){}
   function hideSections(){
     var main=document.querySelector("main");

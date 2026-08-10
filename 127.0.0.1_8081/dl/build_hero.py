@@ -435,10 +435,13 @@ import seo as aeo_seo
 
 html = html.replace("</body>", INJECT + HEROGRID + ANALYTICS + CHROME + PLATFORM + SEO + HOMEXTRA + STORY + "</body>", 1)
 
+PLATFORM_SHELL = aeo_seo.extract_platform_shell_html(PLATFORM)
+
 html = apply_favicons(html)
 html = fix_next_asset_paths(html)
 html = aeo_seo.apply_page_seo(html, "home")
 html = aeo_seo.apply_body_seo_cleanup(html)
+html = aeo_seo.apply_first_paint_shell(html, "home", platform_html=PLATFORM_SHELL)
 
 open(LIVE, "w", encoding="utf-8").write(html)
 print("wrote", LIVE, "(", len(html), "bytes )")
@@ -458,6 +461,7 @@ def build_page(fname, page_key, frag_path):
     page = fix_next_asset_paths(page)
     page = aeo_seo.apply_page_seo(page, page_key)
     page = aeo_seo.apply_body_seo_cleanup(page)
+    page = aeo_seo.apply_first_paint_shell(page, page_key)
     open(fname, "w", encoding="utf-8").write(page)
     print("wrote", fname, "(", len(page), "bytes )")
     return page
@@ -482,6 +486,7 @@ def build_meta_page(fname, page_key, frag_path, prefix_frag=""):
     page = fix_next_asset_paths(page)
     page = aeo_seo.apply_page_seo(page, page_key)
     page = aeo_seo.apply_body_seo_cleanup(page)
+    page = aeo_seo.apply_first_paint_shell(page, page_key)
     open(fname, "w", encoding="utf-8").write(page)
     print("wrote", fname, "(", len(page), "bytes )")
     return page

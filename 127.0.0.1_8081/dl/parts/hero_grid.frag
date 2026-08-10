@@ -21,6 +21,12 @@
 .aeo-hero [class*="repeating-linear-gradient(90deg"],
 .aeo-hero [style*="106.6667% at 50% 0%"]{display:none!important}
 
+/* Mobile Attio scene (md:hidden) ships an opaque primary-background
+   wash at absolute inset-0. That layer sits above the shared square
+   field and made the mobile hero look plain white. Open it so the
+   existing #aeo-sqfield canvas shows through (desktop path unchanged). */
+.aeo-hero .absolute.inset-0.bg-primary-background{background:transparent!important}
+
 /* Opaque section backgrounds would sit in front of the single
    fixed, page-level canvas no matter how negative its z-index.
    Opening these boxes (flat white/surface at rest) lets one shared

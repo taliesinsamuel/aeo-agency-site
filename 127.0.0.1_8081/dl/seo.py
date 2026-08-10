@@ -681,6 +681,368 @@ CRAWLABLE_FOOTER = (
 )
 
 
+# Matches chrome.frag nav markup so first paint is Answered Labs before JS.
+CRAWLABLE_NAV = (
+    '<nav data-aeo="1" aria-label="Primary">'
+    '<div class="aeo-nav">'
+    '<a class="aeo-nav-brand" href="/" aria-label="Answered Labs home">'
+    '<img class="aeo-logo" src="/assets/answered-labs-website-logo-black.svg" '
+    'alt="Answered Labs" width="204" height="22" decoding="async"></a>'
+    '<div class="aeo-nav-links">'
+    '<span class="aeo-nav-hl" aria-hidden="true"></span>'
+    '<a href="/">Home</a><a href="/pricing">Pricing</a>'
+    '<a href="/free-audit">Free audit</a></div>'
+    '<div class="aeo-nav-right">'
+    '<a class="aeo-btn aeo-btn--primary aeo-nav-book" href="/book">Book a Call</a>'
+    '<button type="button" class="aeo-nav-toggle" aria-expanded="false" '
+    'aria-controls="aeo-nav-drawer" aria-label="Open menu">'
+    '<span class="aeo-nav-toggle-bars" aria-hidden="true"></span></button>'
+    "</div>"
+    '<div class="aeo-nav-drawer" id="aeo-nav-drawer" hidden>'
+    '<a href="/">Home</a><a href="/pricing">Pricing</a>'
+    '<a href="/free-audit">Free audit</a>'
+    '<a class="aeo-btn aeo-btn--primary" href="/book">Book a Call</a>'
+    "</div></div></nav>"
+)
+
+# Critical first-paint CSS so AL nav is styled before chrome.frag loads at </body>.
+FIRST_PAINT_CSS = """<style id="aeo-first-paint">
+.site-banner,[data-aeo-legacy="1"],[data-aeo-legacy-nav="1"]{display:none!important;visibility:hidden!important;pointer-events:none!important;height:0!important;max-height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;border:0!important}
+/* Keep Attio product chrome in the hero from painting before the AL chat mounts. */
+[data-home-hero="attio-window-shell"],
+[data-home-hero="attio-window"],
+[data-home-hero="desktop-window"]{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
+.aeo-stage,.aeo-window{opacity:1!important;visibility:visible!important}
+.sticky.top-0:has(>header){background-color:#fff}
+header{background-color:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+header > [class*="backdrop-blur"]{display:none!important}
+header nav[data-aeo="1"]{display:block;position:relative;width:100%;box-sizing:border-box;padding-top:8px;padding-bottom:7px}
+@media (min-width:1024px){
+  header nav[data-aeo="1"]{padding-top:16px;padding-bottom:15px}
+}
+.aeo-nav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;width:100%;font-family:var(--font-inter),"Inter",system-ui,sans-serif;font-size:15px;font-weight:500}
+.aeo-nav-brand{display:inline-flex;align-items:center;justify-self:start;text-decoration:none;padding:4px 2px;min-width:0}
+.aeo-nav-brand .aeo-logo{display:block;height:22px;width:auto;max-width:min(204px,42vw)}
+.aeo-nav-links{position:relative;display:flex;align-items:center;gap:2px;justify-self:center}
+.aeo-nav-links a{color:#2e3238;text-decoration:none;padding:9px 12px;border-radius:10px;white-space:nowrap}
+.aeo-nav-hl{display:none}
+.aeo-nav-right{justify-self:end;display:flex;align-items:center;gap:8px;min-width:max-content}
+.aeo-btn{display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 22px;border-radius:12px;font-size:14.5px;font-weight:600;text-decoration:none;border:1px solid transparent;box-sizing:border-box}
+.aeo-btn--primary,.aeo-nav-book{background:#141416;color:#fff;border-color:#141416}
+.aeo-nav-toggle{display:none;align-items:center;justify-content:center;width:40px;height:40px;padding:0;border:1px solid rgba(28,29,31,.12);border-radius:10px;background:#fff;color:#1c1d1f;cursor:pointer}
+.aeo-nav-toggle-bars,.aeo-nav-toggle-bars::before,.aeo-nav-toggle-bars::after{display:block;width:16px;height:1.5px;background:currentColor;border-radius:1px;position:relative}
+.aeo-nav-toggle-bars::before,.aeo-nav-toggle-bars::after{content:"";position:absolute;left:0}
+.aeo-nav-toggle-bars::before{top:-5px}.aeo-nav-toggle-bars::after{top:5px}
+.aeo-nav-drawer{display:none}
+#aeo-platform{display:block}
+@media (max-width:1023px){
+  .aeo-nav{grid-template-columns:minmax(0,1fr) auto;gap:10px}
+  .aeo-nav-links{display:none}
+  .aeo-nav-right .aeo-nav-book{display:none}
+  .aeo-nav-toggle{display:inline-flex}
+  .aeo-nav-brand .aeo-logo{height:20px;max-width:min(180px,58vw)}
+}
+</style>"""
+
+# Obsolete Attio marketing sections removed at build time (not CSS-hidden).
+ATTIO_SECTION_MARKERS = (
+    "The intelligent system that never sleeps",
+    "Live from day one",
+    "Universal Context",
+    "All of the signals",
+    "SDK. API.",
+    "Run at any scale",
+    "Trusted by 30,000+",
+    "Better as you grow",
+    "Margaret Shen",
+    "next generation of CRM",
+    "Head of Business Operations",
+    "Modal customer story",
+)
+
+# Scraped Attio hero product chrome. AL chat mounts into the stage hosts instead.
+ATTIO_HERO_ATTRS = (
+    'data-home-hero="attio-window-shell"',
+    'data-home-hero="attio-window"',
+    'data-home-hero="desktop-window"',
+)
+
+
+def _find_balanced_region_at(html: str, tag: str, start: int) -> tuple[int, int] | None:
+    """Return (start, end) for the balanced tag opening at html[start:]."""
+    open_re = re.compile(rf"<{tag}\b[^>]*>", re.I)
+    either_re = re.compile(rf"</?{tag}\b[^>]*>", re.I)
+    m = open_re.match(html, start)
+    if not m:
+        m = open_re.search(html, start)
+        if not m or m.start() != start:
+            return None
+    depth = 1
+    p = m.end()
+    while depth:
+        n = either_re.search(html, p)
+        if not n:
+            return None
+        tok = n.group(0)
+        if tok.lower().startswith("</"):
+            depth -= 1
+        else:
+            depth += 1
+        p = n.end()
+    return (m.start(), p)
+
+
+def _find_balanced_regions(html: str, tag: str) -> list[tuple[int, int]]:
+    """Return (start, end) slices for every balanced <tag>...</tag> in html."""
+    out: list[tuple[int, int]] = []
+    pos = 0
+    open_re = re.compile(rf"<{tag}\b[^>]*>", re.I)
+    while True:
+        m = open_re.search(html, pos)
+        if not m:
+            break
+        region = _find_balanced_region_at(html, tag, m.start())
+        if region:
+            out.append(region)
+            pos = region[1]
+        else:
+            pos = m.end()
+    return out
+
+
+def _hide_element_open_tag(open_tag: str) -> str:
+    """Add hide attrs to an opening tag without breaking existing attributes."""
+    if 'data-aeo-legacy="' in open_tag or "data-aeo-legacy='" in open_tag:
+        return open_tag
+    extra = ' data-aeo-legacy="1" aria-hidden="true" hidden style="display:none!important"'
+    if open_tag.endswith("/>"):
+        return open_tag[:-2] + extra + "/>"
+    if open_tag.endswith(">"):
+        return open_tag[:-1] + extra + ">"
+    return open_tag + extra
+
+
+def extract_js_string_concat(expr: str) -> str:
+    """Evaluate a JS string-concatenation expression made of quoted literals."""
+    parts = re.findall(r"'((?:\\.|[^'\\])*)'|\"((?:\\.|[^\"\\])*)\"", expr)
+    out: list[str] = []
+    for a, b in parts:
+        raw = a if a else b
+        out.append(bytes(raw, "utf-8").decode("unicode_escape"))
+    return "".join(out)
+
+
+def extract_platform_shell_html(platform_frag: str) -> str:
+    m = re.search(
+        r"var PLATFORM_HTML\s*=\s*([\s\S]*?);\s*/\*\s*=+\s*viz 1",
+        platform_frag,
+    )
+    if not m:
+        raise RuntimeError("PLATFORM_HTML not found in platform.frag")
+    return extract_js_string_concat(m.group(1))
+
+
+def _delete_balanced_at(html: str, tag: str, start: int) -> str:
+    region = _find_balanced_region_at(html, tag, start)
+    if not region:
+        return html
+    a, b = region
+    return html[:a] + html[b:]
+
+
+def _delete_attr_hosts(html: str, attr_substr: str, tag: str = "div") -> str:
+    """Delete every balanced <tag> whose opening tag contains attr_substr."""
+    guard = 0
+    while guard < 40:
+        guard += 1
+        m = re.search(
+            rf"<{tag}\b[^>]*{re.escape(attr_substr)}[^>]*>",
+            html,
+            flags=re.I,
+        )
+        if not m:
+            break
+        html = _delete_balanced_at(html, tag, m.start())
+    return html
+
+
+def _delete_ancestor_containing(html: str, marker: str, tag: str) -> str:
+    """Delete the nearest balanced <tag> ancestor that contains marker text."""
+    idx = html.find(marker)
+    if idx < 0:
+        return html
+    open_re = re.compile(rf"<{tag}\b[^>]*>", re.I)
+    starts = [m.start() for m in open_re.finditer(html, 0, idx + 1)]
+    for start in reversed(starts):
+        region = _find_balanced_region_at(html, tag, start)
+        if not region:
+            continue
+        a, b = region
+        if a <= idx < b:
+            return html[:a] + html[b:]
+    return html
+
+
+def apply_first_paint_shell(html: str, page_key: str, platform_html: str | None = None) -> str:
+    """Ensure the delivered HTML is Answered Labs before JS runs.
+
+    Replaces Attio header nav at build time, deletes obsolete Attio marketing
+    sections from the output HTML, and (on home) injects #aeo-platform.
+    """
+    if "id=\"aeo-first-paint\"" not in html and "id='aeo-first-paint'" not in html:
+        if re.search(r"<head\b[^>]*>", html, flags=re.I):
+            html = re.sub(
+                r"(<head\b[^>]*>)",
+                lambda m: m.group(1) + "\n" + FIRST_PAINT_CSS + "\n",
+                html,
+                count=1,
+                flags=re.I,
+            )
+
+    html = re.sub(
+        r'aria-label=(["\'])Attio homepage\1',
+        r'aria-label=\1Answered Labs home\1',
+        html,
+        flags=re.I,
+    )
+
+    # Delete Attio promo banner(s) entirely.
+    banner_open = re.search(
+        r'<div\b[^>]*class="[^"]*\bsite-banner\b[^"]*"[^>]*>',
+        html,
+        flags=re.I,
+    )
+    if banner_open:
+        html = _delete_balanced_at(html, "div", banner_open.start())
+
+    headers = _find_balanced_regions(html, "header")
+    if headers:
+        h0, h1 = headers[0]
+        header = html[h0:h1]
+        navs = _find_balanced_regions(header, "nav")
+        if navs:
+            pieces: list[str] = []
+            cursor = 0
+            for i, (ns, ne) in enumerate(navs):
+                pieces.append(header[cursor:ns])
+                if i == 0 and 'data-aeo="1"' not in header[ns:ne]:
+                    pieces.append(CRAWLABLE_NAV)
+                elif i == 0:
+                    pieces.append(header[ns:ne])
+                else:
+                    # Drop secondary Attio nav trees completely.
+                    pass
+                cursor = ne
+            pieces.append(header[cursor:])
+            html = html[:h0] + "".join(pieces) + html[h1:]
+
+    # Delete Attio customer-logo wall (homepage build already drops one; subpages need this).
+    logo_wall = re.search(
+        r'<section\b[^>]*class="[^"]*\bborder-subtle-stroke\b[^"]*\bbg-secondary-background\b[^"]*"[^>]*>',
+        html,
+        flags=re.I,
+    )
+    if logo_wall and "aeo-" not in logo_wall.group(0):
+        chunk_probe = html[logo_wall.start() : logo_wall.start() + 2500]
+        if "Modal customer story" in chunk_probe or "customers/modal" in chunk_probe or 'aria-label="Modal"' in chunk_probe:
+            html = _delete_balanced_at(html, "section", logo_wall.start())
+
+    # Delete Attio "GTM lessons / Elena Verna" hero promo chips (desktop + mobile).
+    for _ in range(8):
+        if "Elena Verna" not in html:
+            break
+        before = html
+        html = _delete_ancestor_containing(html, "Elena Verna", "a")
+        if html == before:
+            html = _delete_ancestor_containing(html, "Elena Verna", "div")
+        if html == before:
+            break
+    html = re.sub(
+        r'<div[^>]*>\s*<div data-visual-test="blackout">\s*</div>\s*</div>',
+        "",
+        html,
+        flags=re.I,
+    )
+
+    # Delete obsolete Attio marketing sections from the final HTML.
+    # Inject AL platform before deleting the Attio platform section on home.
+    for marker in ATTIO_SECTION_MARKERS:
+        if marker not in html:
+            continue
+        sections = _find_balanced_regions(html, "section")
+        for s0, s1 in sections:
+            chunk = html[s0:s1]
+            if marker not in chunk:
+                continue
+            if re.search(r"\bid=[\"']aeo-", chunk[:240], flags=re.I):
+                continue
+            if re.search(r"\bclass=[\"'][^\"']*\baeo-", chunk[:240], flags=re.I):
+                continue
+            replacement = ""
+            has_platform_el = re.search(
+                r"<section\b[^>]*\bid=[\"']aeo-platform[\"']",
+                html,
+                flags=re.I,
+            )
+            if (
+                page_key == "home"
+                and platform_html
+                and marker == "The intelligent system that never sleeps"
+                and not has_platform_el
+            ):
+                replacement = (
+                    '<section class="aeo-plat" id="aeo-platform">'
+                    + platform_html
+                    + "</section>"
+                )
+            html = html[:s0] + replacement + html[s1:]
+            break
+
+    # Remove any leftover empty legacy shells from prior builds / passes.
+    html = re.sub(
+        r"<section\b[^>]*(?:data-aeo-legacy|data-aeo-legacy-nav)=[\"'][^\"']*[\"'][^>]*>[\s\S]*?</section>",
+        "",
+        html,
+        flags=re.I,
+    )
+    html = re.sub(
+        r"<nav\b[^>]*data-aeo-legacy-nav=[\"'][^\"']*[\"'][^>]*>[\s\S]*?</nav>",
+        "",
+        html,
+        flags=re.I,
+    )
+    html = re.sub(
+        r"<div\b[^>]*data-aeo-legacy=[\"'][^\"']*[\"'][^>]*>[\s\S]*?</div>",
+        "",
+        html,
+        flags=re.I,
+    )
+
+    # Delete scraped Attio product chrome inside the hero (AL chat mounts later).
+    for attr in ATTIO_HERO_ATTRS:
+        html = _delete_attr_hosts(html, attr, tag="div")
+
+    # Neutralize leftover Attio marketing phrases outside script/style payloads.
+    html = re.sub(
+        r"Subscribe to Attio product updates and newsletters with a work email address",
+        "Subscribe to Answered Labs updates with a work email address",
+        html,
+        flags=re.I,
+    )
+
+    def _scrub_dom_attio(chunk: str) -> str:
+        if chunk.lower().startswith("<script") or chunk.lower().startswith("<style"):
+            return chunk
+        return re.sub(r"\bAttio\b", "Answered Labs", chunk)
+
+    html = "".join(
+        _scrub_dom_attio(part)
+        for part in re.split(r"(?i)((?:<script\b[^>]*>[\s\S]*?</script>)|(?:<style\b[^>]*>[\s\S]*?</style>))", html)
+    )
+
+    return html
+
+
 def apply_body_seo_cleanup(html: str) -> str:
     html = scrub_attio_external_links(html)
     html = neutralize_attio_shell_copy(html)

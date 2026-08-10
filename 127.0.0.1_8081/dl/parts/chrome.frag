@@ -151,7 +151,9 @@ html{scroll-padding-top:88px}
 
 /* ---- header: turns to glass once you leave the hero ---- */
 header{transition:background-color .35s var(--aeo-e),box-shadow .35s var(--aeo-e),backdrop-filter .35s var(--aeo-e)}
-header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-webkit-backdrop-filter:saturate(180%) blur(16px);backdrop-filter:saturate(180%) blur(16px);box-shadow:0 1px 0 rgba(16,17,20,.06),0 10px 30px -24px rgba(16,17,20,.4)}
+/* Glass-on-scroll disabled: translucent + backdrop-filter jitters on iOS Safari.
+   Opaque white + hairline rule only (see header rules below). */
+header[data-aeo-scrolled="1"]{background-color:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:0 1px 0 rgba(16,17,20,.06)}
 
 /* ---- nav ----
    A true 3-column grid, not flex space-between: the two outer columns
@@ -163,12 +165,6 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
 .aeo-nav-brand{display:inline-flex;align-items:center;justify-self:start;text-decoration:none;padding:4px 2px}
 .aeo-nav-brand .aeo-logo{display:block;height:22px;width:auto;max-width:min(204px,42vw);transition:opacity .2s var(--aeo-e)}
 .aeo-nav-brand:hover .aeo-logo{opacity:.72}
-@media (max-width:760px){
-  .aeo-nav-brand .aeo-logo{height:20px;max-width:min(168px,38vw)}
-}
-@media (max-width:420px){
-  .aeo-nav-brand .aeo-logo{height:18px;max-width:min(148px,36vw)}
-}
 .aeo-nav-links{position:relative;display:flex;align-items:center;gap:2px;justify-self:center}
 /* font size/weight, colour, radius and hover/active tints are lifted
    verbatim from Attio's own nav (.button-ghost): 15px/500, #2e3238 at
@@ -188,7 +184,7 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
    before it shrinks any sibling that doesn't clip its own overflow,
    which is what was squeezing the button's label into two lines on
    narrower widths */
-.aeo-nav-right{justify-self:end;min-width:max-content}
+.aeo-nav-right{justify-self:end;display:flex;align-items:center;gap:8px;min-width:max-content}
 /* identical box model to "Get your free audit" (.aeo-btn / Attio's own
    button-primary re-skin): 44px tall, 0 22px, 12px corners, 14.5px — the
    nav CTA and the hero CTA read as literally the same button. */
@@ -212,18 +208,132 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
   box-shadow:0 1px 2px rgba(16,17,20,.18),0 14px 30px -10px rgba(16,17,20,.44);
 }
 .aeo-nav-book::after{content:none;display:none}
-@media (max-width:760px){
-  .aeo-nav{gap:8px;grid-template-columns:auto 1fr auto}
-  .aeo-nav-links{gap:0;justify-self:end}
-  .aeo-nav-links a{padding:7px 9px;font-size:13px}
-  .aeo-nav-links a:first-child{display:none}
-  .aeo-nav-book{height:38px;padding:0 16px;font-size:13px}
-}
 .aeo-nav-book-short{display:none}
+/* Mobile/tablet menu: desktop nav needs ~1024px to clear the wordmark.
+   Below that, use the hamburger. Wide desktop stays unchanged. */
+.aeo-nav-toggle{
+  display:none;align-items:center;justify-content:center;
+  width:40px;height:40px;padding:0;border:1px solid rgba(28,29,31,.12);
+  border-radius:10px;background:#fff;color:#1c1d1f;cursor:pointer;
+  box-shadow:0 1px 2px rgba(16,17,20,.06);
+}
+.aeo-nav-toggle:focus-visible{outline:none;box-shadow:var(--aeo-ring)}
+.aeo-nav-toggle-bars,.aeo-nav-toggle-bars::before,.aeo-nav-toggle-bars::after{
+  display:block;width:16px;height:1.5px;background:currentColor;border-radius:1px;
+  position:relative;transition:transform .2s var(--aeo-e),opacity .2s var(--aeo-e);
+}
+.aeo-nav-toggle-bars::before,.aeo-nav-toggle-bars::after{content:"";position:absolute;left:0}
+.aeo-nav-toggle-bars::before{top:-5px}
+.aeo-nav-toggle-bars::after{top:5px}
+.aeo-nav-toggle[aria-expanded="true"] .aeo-nav-toggle-bars{background:transparent}
+.aeo-nav-toggle[aria-expanded="true"] .aeo-nav-toggle-bars::before{top:0;transform:rotate(45deg)}
+.aeo-nav-toggle[aria-expanded="true"] .aeo-nav-toggle-bars::after{top:0;transform:rotate(-45deg)}
+.aeo-nav-drawer{
+  display:none;position:absolute;left:12px;right:12px;top:calc(100% + 8px);z-index:50;
+  padding:10px;border:1px solid rgba(28,29,31,.1);border-radius:14px;background:#fff;
+  box-shadow:0 1px 2px rgba(16,17,20,.06),0 18px 40px -20px rgba(16,17,20,.35);
+}
+.aeo-nav-drawer a{
+  display:block;padding:12px 14px;border-radius:10px;color:#2e3238;text-decoration:none;
+  font-size:15px;font-weight:500;letter-spacing:-.006em;
+}
+.aeo-nav-drawer a:hover{background:#f3f4f6;color:#232529}
+.aeo-nav-drawer .aeo-btn{
+  display:flex;align-items:center;justify-content:center;margin-top:6px;
+  height:44px;padding:0 18px;color:#fff;
+}
+.aeo-nav-drawer .aeo-btn:hover{color:#fff}
+/* iOS Safari: keep site chrome sticky in the root scroller with an opaque
+   paint layer. Translucent / backdrop-filter glass causes navbar vibration
+   and lets page content show through the elastic-overscroll gap above sticky.
+   Attio's page shell also uses overflow-x-clip; on WebKit that pairs into a
+   non-visible block-axis overflow and can pull sticky out of the root
+   scrollport — clip horizontal overflow on the root instead.
+
+   Do NOT paint opaque white on html/body: #aeo-sqfield is position:fixed
+   with z-index:-1, and an opaque root background buries that canvas. */
+html,body{overflow-x:clip}
+body > div.flex.min-h-screen.max-w-screen.flex-col.justify-between{
+  overflow-x:visible!important;
+  overflow-y:visible!important;
+}
+.sticky.top-0:has(>header){
+  position:sticky;
+  top:0;
+  z-index:var(--site-header-z-index,92);
+  background-color:#fff;
+  -webkit-backdrop-filter:none;
+  backdrop-filter:none;
+  isolation:isolate;
+}
+.sticky.top-0:has(>header)::before{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:100%;
+  height:100vh;
+  width:100%;
+  max-width:100%;
+  background-color:#fff;
+  pointer-events:none;
+  z-index:0;
+}
+header{
+  position:relative;
+  z-index:1;
+  background-color:#fff!important;
+  background-image:none!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+  opacity:1!important;
+}
+header[data-aeo-scrolled="1"]{
+  background-color:#fff!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+  box-shadow:0 1px 0 rgba(16,17,20,.06);
+}
+header > .absolute.inset-0.-z-1,
+header > [class*="backdrop-blur"]{
+  display:none!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+/* Restore Attio nav vertical padding lost when the AL nav replaced the
+   original <nav class="pt-2 pb-[7px] lg:pt-4 lg:pb-[15px]">. Without this
+   the bar collapses to the 44px CTA height and Book a Call looks flush/
+   clipped against the header edges. */
+header nav[data-aeo="1"]{
+  position:relative;
+  overflow:visible;
+  display:block;
+  width:100%;
+  box-sizing:border-box;
+  padding-top:8px;
+  padding-bottom:7px;
+}
+@media (min-width:1024px){
+  header nav[data-aeo="1"]{
+    padding-top:16px;
+    padding-bottom:15px;
+  }
+}
+html.aeo-nav-open,body.aeo-nav-open{overflow:hidden;touch-action:none}
+@media (max-width:1023px){
+  .aeo-nav{gap:10px;grid-template-columns:minmax(0,1fr) auto;align-items:center}
+  .aeo-nav-links{display:none}
+  .aeo-nav-right{display:flex;align-items:center;gap:8px;justify-self:end;min-width:0}
+  .aeo-nav-right .aeo-nav-book{display:none}
+  .aeo-nav-toggle{display:inline-flex}
+  .aeo-nav-drawer.is-open{display:block}
+  .aeo-nav-brand{min-width:0}
+  .aeo-nav-brand .aeo-logo{height:20px;max-width:min(180px,58vw)}
+}
 @media (max-width:420px){
-  .aeo-nav-book{padding:0 13px}
-  .aeo-nav-book-full{display:none}
-  .aeo-nav-book-short{display:inline}
+  .aeo-nav-brand .aeo-logo{height:18px;max-width:min(160px,56vw)}
 }
 /* ============================================================
    FOOTER — atmospheric dark close with noise + hairline seam.
@@ -354,17 +464,82 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
     // also the element that used to capture the wordmark, so it goes first.
     var banner=header.querySelector(".site-banner");
     if(banner&&banner.style.display!=="none")banner.style.display="none";
-    var nav=header.querySelector("nav");
+    var navs=header.querySelectorAll("nav");
+    var nav=null,i;
+    for(i=0;i<navs.length;i++){
+      if(navs[i].getAttribute("data-aeo")==="1"){nav=navs[i];break;}
+    }
+    if(!nav)nav=navs[0]||null;
+    for(i=0;i<navs.length;i++){
+      if(navs[i]!==nav){
+        navs[i].style.display="none";
+        navs[i].setAttribute("data-aeo-legacy-nav","1");
+        navs[i].setAttribute("aria-hidden","true");
+      }
+    }
     if(nav&&nav.getAttribute("data-aeo")!=="1"){
       nav.setAttribute("data-aeo","1");
       nav.innerHTML='<div class="aeo-nav">'+
         '<a class="aeo-nav-brand" href="/" aria-label="Answered Labs home"><img class="aeo-logo" src="/assets/answered-labs-website-logo-black.svg" alt="Answered Labs" width="204" height="22" decoding="async"></a>'+
         '<div class="aeo-nav-links"><span class="aeo-nav-hl" aria-hidden="true"></span><a href="/">Home</a><a href="/pricing">Pricing</a><a href="/free-audit">Free audit</a></div>'+
-        '<div class="aeo-nav-right"><a class="aeo-btn aeo-btn--primary aeo-nav-book" href="/book">'+
-          '<span class="aeo-nav-book-full">Book a Call</span><span class="aeo-nav-book-short" aria-hidden="true">Call</span>'+
-        '</a></div>'+
+        '<div class="aeo-nav-right">'+
+          '<a class="aeo-btn aeo-btn--primary aeo-nav-book" href="/book">Book a Call</a>'+
+          '<button type="button" class="aeo-nav-toggle" aria-expanded="false" aria-controls="aeo-nav-drawer" aria-label="Open menu">'+
+            '<span class="aeo-nav-toggle-bars" aria-hidden="true"></span>'+
+          '</button>'+
+        '</div>'+
+        '<div class="aeo-nav-drawer" id="aeo-nav-drawer" hidden>'+
+          '<a href="/">Home</a><a href="/pricing">Pricing</a><a href="/free-audit">Free audit</a>'+
+          '<a class="aeo-btn aeo-btn--primary" href="/book">Book a Call</a>'+
+        '</div>'+
       '</div>';
     }
+    if(nav)wireMobileNav(nav);
+  }
+  function wireMobileNav(nav){
+    if(!nav||nav.getAttribute("data-aeo-nav-wired")==="1")return;
+    var toggle=nav.querySelector(".aeo-nav-toggle");
+    var drawer=nav.querySelector(".aeo-nav-drawer");
+    if(!toggle||!drawer)return;
+    nav.setAttribute("data-aeo-nav-wired","1");
+    var lastFocus=null;
+    function setOpen(open){
+      drawer.classList.toggle("is-open",open);
+      if(open)drawer.removeAttribute("hidden");else drawer.setAttribute("hidden","");
+      toggle.setAttribute("aria-expanded",open?"true":"false");
+      toggle.setAttribute("aria-label",open?"Close menu":"Open menu");
+      document.documentElement.classList.toggle("aeo-nav-open",open);
+      document.body.classList.toggle("aeo-nav-open",open);
+      if(open){
+        lastFocus=document.activeElement;
+        var first=drawer.querySelector("a,button");
+        if(first)try{first.focus({preventScroll:true});}catch(e){}
+      }else if(lastFocus&&typeof lastFocus.focus==="function"){
+        try{lastFocus.focus({preventScroll:true});}catch(e){}
+        lastFocus=null;
+      }
+    }
+    function isOpen(){return drawer.classList.contains("is-open");}
+    toggle.addEventListener("click",function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      setOpen(!isOpen());
+    });
+    drawer.addEventListener("click",function(e){
+      var a=e.target&&e.target.closest?e.target.closest("a"):null;
+      if(a)setOpen(false);
+    });
+    document.addEventListener("click",function(e){
+      if(!isOpen())return;
+      if(nav.contains(e.target))return;
+      setOpen(false);
+    });
+    document.addEventListener("keydown",function(e){
+      if(e.key==="Escape"&&isOpen()){setOpen(false);toggle.focus();}
+    });
+    window.addEventListener("resize",function(){
+      if(window.matchMedia("(min-width:1024px)").matches&&isOpen())setOpen(false);
+    });
   }
   /* ---- nav: one highlight surface that travels between links on hover ---- */
   function wireNavHighlight(){
@@ -442,13 +617,9 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
     var h=document.querySelector("header");
     if(!h||h.getAttribute("data-aeo-hdr")==="1")return;
     h.setAttribute("data-aeo-hdr","1");
-    var last=null;
-    function upd(){
-      var on=(window.pageYOffset||document.documentElement.scrollTop||0)>28?"1":"0";
-      if(on!==last){last=on;h.setAttribute("data-aeo-scrolled",on);}
-    }
-    window.addEventListener("scroll",upd,{passive:true});
-    upd();
+    /* Opaque sticky chrome only. Do not toggle glass / backdrop-filter /
+       translucency from scrollY — that composites badly on iOS Safari. */
+    h.removeAttribute("data-aeo-scrolled");
   }
 
   /* ---- scroll reveal: shared observer, exposed for other frags ---- */
