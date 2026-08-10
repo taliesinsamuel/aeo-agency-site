@@ -133,6 +133,52 @@ html{scroll-padding-top:88px}
 .aeo-hero .button-ghost:hover{opacity:.68}
 .aeo-hero input[type="text"],.aeo-hero input[type="email"]{border-radius:var(--aeo-r-md)!important;transition:border-color .22s var(--aeo-e),box-shadow .22s var(--aeo-e)!important}
 .aeo-hero input[type="text"]:focus,.aeo-hero input[type="email"]:focus{outline:none!important;border-color:var(--aeo-accent)!important;box-shadow:var(--aeo-ring)!important}
+/* Mobile hero: same two CTAs as desktop. Hide Attio's email-capture form and
+   the ghost Book link beneath it; reveal the desktop Book / Free audit pair.
+   Attio wraps each CTA in unequal children (one w-full, one shrink) which
+   left-aligns Free audit while Book stays centered — force one centered column. */
+@media (max-width:767px){
+  .aeo-hero form[toolname="subscribe_newsletter"]{
+    display:none!important;visibility:hidden!important;pointer-events:none!important;
+    position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;
+    clip:rect(0,0,0,0)!important;margin:-1px!important;padding:0!important;border:0!important;
+  }
+  .aeo-hero a.button-primary.max-md\:hidden,
+  .aeo-hero a.button-outline.max-md\:hidden,
+  .aeo-hero .button-outline.max-md\:hidden{
+    display:inline-flex!important;
+  }
+  .aeo-hero a.button-ghost.md\:hidden,
+  .aeo-hero .button-ghost.md\:hidden{
+    display:none!important;
+  }
+  .aeo-hero .aeo-hero-ctas{
+    display:flex!important;
+    flex-direction:column!important;
+    flex-wrap:nowrap!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:10px!important;
+    width:100%!important;
+    max-width:100%!important;
+  }
+  .aeo-hero .aeo-hero-ctas > *{
+    display:flex!important;
+    justify-content:center!important;
+    align-items:stretch!important;
+    width:100%!important;
+    max-width:20rem!important;
+    box-sizing:border-box!important;
+  }
+  .aeo-hero .aeo-hero-ctas a.button-primary,
+  .aeo-hero .aeo-hero-ctas a.button-outline{
+    width:100%!important;
+    max-width:100%!important;
+    justify-content:center!important;
+    white-space:nowrap!important;
+    box-sizing:border-box!important;
+  }
+}
 
 /* ============================================================
    SCROLL REVEAL — opt-in via [data-aeo-rv]; --d carries stagger.
@@ -585,11 +631,65 @@ html.aeo-nav-open,body.aeo-nav-open{overflow:hidden;touch-action:none}
      with no working call to action at all. */
   var CTA_RE=/^\s*(book a call|get (your|my) free audit|start for free|talk to sales)\s*$/i;
   var CTA_BOOK_RE=/^\s*book a call\s*$/i;
+  function fixHeroMobileCtas(){
+    var hero=document.querySelector(".aeo-hero");
+    if(!hero||hero.getAttribute("data-aeo-hero-ctas")==="1")return;
+    hero.setAttribute("data-aeo-hero-ctas","1");
+    /* Disable Attio's mobile hero email form — visitors enter email on /free-audit. */
+    var forms=hero.querySelectorAll("form");
+    for(var i=0;i<forms.length;i++){
+      var fm=forms[i];
+      if(fm.id==="aeo-audit-form")continue;
+      if(!(fm.getAttribute("toolname")==="subscribe_newsletter"||
+           fm.querySelector('input[name="email"],input[type="email"],input[placeholder*="email" i]')))continue;
+      fm.setAttribute("data-aeo-hero-email-form","1");
+      fm.setAttribute("data-aeo-cta","skip");
+      if(fm.parentNode)fm.parentNode.removeChild(fm);
+    }
+    var nodes=hero.querySelectorAll("a,button");
+    for(var j=0;j<nodes.length;j++){
+      var el=nodes[j];
+      var t=(el.textContent||"").replace(/\s+/g," ").trim();
+      if(!CTA_RE.test(t))continue;
+      var cls=el.className||"";
+      /* Hide the mobile-only ghost Book link that sat under the email form. */
+      if(/\bbutton-ghost\b/.test(cls)&&/\bmd:hidden\b/.test(cls)&&CTA_BOOK_RE.test(t)){
+        el.setAttribute("data-aeo-hero-mobile-ghost","1");
+        el.setAttribute("hidden","");
+        el.setAttribute("aria-hidden","true");
+        el.style.display="none";
+        continue;
+      }
+      /* Reveal the desktop CTA pair (Book outline + Free audit primary). */
+      if(/\bmax-md:hidden\b/.test(cls)){
+        el.className=cls.replace(/\bmax-md:hidden\b/g,"").replace(/\s+/g," ").trim();
+        el.setAttribute("data-aeo-hero-cta","1");
+      }
+    }
+    /* Mark CTA rows for mobile column layout CSS. Do not reorder DOM —
+       desktop stays Book | Free audit; mobile scene is already Free audit then Book. */
+    var rows=hero.querySelectorAll('[class*="max-md:flex-col"]');
+    for(var r=0;r<rows.length;r++){
+      var row=rows[r];
+      var hasBook=false,hasAudit=false,c,kid,btn,label;
+      for(c=0;c<row.children.length;c++){
+        kid=row.children[c];
+        btn=kid.querySelector&&kid.querySelector("a.button-outline,.button-outline,a.button-primary,.button-primary");
+        if(!btn)continue;
+        label=(btn.textContent||"").replace(/\s+/g," ").trim();
+        if(CTA_BOOK_RE.test(label))hasBook=true;
+        if(/get (your|my) free audit/i.test(label))hasAudit=true;
+      }
+      if(hasBook&&hasAudit)row.classList.add("aeo-hero-ctas");
+    }
+  }
   function fixCtas(){
+    fixHeroMobileCtas();
     var btns=document.querySelectorAll("button");
     for(var i=0;i<btns.length;i++){
       var b=btns[i];
       if((b.getAttribute("type")||"")==="submit")continue;
+      if(b.getAttribute("data-aeo-hero-mobile-ghost")==="1")continue;
       var t=(b.textContent||"").replace(/\s+/g," ").trim();
       if(!CTA_RE.test(t))continue;
       var a=document.createElement("a");
@@ -599,10 +699,22 @@ html.aeo-nav-open,body.aeo-nav-open{overflow:hidden;touch-action:none}
       a.innerHTML=b.innerHTML;
       b.parentNode.replaceChild(a,b);
     }
+    /* Ensure CTA anchors (including Attio's desktop Free audit link) point correctly. */
+    var anchors=document.querySelectorAll("a");
+    for(var k=0;k<anchors.length;k++){
+      var link=anchors[k];
+      if(link.getAttribute("data-aeo-hero-mobile-ghost")==="1")continue;
+      var label=(link.textContent||"").replace(/\s+/g," ").trim();
+      if(!CTA_RE.test(label))continue;
+      link.setAttribute("href",CTA_BOOK_RE.test(label)?"/book":"/free-audit");
+      link.setAttribute("data-aeo-cta","1");
+    }
     var forms=document.querySelectorAll("form");
     for(var f=0;f<forms.length;f++){
       var fm=forms[f];
       if(fm.id==="aeo-audit-form")continue;
+      if(fm.getAttribute("data-aeo-hero-email-form")==="1")continue;
+      if(fm.getAttribute("data-aeo-cta")==="skip")continue;
       if(fm.getAttribute("data-aeo-cta"))continue;
       fm.setAttribute("data-aeo-cta","1");
       fm.addEventListener("submit",function(ev){
