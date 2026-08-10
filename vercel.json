@@ -1,6 +1,6 @@
 {
   "framework": null,
-  "buildCommand": "python3 -m pip install --disable-pip-version-check -r requirements.txt && npm run build",
+  "buildCommand": "npm run build",
   "outputDirectory": ".",
   "trailingSlash": false,
   "redirects": [
