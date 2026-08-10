@@ -107,7 +107,7 @@
 
     function boot(){
       if(!window.Calendly||typeof window.Calendly.initInlineWidget!=="function"){
-        if(loading)loading.textContent="Couldn\u2019t load the calendar. Please refresh or email hello@answered.agency.";
+        if(loading)loading.textContent="Couldn\u2019t load the calendar. Please refresh or email hello@answeredlabs.com.";
         return;
       }
       if(loading)loading.hidden=true;

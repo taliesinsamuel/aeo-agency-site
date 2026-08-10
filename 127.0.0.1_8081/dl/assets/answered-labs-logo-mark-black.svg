@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 82 82" width="82" height="82" role="img"
+      aria-label="Answered Labs logo mark">
+      
+    <g transform="translate(0 0) scale(1)">
+      <rect x="20" y="7" width="25" height="66" rx="12.5"
+            transform="rotate(29 32.5 40)" fill="#1c1d1f"/>
+      <circle cx="62" cy="59" r="13" fill="#266df0"/>
+    </g>
+    
+    </svg>

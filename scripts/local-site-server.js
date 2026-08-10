@@ -42,10 +42,17 @@ const REWRITES = [
   ["/contact.html", "/127.0.0.1_8081/dl/contact.html"],
   ["/pricing.html", "/127.0.0.1_8081/dl/pricing.html"],
   ["/book.html", "/127.0.0.1_8081/dl/book.html"],
+  ["/privacy.html", "/127.0.0.1_8081/dl/privacy.html"],
+  ["/terms.html", "/127.0.0.1_8081/dl/terms.html"],
   ["/contact", "/127.0.0.1_8081/dl/contact.html"],
   ["/pricing", "/127.0.0.1_8081/dl/pricing.html"],
   ["/book", "/127.0.0.1_8081/dl/book.html"],
+  ["/privacy", "/127.0.0.1_8081/dl/privacy.html"],
+  ["/terms", "/127.0.0.1_8081/dl/terms.html"],
 ];
+
+const NOT_FOUND = path.join(ROOT, "404.html");
+const NOT_FOUND_FALLBACK = path.join(ROOT, "127.0.0.1_8081", "dl", "404.html");
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -80,11 +87,28 @@ function safeJoin(root, urlPath) {
   return full;
 }
 
+function sendNotFound(res) {
+  const target = fs.existsSync(NOT_FOUND)
+    ? NOT_FOUND
+    : fs.existsSync(NOT_FOUND_FALLBACK)
+      ? NOT_FOUND_FALLBACK
+      : null;
+  if (!target) {
+    res.statusCode = 404;
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.end("Not found");
+    return;
+  }
+  res.statusCode = 404;
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
+  res.setHeader("X-Robots-Tag", "noindex, nofollow");
+  fs.createReadStream(target).pipe(res);
+}
+
 function sendFile(res, filePath) {
   fs.stat(filePath, (err, st) => {
     if (err) {
-      res.statusCode = 404;
-      res.end("Not found");
+      sendNotFound(res);
       return;
     }
     let target = filePath;
@@ -96,8 +120,7 @@ function sendFile(res, filePath) {
         const html = entries.find((e) => e.endsWith(".html") && e.startsWith("ua="));
         if (html) target = path.join(filePath, html);
         else {
-          res.statusCode = 404;
-          res.end("Not found");
+          sendNotFound(res);
           return;
         }
       }
@@ -127,8 +150,17 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, "127.0.0.1", () => {
   console.log("Serving http://127.0.0.1:" + PORT + "/ (static + /api/free-audit)");
-  console.log(
-    "HUBSPOT_ACCESS_TOKEN:",
-    process.env.HUBSPOT_ACCESS_TOKEN ? "set" : "MISSING — add to .env for live CRM tests"
-  );
+  const token =
+    (process.env.HUBSPOT_ACCESS_TOKEN && process.env.HUBSPOT_ACCESS_TOKEN.trim()) ||
+    (process.env.HUBSPOT_PRIVATE_APP_TOKEN && process.env.HUBSPOT_PRIVATE_APP_TOKEN.trim()) ||
+    "";
+  if (token) {
+    console.log("HUBSPOT_ACCESS_TOKEN: set");
+  } else {
+    console.warn(
+      "HUBSPOT_ACCESS_TOKEN: MISSING\n" +
+        "  Free Audit submissions will return 503 until you copy .env.example → .env\n" +
+        "  and set HUBSPOT_ACCESS_TOKEN (HubSpot private app token)."
+    );
+  }
 });

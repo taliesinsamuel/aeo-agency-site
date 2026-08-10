@@ -7,6 +7,7 @@
     "build": "cd 127.0.0.1_8081/dl && python3 build_hero.py",
     "serve": "./serve.sh",
     "test:api": "node scripts/test-free-audit.js",
+    "test:hubspot": "node scripts/live-hubspot-e2e.js",
     "dev": "node scripts/local-site-server.js"
   },
   "engines": {

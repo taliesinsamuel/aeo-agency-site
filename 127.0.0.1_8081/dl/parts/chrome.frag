@@ -161,8 +161,14 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
    leftover flex space happened to be even. */
 .aeo-nav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;width:100%;font-size:15px;font-weight:500}
 .aeo-nav-brand{display:inline-flex;align-items:center;justify-self:start;text-decoration:none;padding:4px 2px}
-.aeo-nav-brand .aeo-brand{transition:opacity .2s var(--aeo-e)}
-.aeo-nav-brand:hover .aeo-brand{opacity:.72}
+.aeo-nav-brand .aeo-logo{display:block;height:22px;width:auto;max-width:min(204px,42vw);transition:opacity .2s var(--aeo-e)}
+.aeo-nav-brand:hover .aeo-logo{opacity:.72}
+@media (max-width:760px){
+  .aeo-nav-brand .aeo-logo{height:20px;max-width:min(168px,38vw)}
+}
+@media (max-width:420px){
+  .aeo-nav-brand .aeo-logo{height:18px;max-width:min(148px,36vw)}
+}
 .aeo-nav-links{position:relative;display:flex;align-items:center;gap:2px;justify-self:center}
 /* font size/weight, colour, radius and hover/active tints are lifted
    verbatim from Attio's own nav (.button-ghost): 15px/500, #2e3238 at
@@ -219,9 +225,6 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
   .aeo-nav-book-full{display:none}
   .aeo-nav-book-short{display:inline}
 }
-.aeo-brand{font-family:"Inter Display",Inter,sans-serif;font-weight:700;font-size:19px;letter-spacing:-.025em;color:var(--aeo-ink);white-space:nowrap}
-.aeo-brand i{font-style:normal;color:var(--aeo-accent);text-shadow:0 0 12px rgba(38,109,240,.45)}
-
 /* ============================================================
    FOOTER — atmospheric dark close with noise + hairline seam.
    ============================================================ */
@@ -234,8 +237,8 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
 .aeo-foot-inner{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:64px 24px 36px}
 .aeo-foot-top{display:flex;justify-content:space-between;gap:48px;flex-wrap:wrap;padding-bottom:44px;border-bottom:1px solid rgba(255,255,255,.08)}
 .aeo-foot-brand{max-width:320px}
-.aeo-foot-brand .aeo-brand{color:#fff;font-size:22px}
-.aeo-foot-brand .aeo-brand i{color:#6f9dfa}
+.aeo-foot-brand>a{display:inline-flex;text-decoration:none}
+.aeo-foot-brand .aeo-logo{display:block;height:26px;width:auto;max-width:100%}
 .aeo-foot-brand p{margin:12px 0 0;font-size:14px;line-height:1.58;color:#9aa2af;font-weight:500}
 .aeo-foot-cols{display:flex;gap:clamp(36px,6vw,96px);flex-wrap:wrap}
 .aeo-foot-col h4{margin:0 0 14px;font-size:12.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#8d95a3}
@@ -293,7 +296,7 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
         return data;
       });
     }).then(function(data){cb(null,data);})
-     .catch(function(err){console.warn("[Answered] Free Audit submit failed:",err&&err.message?err.message:err);cb(err||new Error("submit_failed"),null);});
+     .catch(function(err){console.warn("[Answered Labs] Free Audit submit failed:",err&&err.message?err.message:err);cb(err||new Error("submit_failed"),null);});
   };
 
   /* Load Calendly widget.js once (booking/audit pages only call this). */
@@ -329,7 +332,7 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
       var a=as[i],h=a.getAttribute("href")||"";
       if(!h)continue;
       if(/^(#|mailto:|tel:)/.test(h))continue;
-      if(/^(\.\/|pricing\.html|contact\.html|book\.html|index\.html)/.test(h))continue;
+      if(/^(\.\/|pricing\.html|contact\.html|book\.html|privacy\.html|terms\.html|index\.html)/.test(h))continue;
       if(h.indexOf("./#")===0)continue;
       // Never rewrite third-party integration destinations
       if(/calendly\.com|hubspot\.com|hs-scripts\.com|hsforms\.com|hubapi\.com/i.test(h))continue;
@@ -355,7 +358,7 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
     if(nav&&nav.getAttribute("data-aeo")!=="1"){
       nav.setAttribute("data-aeo","1");
       nav.innerHTML='<div class="aeo-nav">'+
-        '<a class="aeo-nav-brand" href="./"><span class="aeo-brand">Answered<i>.</i></span></a>'+
+        '<a class="aeo-nav-brand" href="./" aria-label="Answered Labs home"><img class="aeo-logo" src="/127.0.0.1_8081/dl/assets/answered-labs-website-logo-black.svg" alt="Answered Labs" width="204" height="22" decoding="async"></a>'+
         '<div class="aeo-nav-links"><span class="aeo-nav-hl" aria-hidden="true"></span><a href="./">Home</a><a href="pricing.html">Pricing</a><a href="contact.html">Free audit</a></div>'+
         '<div class="aeo-nav-right"><a class="aeo-btn aeo-btn--primary aeo-nav-book" href="book.html">'+
           '<span class="aeo-nav-book-full">Book a Call</span><span class="aeo-nav-book-short" aria-hidden="true">Call</span>'+
@@ -390,14 +393,14 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
     f.className="aeo-foot";
     f.innerHTML='<div class="aeo-foot-glow"></div><div class="aeo-foot-inner">'+
       '<div class="aeo-foot-top">'+
-        '<div class="aeo-foot-brand"><span class="aeo-brand">Answered<i>.</i></span><p>The answer engine optimization agency for local businesses. Be the business AI recommends.</p></div>'+
+        '<div class="aeo-foot-brand"><a href="./" aria-label="Answered Labs home"><img class="aeo-logo" src="/127.0.0.1_8081/dl/assets/answered-labs-website-logo-white.svg" alt="Answered Labs" width="242" height="26" decoding="async"></a><p>The answer engine optimization agency for local businesses. Be the business AI recommends.</p></div>'+
         '<div class="aeo-foot-cols">'+
           '<div class="aeo-foot-col"><h4>What we do</h4><a href="./#aeo-platform">AI visibility tracking</a><a href="./#aeo-platform">Site structure &amp; schema</a><a href="./#aeo-platform">Content AI quotes</a><a href="./#aeo-platform">Reviews &amp; citations</a></div>'+
-          '<div class="aeo-foot-col"><h4>Company</h4><a href="pricing.html">Pricing</a><a href="contact.html">Free audit</a><a href="book.html">Book a call</a></div>'+
-          '<div class="aeo-foot-col"><h4>Contact</h4><a href="mailto:hello@answered.agency">hello@answered.agency</a><a href="contact.html">Get in touch</a></div>'+
+          '<div class="aeo-foot-col"><h4>Company</h4><a href="pricing.html">Pricing</a><a href="contact.html">Free audit</a><a href="book.html">Book a call</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></div>'+
+          '<div class="aeo-foot-col"><h4>Contact</h4><a href="mailto:hello@answeredlabs.com">hello@answeredlabs.com</a><a href="contact.html">Get in touch</a></div>'+
         '</div>'+
       '</div>'+
-      '<div class="aeo-foot-bottom"><span>\u00a9 2026 Answered. All rights reserved.</span><span>Tracking ChatGPT \u00b7 Perplexity \u00b7 Gemini \u00b7 Claude</span></div>'+
+      '<div class="aeo-foot-bottom"><span>\u00a9 2026 Answered Labs. All rights reserved.</span><span><a href="privacy.html">Privacy</a> \u00b7 <a href="terms.html">Terms</a></span></div>'+
     '</div>';
   }
 

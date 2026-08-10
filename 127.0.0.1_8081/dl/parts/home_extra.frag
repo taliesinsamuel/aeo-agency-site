@@ -1,5 +1,5 @@
 <style id="aeo-home-style">
-/* ---- how it works: pixel materialisation entrance (scroll = trigger only) ---- */
+/* ---- how it works: left→right slide entrance (scroll = trigger only) ---- */
 .aeo-proc{overflow-x:clip;background:transparent}
 .aeo-proc .aeo-plat-bg{display:none}
 .aeo-proc .aeo-plat-inner{display:none}
@@ -20,7 +20,7 @@
   display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
   overflow:visible;box-sizing:border-box;
   padding:clamp(28px,4vh,56px) 0 clamp(36px,5vh,72px);
-  gap:clamp(18px,2.4vh,28px);
+  gap:clamp(69px,7.2vh,90px);
 }
 .aeo-proc-intro{
   position:relative;z-index:2;text-align:center;
@@ -33,21 +33,23 @@
 }
 .aeo-proc-intro.is-in{opacity:1;transform:none}
 .aeo-proc-intro .aeo-pill{margin-bottom:6px}
-.aeo-proc-intro .aeo-h2{margin:0;font-size:clamp(22px,2.6vw,34px)}
+.aeo-proc-intro .aeo-h2{margin:0;font-size:clamp(28px,3.3vw,44px)}
 .aeo-proc-intro .aeo-lead{margin:8px auto 0;max-width:46ch;font-size:clamp(14px,1.1vw,16px)}
+.aeo-proc-intro .aeo-h2:last-child{margin-bottom:0}
 
 .aeo-proc-stage{
   position:relative;z-index:1;width:100%;max-width:1440px;margin:0 auto;
   padding:0 18px;box-sizing:border-box;flex:0 1 auto;
 }
 
-/* three equal-width cards — final geometry fixed; reveal is clip-only */
+/* three equal-width cards — final geometry fixed; entrance is translateX only */
 .aeo-steps{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
   gap:clamp(16px,1.6vw,24px);align-items:stretch;
 }
 .aeo-step{
   --aeo-orb-size:clamp(132px,12vw,168px);
+  --aeo-slide-x:-88px;
   --aeo-base:#1c2a16;
   --aeo-glow:rgba(140,245,160,.26);
   --aeo-ink-hi:#d2f56a;
@@ -72,29 +74,24 @@
   overflow:hidden;isolation:isolate;
   opacity:1;
   transform:none;
+  will-change:transform,opacity;
 }
-/* Pending = layout reserved, nothing painted (no ghost outlines / borders). */
-.aeo-step.aeo-px-pending{
-  opacity:0;visibility:hidden;
-  border-color:transparent;
-  box-shadow:none;
+/* Ready above: reserved layout, shifted left + hidden until entrance. */
+.aeo-step.aeo-slide-ready{
+  opacity:0;
+  visibility:hidden;
+  transform:translate3d(var(--aeo-slide-x),0,0);
 }
-/* Live: mask defines stair-stepped silhouette — disable CSS radius so
-   hard background-grid squares form the corner, not a smooth clip. */
-.aeo-step.aeo-px-live{
-  opacity:1;visibility:visible;transform:none;
-  border-radius:0;
-  border-color:rgba(255,255,255,calc(.06 * var(--aeo-px-chrome,0)));
-  box-shadow:none;
-  /* Hard-edged alpha apertures only — never feather mask edges. */
-  -webkit-mask-mode:alpha;mask-mode:alpha;
+.aeo-step.aeo-slide-live{
+  visibility:visible;
+  transition:opacity .76s cubic-bezier(.22,1,.36,1),transform .76s cubic-bezier(.22,1,.36,1);
 }
-.aeo-step.aeo-px-done,
+.aeo-step.aeo-slide-done,
 .aeo-step.is-in{
-  opacity:1;visibility:visible;transform:none;
+  opacity:1;visibility:visible;
+  transform:translate3d(0,0,0);
   border-radius:26px;
   border-color:rgba(255,255,255,.06);
-  -webkit-mask-image:none!important;mask-image:none!important;
 }
 /* Card 1 — sampled from green/lime reference */
 .aeo-step--lime{
@@ -222,13 +219,17 @@
   .aeo-step h3{font-size:26px}
 }
 @media (max-width:860px){
-  .aeo-proc-pin{padding:8px 0 28px;gap:20px}
+  .aeo-proc-pin{padding:8px 0 28px;gap:66px}
   .aeo-proc-intro{padding:0 16px}
   .aeo-proc-stage{padding:0 16px}
   .aeo-steps{grid-template-columns:1fr;gap:16px}
   .aeo-step{
     --aeo-orb-size:120px;
+    --aeo-slide-x:-52px;
     min-height:440px;max-height:none;
+  }
+  .aeo-step.aeo-slide-live{
+    transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1);
   }
   .aeo-step-orb span{font-size:64px}
   .aeo-step-body{padding:28px 22px 28px}
@@ -237,12 +238,12 @@
 }
 @media (prefers-reduced-motion:reduce){
   .aeo-proc-intro,.aeo-step{transition:none!important;opacity:1;visibility:visible;transform:none;border-radius:26px}
-  .aeo-proc-intro.is-in,.aeo-step.is-in,.aeo-step.aeo-px-pending,.aeo-step.aeo-px-live,.aeo-step.aeo-px-done{
+  .aeo-proc-intro.is-in,.aeo-step.is-in,.aeo-step.aeo-slide-ready,.aeo-step.aeo-slide-live,.aeo-step.aeo-slide-done{
     opacity:1;visibility:visible;transform:none;border-radius:26px
   }
 }
 
-/* ---- stats band (dark) ---- */
+/* ---- stats band (content only; surface comes from .aeo-close) ---- */
 .aeo-stats{position:relative;background:linear-gradient(180deg,#101215,var(--aeo-night) 55%,#0c0d0f);overflow:hidden;font-family:var(--font-inter),"Inter",system-ui,sans-serif}
 .aeo-stats *{box-sizing:border-box}
 .aeo-stats::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(38,109,240,.5) 28%,rgba(140,110,245,.45) 62%,transparent);pointer-events:none;z-index:2}
@@ -259,9 +260,64 @@
 .aeo-stat-label{margin-top:13px;font-size:14.5px;line-height:1.5;letter-spacing:-.006em;color:#9aa2af;font-weight:500}
 @media (max-width:860px){.aeo-stats-inner{grid-template-columns:1fr;gap:36px}.aeo-stat+.aeo-stat{border-left:none;border-top:1px dashed rgba(255,255,255,.12);padding-top:32px}}
 
+/* ---- unified closing band: metrics + final CTA as one surface ---- */
+.aeo-close{
+  position:relative;
+  background:linear-gradient(180deg,#0d0f12 0%,#0b0c0f 48%,#0a0b0d 100%);
+  overflow:hidden;
+  isolation:isolate;
+}
+.aeo-close-glow{
+  position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:
+    /* Bottom-center bloom — strongest, feeds the seam + CTA */
+    radial-gradient(64% 80% at 50% 100%,rgba(38,109,240,.38),transparent 72%),
+    /* Mid column so the horizontal border sits inside the same atmosphere */
+    radial-gradient(54% 58% at 50% 48%,rgba(38,109,240,.22),transparent 74%),
+    /* Upper lift so metrics share the same vertical-line + glow language */
+    radial-gradient(50% 52% at 50% 14%,rgba(38,109,240,.16),transparent 72%),
+    radial-gradient(34% 42% at 14% -6%,rgba(140,110,245,.13),transparent 70%);
+  animation:aeo-final-breathe 13s ease-in-out infinite alternate;
+}
+.aeo-close-stripes{
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  background-image:repeating-linear-gradient(to right,rgba(255,255,255,.045) 0 1px,transparent 1px 8px);
+  /* Soft side falloff only — lines stay continuous through the center */
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 8%,#000 92%,transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0%,#000 8%,#000 92%,transparent 100%);
+}
+.aeo-close-noise{
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  background-image:var(--aeo-noise);opacity:.045;mix-blend-mode:overlay;
+}
+.aeo-close > svg{display:none!important}
+.aeo-close > .aeo-stats,
+.aeo-close > .aeo-final{position:relative;z-index:2;background:transparent!important;overflow:visible}
+.aeo-close > .aeo-stats::after,
+.aeo-close > .aeo-stats .aeo-stats-bg,
+.aeo-close > .aeo-final::after,
+.aeo-close > .aeo-final .aeo-final-glow{display:none!important}
+/* Drop Attio's container-clipped stripe wash + hard border-x rails */
+.aeo-close .aeo-final [style*="repeating-linear-gradient"],
+.aeo-close .aeo-final [style*="--cta-pattern-mask"]{display:none!important}
+.aeo-close .aeo-final .border-x{
+  border-left:none!important;
+  border-right:none!important;
+  border-left-width:0!important;
+  border-right-width:0!important;
+}
+.aeo-close .aeo-final.border-subtle-stroke,
+.aeo-close .aeo-final{
+  border-top:none!important;
+  border-top-width:0!important;
+  border-top-color:transparent!important;
+}
+/* Attio's absolute stripe wash wrapper (children already hidden) */
+.aeo-close .aeo-final > .pointer-events-none.absolute.inset-0{display:none!important}
+
 /* ---- closing CTA (Attio's markup, our surface) ---- */
 .aeo-final{position:relative;background:linear-gradient(180deg,#0d0f12,#0a0b0d)!important}
-.aeo-final::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;z-index:3;background:linear-gradient(90deg,transparent,rgba(38,109,240,.5) 28%,rgba(140,110,245,.45) 62%,transparent);pointer-events:none}
+.aeo-final::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;z-index:3;background:linear-gradient(90deg,transparent,rgba(38,109,240,.42) 22%,rgba(96,150,255,.62) 50%,rgba(140,110,245,.42) 72%,transparent);pointer-events:none}
 .aeo-final::after{content:"";position:absolute;inset:0;z-index:3;background-image:var(--aeo-noise);opacity:.05;mix-blend-mode:overlay;pointer-events:none}
 .aeo-final-glow{position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(46% 62% at 50% 112%,rgba(38,109,240,.32),transparent 68%),radial-gradient(34% 48% at 16% -14%,rgba(140,110,245,.20),transparent 70%);animation:aeo-final-breathe 13s ease-in-out infinite alternate}
 @keyframes aeo-final-breathe{to{opacity:.7}}
@@ -275,7 +331,7 @@
 
 @media (prefers-reduced-motion: reduce){
   .aeo-step,.aeo-stat{opacity:1;visibility:visible;transform:none;transition:none}
-  .aeo-final-glow{animation:none}
+  .aeo-final-glow,.aeo-close-glow{animation:none}
 }
 </style>
 <template id="aeo-home-tpl">
@@ -287,7 +343,6 @@
       <div class="aeo-proc-intro">
         <span class="aeo-pill aeo-pill-center">How it works</span>
         <h2 class="aeo-h2">From invisible to recommended in 90 days</h2>
-        <p class="aeo-lead">A simple monthly system. No jargon, no dashboards to learn. Just your name showing up more often.</p>
       </div>
       <div class="aeo-proc-stage">
         <div class="aeo-steps">
@@ -392,19 +447,44 @@
   }
   function dressFinalCta(){
     var main=document.querySelector("main");if(!main)return;
-    var kids=main.children;
-    for(var i=0;i<kids.length;i++){
+    if(document.querySelector("[data-aeo-close]"))return;
+    var final=null,kids=main.children,i;
+    for(i=0;i<kids.length;i++){
       var k=kids[i];
       if(k.tagName!=="SECTION")continue;
-      if(k.getAttribute("data-aeo-final"))continue;
       if((k.textContent||"").indexOf("Be the business AI recommends")===-1)continue;
-      k.setAttribute("data-aeo-final","1");
-      k.classList.add("aeo-final");
-      var glow=document.createElement("div");
-      glow.className="aeo-final-glow";
-      glow.setAttribute("aria-hidden","true");
-      k.insertBefore(glow,k.firstChild);
+      final=k;break;
     }
+    if(!final)return;
+    final.setAttribute("data-aeo-final","1");
+    final.classList.add("aeo-final");
+    var stats=document.getElementById("aeo-stats");
+    /* Stats mounts after the first hide pass — wait so both share one surface. */
+    if(!stats||!stats.parentNode)return;
+    var wrap=document.createElement("div");
+    wrap.className="aeo-close";
+    wrap.setAttribute("data-aeo-close","1");
+    var parent=stats.parentNode;
+    parent.insertBefore(wrap,stats);
+    var n=stats;
+    while(n){
+      var next=n.nextElementSibling;
+      wrap.appendChild(n);
+      if(n===final)break;
+      n=next;
+    }
+    var stripes=document.createElement("div");
+    stripes.className="aeo-close-stripes";
+    stripes.setAttribute("aria-hidden","true");
+    var glow=document.createElement("div");
+    glow.className="aeo-close-glow";
+    glow.setAttribute("aria-hidden","true");
+    var noise=document.createElement("div");
+    noise.className="aeo-close-noise";
+    noise.setAttribute("aria-hidden","true");
+    wrap.insertBefore(noise,wrap.firstChild);
+    wrap.insertBefore(stripes,wrap.firstChild);
+    wrap.insertBefore(glow,wrap.firstChild);
   }
   function cancelCount(node){
     if(node._aeoRaf){cancelAnimationFrame(node._aeoRaf);node._aeoRaf=null;}
@@ -422,286 +502,28 @@
     node._aeoRaf=requestAnimationFrame(step);
   }
   /*
-   * Background-grid resolve: reveal the REAL card through the SAME lattice
-   * as #aeo-sqfield (size 4px, pitch 8.5/9.2/10, centred). Sharp squares,
-   * gaps preserved until late expansion, then seamless handoff to DOM.
+   * How it works cards: left→right slide entrance.
+   * Scroll TRIGGERS only. Time owns the animation. No pixel masks.
    */
-  function aeoHash2(x,y,seed){
-    var n=Math.imul(x+Math.imul(seed,374761393),668265263)^Math.imul(y+Math.imul(seed,1274126177),374761393);
-    n=Math.imul(n^(n>>>13),1274126177);
-    return ((n>>>0))/4294967296;
-  }
-  function aeoValueNoise(x,y,seed){
-    var x0=Math.floor(x),y0=Math.floor(y);
-    var fx=x-x0,fy=y-y0;
-    var ux=fx*fx*(3-2*fx),uy=fy*fy*(3-2*fy);
-    var a=aeoHash2(x0,y0,seed),b=aeoHash2(x0+1,y0,seed);
-    var c=aeoHash2(x0,y0+1,seed),d=aeoHash2(x0+1,y0+1,seed);
-    return a+(b-a)*ux+(c-a)*uy+(a-b-c+d)*ux*uy;
-  }
-  /* 70% fine random + 30% tiny local noise — NO large low-freq blobs. */
-  function aeoFineThresh(gi,gj,seed){
-    return 0.72*aeoHash2(gi,gj,seed)+0.28*aeoValueNoise(gi/2.2,gj/2.2,seed+11);
-  }
-  function aeoSqGrid(){
-    var api=window.__aeoSqField;
-    if(api&&typeof api.get==="function"){
-      var g=api.get();
-      if(g&&g.ready)return g;
-    }
-    /* Fallback if field has not booted yet — same CFG numbers. */
-    var vw=window.innerWidth||1024;
-    var spacing=vw<768?10:vw<1024?9.2:8.5;
-    var cols=Math.ceil(vw/spacing)+2,rows=Math.ceil((window.innerHeight||800)/spacing)+2;
-    return {
-      size:4,
-      spacing:spacing,
-      gap:spacing-4,
-      offX:(vw-(cols-1)*spacing)/2,
-      offY:((window.innerHeight||800)-(rows-1)*spacing)/2,
-      cols:cols,
-      rows:rows,
-      ready:true
-    };
-  }
-  function aeoInRoundRect(x,y,w,h,r){
-    if(x<0||y<0||x>w||y>h)return false;
-    if(x>=r&&x<=w-r)return true;
-    if(y>=r&&y<=h-r)return true;
-    var cx=x<r?r:w-r,cy=y<r?r:h-r;
-    var dx=x-cx,dy=y-cy;
-    return dx*dx+dy*dy<=r*r;
-  }
-  /* Density over pixel phase t∈[0,1]. Absolute times assume START=450, DUR=3100. */
-  function aeoDensity(t){
-    if(t<=0)return 0;
-    if(t>=1)return 1;
-    /* Key targets (progress → density): match ~3.5s timeline. */
-    var keys=[
-      [0.00,0.00],[0.016,0.015],[0.145,0.08],[0.274,0.20],
-      [0.403,0.38],[0.532,0.58],[0.661,0.75],[0.774,0.88],
-      [0.871,0.96],[0.952,1.00],[1.00,1.00]
-    ];
-    var i;
-    for(i=1;i<keys.length;i++){
-      if(t<=keys[i][0]){
-        var t0=keys[i-1][0],t1=keys[i][0];
-        var d0=keys[i-1][1],d1=keys[i][1];
-        var u=(t-t0)/Math.max(1e-6,t1-t0);
-        u=u*u*(3-2*u);
-        return d0+(d1-d0)*u;
-      }
-    }
-    return 1;
-  }
-  /* Keep exact background square size until late; close gaps ~3000–3550ms. */
-  function aeoDrawSize(t,size0,pitch){
-    if(t<=0.82)return size0;
-    var u=(t-0.82)/0.18;
-    u=u*u*(3-2*u);
-    return size0+(pitch+1.25-size0)*u; /* overlap kills hairline seams on DPR snap */
-  }
-  function aeoPixelReveal(el,seed){
-    var canvas=null,ctx=null,cells=null,raf=0,playing=false,done=false,meta=null;
-    var cssW=0,cssH=0,dpr=1,radius=26;
-    function cancelRaf(){if(raf){cancelAnimationFrame(raf);raf=0;}}
-    function clearMask(){
-      el.style.webkitMaskImage="";
-      el.style.maskImage="";
-      el.style.webkitMaskSize="";
-      el.style.maskSize="";
-      el.style.webkitMaskRepeat="";
-      el.style.maskRepeat="";
-      el.style.removeProperty("--aeo-px-chrome");
-      canvas=null;ctx=null;cells=null;
-    }
-    function finish(){
-      cancelRaf();
-      playing=false;done=true;
-      clearMask();
-      el.classList.remove("aeo-px-live","aeo-px-pending");
-      el.classList.add("is-in","aeo-px-done");
-    }
-    function collectCells(){
-      var grid=aeoSqGrid();
-      var box=el.getBoundingClientRect();
-      cssW=Math.max(1,box.width);
-      cssH=Math.max(1,box.height);
-      radius=26;
-      var br=getComputedStyle(el).borderRadius;
-      /* During live we force radius 0; read from done style via constant. */
-      dpr=Math.min(window.devicePixelRatio||1,2);
-      canvas=document.createElement("canvas");
-      canvas.width=Math.max(1,Math.round(cssW*dpr));
-      canvas.height=Math.max(1,Math.round(cssH*dpr));
-      ctx=canvas.getContext("2d",{alpha:true,willReadFrequently:false});
-      ctx.imageSmoothingEnabled=false;
-      cells=[];
-      var gi,gj,cx,cy,lx,ly;
-      /* Infinite lattice with the SAME origin/pitch as #aeo-sqfield —
-         do not clamp to the viewport-only cols/rows (cards can straddle). */
-      var i0=Math.floor((box.left-grid.offX)/grid.spacing)-1;
-      var i1=Math.ceil((box.right-grid.offX)/grid.spacing)+1;
-      var j0=Math.floor((box.top-grid.offY)/grid.spacing)-1;
-      var j1=Math.ceil((box.bottom-grid.offY)/grid.spacing)+1;
-      for(gj=j0;gj<=j1;gj++){
-        for(gi=i0;gi<=i1;gi++){
-          cx=grid.offX+gi*grid.spacing;
-          cy=grid.offY+gj*grid.spacing;
-          lx=cx-box.left;
-          ly=cy-box.top;
-          if(!aeoInRoundRect(lx,ly,cssW,cssH,radius))continue;
-          cells.push({
-            gi:gi,gj:gj,
-            lx:lx,ly:ly,
-            thresh:aeoFineThresh(gi,gj,seed)
-          });
-        }
-      }
-      meta={
-        count:cells.length,
-        size:grid.size,
-        spacing:grid.spacing,
-        gap:grid.gap,
-        offX:grid.offX,
-        offY:grid.offY
-      };
-      el.style.webkitMaskSize="100% 100%";
-      el.style.maskSize="100% 100%";
-      el.style.webkitMaskRepeat="no-repeat";
-      el.style.maskRepeat="no-repeat";
-      el.style.setProperty("--aeo-px-chrome","0");
-      return grid;
-    }
-    function paint(t){
-      if(!ctx||!cells)return;
-      var grid=meta;
-      var dens=aeoDensity(t);
-      var draw=aeoDrawSize(t,grid.size,grid.spacing);
-      /* ~100ms local fade at DUR=3100 → soft≈0.032 of progress. */
-      var soft=0.035;
-      var cw=canvas.width,ch=canvas.height;
-      ctx.setTransform(1,0,0,1,0,0);
-      ctx.clearRect(0,0,cw,ch);
-      ctx.imageSmoothingEnabled=false;
-      if(ctx.imageSmoothingQuality)ctx.imageSmoothingQuality="low";
-      ctx.fillStyle="#fff";
-      var i,c,o,a,sx,sy,sw,cxDev,cyDev;
-      sw=Math.max(1,Math.round(draw*dpr));
-      for(i=0;i<cells.length;i++){
-        c=cells[i];
-        o=(dens-c.thresh)/soft;
-        if(o<=0)continue;
-        if(o>=1)a=1;
-        else a=o*o*(3-2*o);
-        /* Integer device-pixel squares centred on the shared lattice. */
-        cxDev=Math.round(c.lx*dpr);
-        cyDev=Math.round(c.ly*dpr);
-        sx=cxDev-Math.floor(sw/2);
-        sy=cyDev-Math.floor(sw/2);
-        ctx.globalAlpha=a;
-        ctx.fillRect(sx,sy,sw,sw);
-      }
-      ctx.globalAlpha=1;
-      var url=canvas.toDataURL("image/png");
-      el.style.webkitMaskImage="url("+url+")";
-      el.style.maskImage="url("+url+")";
-      var chrome=0;
-      if(t>0.75)chrome=Math.min(1,(t-0.75)/0.20);
-      el.style.setProperty("--aeo-px-chrome",chrome.toFixed(3));
-    }
-    function setPending(){
-      cancelRaf();
-      playing=false;done=false;
-      clearMask();
-      el.classList.remove("is-in","aeo-px-live","aeo-px-done");
-      el.classList.add("aeo-px-pending");
-    }
-    function showFinal(){
-      cancelRaf();
-      playing=false;done=true;
-      clearMask();
-      el.classList.remove("aeo-px-pending","aeo-px-live");
-      el.classList.add("is-in","aeo-px-done");
-    }
-    function play(cardOffset){
-      cancelRaf();
-      playing=true;done=false;
-      el.classList.remove("aeo-px-pending","aeo-px-done","is-in");
-      el.classList.add("aeo-px-live");
-      collectCells();
-      paint(0);
-      var START=450+(cardOffset||0);
-      var DUR=3100; /* ~450→3550ms pixel phase */
-      var endAt=START+DUR+120;
-      var t0=null;
-      function frame(now){
-        if(t0==null)t0=now;
-        var elapsed=now-t0;
-        var local=elapsed-START;
-        var t=local<=0?0:Math.min(1,local/DUR);
-        /* Re-sample lattice against current card rect so viewport-fixed
-           background squares stay aligned if layout shifts slightly. */
-        if((elapsed|0)%3===0){
-          var box=el.getBoundingClientRect();
-          if(Math.abs(box.width-cssW)>0.5||Math.abs(box.height-cssH)>0.5){
-            collectCells();
-          }else{
-            /* Refresh local coords from current viewport rect. */
-            var g=aeoSqGrid(),i,c;
-            for(i=0;i<cells.length;i++){
-              c=cells[i];
-              c.lx=g.offX+c.gi*g.spacing-box.left;
-              c.ly=g.offY+c.gj*g.spacing-box.top;
-            }
-          }
-        }
-        paint(t);
-        if(elapsed>=endAt){
-          finish();
-          return;
-        }
-        raf=requestAnimationFrame(frame);
-      }
-      raf=requestAnimationFrame(frame);
-      return endAt;
-    }
-    return {
-      setPending:setPending,
-      showFinal:showFinal,
-      play:play,
-      isPlaying:function(){return playing;},
-      isDone:function(){return done;},
-      meta:function(){return meta;},
-      /* Dev inspection helper — paint a frozen progress without timers. */
-      debugAt:function(t){
-        el.classList.remove("aeo-px-pending","aeo-px-done","is-in");
-        el.classList.add("aeo-px-live");
-        collectCells();
-        paint(t);
-        return meta;
-      }
-    };
-  }
+  var CARD_DUR=window.matchMedia("(max-width:860px)").matches?700:760;
+  var CARD_STAGGER=window.matchMedia("(max-width:860px)").matches?110:130;
   function wire(sec){
     var steps=[].slice.call(sec.querySelectorAll(".aeo-step"));
     var intro=sec.querySelector(".aeo-proc-intro");
     var stage=sec.querySelector(".aeo-proc-stage")||sec;
     var triggerEl=intro||stage;
     var stats=document.querySelectorAll("#aeo-stats .aeo-stat");
-    /* Time-based pixel entrance: scroll only TRIGGERS. Never scrubs. */
-    var STATE_ARMED="armed-hidden";
+    var STATE_ARMED="ready-above";
     var STATE_ANIMATING="animating";
-    var STATE_COMPLETED="completed";
+    var STATE_COMPLETED="complete";
     var state=STATE_ARMED;
-    var lastY=window.pageYOffset||0,dir="down";
+    var lastY=window.pageYOffset||0;
     var wasOutsideTrigger=true;
-    var reveals=steps.map(function(el,i){return aeoPixelReveal(el,[101,227,383][i]||(i+1)*97);});
-    /* Synchronised composition — tiny seed differences only. */
-    var CARD_OFFSETS=[0,40,80];
-    /* Expose for visual QA; removed from public API concerns. */
-    window.__aeoProcDebug={reveals:reveals,at:function(t){return reveals.map(function(r){return r.debugAt(t);});}};
+    var completeTimer=null;
 
+    function clearStepClasses(el){
+      el.classList.remove("aeo-slide-ready","aeo-slide-live","aeo-slide-done","is-in");
+    }
     function showIntroFinal(){
       if(!intro)return;
       intro.style.transition="none";
@@ -716,15 +538,31 @@
       void intro.offsetWidth;
       intro.style.transition="";
     }
+    function setReady(el){
+      clearStepClasses(el);
+      el.style.transition="none";
+      el.classList.add("aeo-slide-ready");
+      void el.offsetWidth;
+      el.style.transition="";
+    }
+    function setFinal(el){
+      clearStepClasses(el);
+      el.style.transition="none";
+      el.classList.add("is-in","aeo-slide-done");
+      void el.offsetWidth;
+      el.style.transition="";
+    }
     function showFinal(){
       state=STATE_COMPLETED;
+      if(completeTimer){clearTimeout(completeTimer);completeTimer=null;}
       showIntroFinal();
-      for(var i=0;i<reveals.length;i++)reveals[i].showFinal();
+      for(var i=0;i<steps.length;i++)setFinal(steps[i]);
     }
     function resetToHidden(){
-      /* Only called when section is fully offscreen above the user. */
+      /* Only when the entire section is safely above the viewport. */
+      if(completeTimer){clearTimeout(completeTimer);completeTimer=null;}
       hideIntro();
-      for(var i=0;i<reveals.length;i++)reveals[i].setPending();
+      for(var i=0;i<steps.length;i++)setReady(steps[i]);
       state=STATE_ARMED;
     }
     function playEntrance(){
@@ -736,26 +574,38 @@
         void intro.offsetWidth;
         intro.style.transition="";
       }
-      for(var i=0;i<reveals.length;i++)reveals[i].setPending();
+      for(var i=0;i<steps.length;i++)setReady(steps[i]);
       requestAnimationFrame(function(){
         requestAnimationFrame(function(){
           if(state!==STATE_ANIMATING)return;
           if(intro)intro.classList.add("is-in");
-          var end=0;
-          for(var j=0;j<reveals.length;j++){
-            var e=reveals[j].play(CARD_OFFSETS[j]||0);
-            if(e>end)end=e;
+          for(var j=0;j<steps.length;j++){
+            (function(el,delay){
+              setTimeout(function(){
+                if(state!==STATE_ANIMATING&&state!==STATE_COMPLETED)return;
+                /* Keep ready pose, enable transition, then release to final. */
+                el.classList.add("aeo-slide-live");
+                void el.offsetWidth;
+                el.classList.remove("aeo-slide-ready");
+                el.classList.add("is-in","aeo-slide-done");
+              },delay);
+            })(steps[j],j*CARD_STAGGER);
           }
-          setTimeout(function(){
+          var end=CARD_STAGGER*(steps.length-1)+CARD_DUR+40;
+          completeTimer=setTimeout(function(){
+            completeTimer=null;
             if(state===STATE_ANIMATING)state=STATE_COMPLETED;
-          },end+30);
+            for(var k=0;k<steps.length;k++){
+              steps[k].classList.remove("aeo-slide-live","aeo-slide-ready");
+              steps[k].classList.add("is-in","aeo-slide-done");
+            }
+          },end);
         });
       });
     }
     function rearmIfAbove(){
       var r=sec.getBoundingClientRect();
       var vh=window.innerHeight||1;
-      /* Re-arm only after the whole section is below the viewport (user above it). */
       if(r.top>vh){
         if(state!==STATE_ARMED)resetToHidden();
         wasOutsideTrigger=true;
@@ -763,39 +613,28 @@
     }
     function onDirScroll(){
       var y=window.pageYOffset||0;
-      if(Math.abs(y-lastY)>=3){
-        dir=y>lastY?"down":"up";
-        lastY=y;
-      }
+      if(Math.abs(y-lastY)>=3)lastY=y;
       rearmIfAbove();
     }
     function handleTriggerEnter(){
       if(!wasOutsideTrigger)return;
       wasOutsideTrigger=false;
       if(state===STATE_ANIMATING)return;
-      /*
-       * COMPLETE means we are mid-pass or entered from below — stay final.
-       * ARMED means we re-armed only after leaving ABOVE — so this crossing
-       * is always a genuine top-to-bottom entry (ignore sticky-scroll dir jitter).
-       */
       if(state===STATE_COMPLETED)return;
       if(state===STATE_ARMED)playEntrance();
     }
     function checkTriggerThreshold(){
       var r=triggerEl.getBoundingClientRect();
       var vh=window.innerHeight||1;
-      /* ~78% viewport — same discrete threshold as the IO rootMargin. */
-      var nowAt=r.top<vh*0.78&&r.bottom>vh*0.1;
+      var nowAt=r.top<vh*0.75&&r.bottom>vh*0.1;
       if(nowAt)handleTriggerEnter();
       else wasOutsideTrigger=true;
     }
     function wireStepsEntrance(){
       if(reduce){showFinal();return;}
-      /* Initial load: if already meaningfully visible, show final (no surprise clear). */
       var r0=sec.getBoundingClientRect();
       var vh0=window.innerHeight||1;
       if(r0.bottom<=0){
-        /* Loaded past the section — keep completed for upward re-entry. */
         showFinal();
       }else if(r0.top<vh0*0.85&&r0.bottom>vh0*0.08){
         showFinal();
@@ -803,7 +642,6 @@
         resetToHidden();
       }
       window.addEventListener("scroll",onDirScroll,{passive:true});
-      /* Discrete threshold on scroll (never scrubs). Complements IO for reliability. */
       window.addEventListener("scroll",checkTriggerThreshold,{passive:true});
       onDirScroll();
       if("IntersectionObserver" in window){
@@ -813,7 +651,7 @@
             if(e.isIntersecting)handleTriggerEnter();
             else wasOutsideTrigger=true;
           }
-        },{threshold:0,rootMargin:"0px 0px -22% 0px"});
+        },{threshold:0,rootMargin:"0px 0px -25% 0px"});
         io.observe(triggerEl);
       }
     }
@@ -855,6 +693,7 @@
     var frag=tpl.content.cloneNode(true);
     var anchor=document.getElementById("aeo-seo")||plat;
     anchor.parentNode.insertBefore(frag,anchor.nextSibling);
+    dressFinalCta();
     wire(document.getElementById("aeo-process"));
   }
   var n=0,iv=setInterval(function(){mount();if(++n>70)clearInterval(iv);},150);

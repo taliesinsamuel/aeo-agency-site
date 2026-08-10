@@ -41,6 +41,11 @@ body > div.flex,
   if(window.__aeoFloatFieldBooted)return;
   // Hard guard: never run if the homepage square field is present.
   if(window.__aeoSqFieldBooted||document.getElementById("aeo-sqfield"))return;
+  // Privacy / Terms use a continuous dark legal canvas — no starfield.
+  try{
+    var path=(location.pathname||"").toLowerCase();
+    if(/\/(privacy|terms)(\.html)?\/?$/.test(path)||document.documentElement.classList.contains("aeo-legal-page"))return;
+  }catch(e){}
   window.__aeoFloatFieldBooted=true;
 
   var reduce=false; try{reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;}catch(e){}
@@ -51,24 +56,25 @@ body > div.flex,
   var CFG={
     size:4.0,
     color:"0,0,0",
-    // Homepage grayscale ladder — source of truth: parts/hero_grid.frag
-    aMin:0.020,aMax:0.052,   // majority of squares — very light grey
-    aMidMin:0.050,aMidMax:0.105, // light-medium (homepage mid-sparkle band)
-    aRareMin:0.14,aRareMax:0.21, // soft charcoal accents only
-    aBlackMin:0.14,aBlackMax:0.21, // former near-black tier → homepage charcoal
+    // Non-home only: slightly denser + a touch darker than before.
+    // Size/physics/sparkle timing unchanged. Homepage uses hero_grid.frag.
+    aMin:0.034,aMax:0.082,   // majority — a bit darker still
+    aMidMin:0.072,aMidMax:0.135, // light-medium band
+    aRareMin:0.17,aRareMax:0.26, // soft charcoal accents only
+    aBlackMin:0.17,aBlackMax:0.26, // charcoal tier (kept ≤ aCeil)
     midChance:0.22,
     rareChance:0.11,
     blackChance:0.06,
-    aCeil:0.21, // homepage draw range (= aRareMax)
-    // Sparkle — timing/rate unchanged; peak shades use homepage palette
+    aCeil:0.26,
+    // Sparkle — timing/rate unchanged; peak shades use palette above
     sparkleSpawn:1.35,
     sparkleDurMin:0.42,
     sparkleDurMax:0.95,
     ambientLerp:1.45,
-    // Density — unchanged from current non-home field
-    areaPerParticle:780,
-    countMin:885,
-    countMax:1880,
+    // Density — slightly fewer than last pass; still above original
+    areaPerParticle:600,
+    countMin:1100,
+    countMax:2300,
     // Ambient drift (px/s) — unchanged idle look/feel
     driftMin:22,
     driftMax:42,

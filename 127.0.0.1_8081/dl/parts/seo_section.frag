@@ -1,128 +1,272 @@
 <style id="aeo-seo-style">
 /* ============================================================
-   SEARCH FOUNDATIONS — homepage-only secondary service intro.
-   Sits between #aeo-platform (stacked cards) and #aeo-process
-   ("How it works"). Deliberately NOT position:sticky — a plain
-   flow section with an intersection-triggered entrance, same
-   family as #aeo-process, to avoid any sticky-range overlap.
+   SEO SECTION — homepage-only. Strategy workspace animation.
+   Accents from .aeo-step--lime / --violet / --cyan below.
    ============================================================ */
 #aeo-seo{
   background:transparent!important;
-  /* Relocated from #aeo-process (home_extra.frag): this pulls the
-     section up into the stacked-cards' own sticky-exit runway so it
-     arrives shortly after the stack releases, not after a dead
-     extra viewport of scroll. #aeo-process no longer needs this
-     since #aeo-seo is now the stack's immediate next sibling. */
   margin-top:calc(-1 * var(--aeo-stack-exit-pull,0px));
   position:relative;
   z-index:1;
 }
 #aeo-seo .aeo-plat-bg{display:none}
-/* Slightly reduced bottom padding: #aeo-process supplies its own
-   top padding right after this section, so the two shouldn't add
-   in full — same handoff pattern #aeo-platform already uses. */
 #aeo-seo .aeo-plat-inner{padding-bottom:clamp(28px,3.4vw,48px)}
 @media (prefers-reduced-motion:reduce){
   #aeo-seo{margin-top:0}
 }
 
 .aeo-seo-card{
+  --seo-lime:#7af5b4;
+  --seo-lime-hi:#d8f86e;
+  --seo-violet:#e0a8ff;
+  --seo-violet-hi:#f0c8ff;
+  --seo-cyan:#2af7f8;
+  --seo-cyan-hi:#8accff;
+  --seo-ink:#f5f6f7;
+  --seo-mute:#8e97a5;
+  --seo-line:#262b33;
+  --seo-bg:#0b0d10;
+  --seo-raised:#14181e;
   position:relative;
   max-width:1180px;margin:0 auto;
-  background:#fff;
-  background-image:linear-gradient(180deg,#fff,#fbfcfe);
-  border:1px solid rgba(28,29,31,.09);
+  background:
+    radial-gradient(42% 58% at 34% 48%,rgba(122,245,180,.04),transparent 62%),
+    radial-gradient(36% 48% at 72% 28%,rgba(224,168,255,.035),transparent 64%),
+    radial-gradient(40% 52% at 76% 78%,rgba(42,247,248,.03),transparent 66%),
+    linear-gradient(180deg,#111419 0%,var(--seo-bg) 52%,#090b0e 100%);
+  border:1px solid var(--seo-line);
   border-radius:var(--aeo-r-2xl);
-  box-shadow:var(--aeo-sh-4);
-  padding:clamp(28px,3.2vw,44px) clamp(24px,3vw,40px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 24px 56px -34px rgba(0,0,0,.55);
   overflow:hidden;
+  color:var(--seo-ink);
   box-sizing:border-box;
 }
 .aeo-seo-card *{box-sizing:border-box}
-.aeo-seo-grid{
-  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
-  gap:clamp(28px,3.4vw,48px);align-items:start;
-}
-.aeo-seo-score,.aeo-seo-feed{min-width:0}
-/* .aeo-vis-area's class rule sets fill:url(#aeoVisFill) (platform.frag's
-   own gradient id) which would win over the inline fill attribute below;
-   point this instance at its own gradient instead. */
-#aeo-seo-area{fill:url(#aeoSeoFill)}
-/* 3 mini-stats instead of the 4-engine grid this class is normally used for */
-#aeo-seo-mini-stats{grid-template-columns:repeat(3,1fr)}
-.aeo-seo-feed-head{font-size:12.5px;font-weight:600;letter-spacing:.01em;color:var(--aeo-ink-3);margin:0 0 12px}
-/* neutral icon slot -> green "done" badge, geometry borrowed from .aeo-act-fav */
-.aeo-seo-check{background:linear-gradient(180deg,#22c55e,#16a34a)!important;border-color:transparent!important}
-.aeo-seo-check svg{color:#fff}
-.aeo-seo-feed .aeo-act-dom{font-weight:600;white-space:normal;line-height:1.35}
 
-.aeo-seo-keywords{margin-top:clamp(22px,2.6vw,30px);padding-top:clamp(18px,2vw,24px);border-top:1px solid var(--aeo-line)}
-.aeo-seo-kw-row{
+.aeo-seo-card-head{
   display:flex;align-items:center;justify-content:space-between;gap:16px;
-  padding:10px 2px;
-  opacity:0;transform:translateY(6px);
-  transition:opacity .4s var(--aeo-e-out),transform .4s var(--aeo-e-out);
+  padding:12px 22px;
+  border-bottom:1px solid var(--seo-line);
+  font-size:11px;font-weight:500;letter-spacing:.02em;color:var(--seo-mute);
 }
-.aeo-seo-kw-row.in{opacity:1;transform:none}
-.aeo-seo-kw-row+.aeo-seo-kw-row{border-top:1px dashed var(--aeo-line-dash)}
-.aeo-seo-kw-term{font-size:13.5px;font-weight:600;color:var(--aeo-ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
-.aeo-seo-kw-pos{display:flex;align-items:center;gap:8px;flex:none;font-variant-numeric:tabular-nums}
-.aeo-seo-kw-old{font-size:13px;font-weight:600;color:var(--aeo-ink-4);text-decoration:line-through}
-.aeo-seo-kw-arrow{color:var(--aeo-ink-5);font-size:13px}
-.aeo-seo-kw-new{font-size:14px;font-weight:700;color:#0f8a4f}
+.aeo-seo-card-head-r{color:#6a7280;font-variant-numeric:tabular-nums}
 
-@media (max-width:860px){
-  .aeo-seo-grid{grid-template-columns:1fr;gap:28px}
-  .aeo-seo-card{padding:24px 20px}
+.aeo-seo-canvas{
+  position:relative;
+  width:100%;
+  height:clamp(448px,50vw,520px);
+  min-height:448px;
+  padding:20px 24px 24px;
 }
-@media (max-width:520px){
-  #aeo-seo-mini-stats{grid-template-columns:repeat(3,1fr);gap:6px 8px}
-  .aeo-vm-name{font-size:9.5px}
-  .aeo-vm-pct{font-size:15px}
-  .aeo-seo-kw-term{font-size:12.5px}
+.aeo-seo-canvas::before{
+  content:"";position:absolute;inset:14px 16px 16px;
+  border:1px solid rgba(255,255,255,.035);
+  border-radius:14px;
+  background:
+    radial-gradient(42% 55% at 30% 48%,rgba(255,255,255,.03),transparent 70%),
+    linear-gradient(180deg,rgba(255,255,255,.012),transparent 40%);
+  pointer-events:none;
 }
+
+.aeo-seo-svg{
+  position:absolute;inset:0;width:100%;height:100%;
+  pointer-events:none;z-index:1;overflow:visible;
+}
+.aeo-seo-path-base{
+  fill:none;stroke:rgba(255,255,255,.08);stroke-width:1;stroke-linecap:round;stroke-linejoin:round;
+}
+.aeo-seo-path-active{
+  fill:none;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;
+  opacity:0;
+  stroke-opacity:.88;
+}
+.aeo-seo-path-active.is-draw{opacity:1}
+.aeo-seo-signal{opacity:0;pointer-events:none}
+
+/* Hub */
+.aeo-seo-hub{
+  position:absolute;z-index:4;
+  left:28%;top:50%;
+  width:152px;height:152px;
+  margin:-76px 0 0 -76px;
+  opacity:1;transform:scale(.985);
+  transition:transform .35s cubic-bezier(.22,1,.36,1);
+}
+.aeo-seo-hub.is-on{transform:scale(1)}
+.aeo-seo-hub-shell{
+  position:absolute;inset:0;border-radius:999px;
+  background:
+    radial-gradient(120% 90% at 34% 26%,rgba(255,255,255,.035),transparent 46%),
+    linear-gradient(180deg,#151a21,#0f1318 58%,#0c1015);
+  border:1px solid rgba(255,255,255,.09);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 14px 32px -18px rgba(0,0,0,.7);
+  transition:background .35s ease,border-color .35s ease,box-shadow .35s ease;
+}
+.aeo-seo-hub.is-on .aeo-seo-hub-shell{
+  background:
+    radial-gradient(120% 90% at 34% 26%,rgba(255,255,255,.07),transparent 46%),
+    linear-gradient(180deg,#171c24,#10141a 58%,#0d1116);
+  border-color:rgba(255,255,255,.12);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 14px 32px -18px rgba(0,0,0,.7);
+}
+.aeo-seo-hub-ring{
+  position:absolute;inset:-6px;border-radius:inherit;pointer-events:none;opacity:.3;
+  transition:opacity .4s ease;
+}
+.aeo-seo-hub.is-on .aeo-seo-hub-ring{opacity:.55}
+.aeo-seo-hub.is-lit .aeo-seo-hub-ring{opacity:1}
+.aeo-seo-hub-ring svg{width:100%;height:100%;display:block}
+.aeo-seo-hub-ring .seg{fill:none;stroke-width:1.35;stroke-linecap:round;stroke:rgba(255,255,255,.1)}
+.aeo-seo-hub-ring .seg-a{stroke:rgba(122,245,180,.55)}
+.aeo-seo-hub-ring .seg-b{stroke:rgba(224,168,255,.55)}
+.aeo-seo-hub-ring .seg-c{stroke:rgba(42,247,248,.52)}
+.aeo-seo-hub-label{
+  position:absolute;inset:0;z-index:2;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+}
+.aeo-seo-hub-kicker{
+  font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6f7886;margin-bottom:3px;
+}
+.aeo-seo-hub-title{
+  font-family:"Inter Display",Inter,sans-serif;
+  font-size:19px;font-weight:600;letter-spacing:-.02em;color:var(--seo-ink);line-height:1.1;
+}
+.aeo-seo-anchors{position:absolute;inset:0;z-index:5;pointer-events:none}
+.aeo-seo-anchor{
+  position:absolute;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:999px;
+  background:#1a2028;border:1px solid rgba(255,255,255,.18);
+  transition:background .25s ease,border-color .25s ease,box-shadow .25s ease;
+}
+.aeo-seo-anchor.is-on{
+  background:var(--accent);border-color:var(--accent);
+  box-shadow:0 0 0 2px rgba(11,13,16,.55);
+}
+
+/* Workstream modules — constellation panels, not a uniform stack */
+.aeo-seo-mod{
+  position:absolute;z-index:3;
+  display:grid;grid-template-columns:auto 1fr auto;align-items:center;column-gap:8px;
+  min-height:58px;
+  background:linear-gradient(180deg,#181d25 0%,#13181f 100%);
+  border:1px solid #2a313b;
+  border-radius:11px;
+  padding:9px 11px 9px 0;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+  opacity:0;
+  transform:translate3d(-12px,4px,0);
+  pointer-events:none;
+}
+.aeo-seo-mod.is-on{
+  opacity:1;
+  transform:translate3d(0,0,0);
+  transition:opacity .28s cubic-bezier(.22,1,.36,1),transform .28s cubic-bezier(.22,1,.36,1);
+  pointer-events:auto;
+}
+.aeo-seo-mod-bar{
+  width:2px;align-self:stretch;margin:10px 0;border-radius:0 2px 2px 0;
+  background:var(--accent);opacity:.28;transition:opacity .25s ease;
+}
+.aeo-seo-mod.is-on .aeo-seo-mod-bar{opacity:.95}
+.aeo-seo-mod-main{min-width:0;padding-left:9px}
+.aeo-seo-mod-top{display:flex;align-items:baseline;gap:6px;min-width:0}
+.aeo-seo-mod-idx{
+  font-size:9px;font-weight:600;letter-spacing:.05em;color:#555e6b;font-variant-numeric:tabular-nums;
+  flex:0 0 auto;
+}
+.aeo-seo-mod-title{
+  font-size:13.5px;font-weight:600;letter-spacing:-.014em;color:var(--seo-ink);line-height:1.2;
+  opacity:0;transition:opacity .2s ease;
+}
+.aeo-seo-mod.is-on .aeo-seo-mod-title{opacity:1;transition-delay:.06s}
+.aeo-seo-mod-detail{
+  margin-top:2px;font-size:11px;font-weight:500;color:var(--seo-mute);line-height:1.3;
+  opacity:0;transition:opacity .2s ease;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.aeo-seo-mod.is-on .aeo-seo-mod-detail{opacity:1;transition-delay:.12s}
+.aeo-seo-mod-dot{
+  width:5px;height:5px;border-radius:999px;margin-right:1px;align-self:start;margin-top:8px;
+  border:1px solid rgba(255,255,255,.14);background:transparent;
+  transition:background .25s ease,border-color .25s ease;
+}
+.aeo-seo-mod.is-on .aeo-seo-mod-dot{background:var(--accent);border-color:var(--accent)}
+
+/* Desktop constellation — deliberate fan, varied X offsets */
+.aeo-seo-mod[data-i="0"]{--accent:var(--seo-lime); left:52%; top:7%; width:246px}
+.aeo-seo-mod[data-i="1"]{--accent:var(--seo-violet); left:61%; top:26%; width:288px}
+.aeo-seo-mod[data-i="2"]{--accent:var(--seo-cyan); left:68%; top:45%; width:254px}
+.aeo-seo-mod[data-i="3"]{--accent:var(--seo-violet); left:58%; top:64%; width:272px}
+.aeo-seo-mod[data-i="4"]{--accent:var(--seo-lime-hi); left:49%; top:82%; width:296px}
+
+.aeo-seo-canvas.is-resetting .aeo-seo-mod.is-on,
+.aeo-seo-canvas.is-resetting .aeo-seo-path-active.is-draw{
+  transition:opacity .35s ease!important;
+  opacity:0!important;
+}
+.aeo-seo-canvas.is-resetting .aeo-seo-anchor.is-on{
+  background:#1a2028!important;border-color:rgba(255,255,255,.18)!important;box-shadow:none!important;
+}
+
+@media (max-width:760px){
+  .aeo-seo-card-head{padding:11px 16px}
+  .aeo-seo-canvas{height:auto;min-height:0;padding:16px 14px 18px}
+  .aeo-seo-svg{display:none}
+  .aeo-seo-hub{
+    position:relative;left:auto;top:auto;margin:4px auto 18px;
+    width:148px;height:148px;
+  }
+  .aeo-seo-anchors{display:none}
+  .aeo-seo-mods{display:flex;flex-direction:column;gap:10px}
+  .aeo-seo-mod{
+    position:relative;left:auto!important;top:auto!important;width:100%!important;
+    transform:translate3d(-10px,0,0);
+  }
+  .aeo-seo-mod.is-on{transform:none}
+}
+
 @media (prefers-reduced-motion:reduce){
-  .aeo-seo-kw-row{opacity:1;transform:none;transition:none}
+  .aeo-seo-hub,.aeo-seo-mod,.aeo-seo-mod-title,.aeo-seo-mod-detail,.aeo-seo-hub-shell,.aeo-seo-hub-ring{transition:none!important}
+  .aeo-seo-hub,.aeo-seo-hub.is-on{transform:none}
+  .aeo-seo-mod,.aeo-seo-mod.is-on{opacity:1;transform:none}
+  .aeo-seo-mod-title,.aeo-seo-mod-detail{opacity:1!important}
+  .aeo-seo-path-active{opacity:1}
+  .aeo-seo-hub-ring{opacity:1}
 }
 </style>
 <template id="aeo-seo-tpl">
 <section class="aeo-plat aeo-seo" id="aeo-seo">
   <div class="aeo-plat-inner">
     <div class="aeo-plat-intro">
-      <span class="aeo-pill aeo-pill-center">Search foundations</span>
-      <h2 class="aeo-h2">AI visibility starts with strong search foundations.</h2>
-      <p class="aeo-lead">We improve the technical SEO, content and authority signals that help both search engines and AI understand, trust and recommend your business.</p>
+      <span class="aeo-pill aeo-pill-center">Search Engine Optimization</span>
+      <h2 class="aeo-h2">Build stronger SEO foundations.</h2>
+      <p class="aeo-lead">We improve your technical SEO, site structure and content so search engines can crawl, understand and rank your business.</p>
     </div>
-    <div class="aeo-seo-card" id="aeo-seo-card" data-aeo-rv-auto>
-      <div class="aeo-seo-grid">
-        <div class="aeo-seo-score">
-          <div class="aeo-vis-wrap">
-            <div class="aeo-vis-top">
-              <div>
-                <div class="aeo-vis-label">Search visibility</div>
-                <div class="aeo-vis-score"><span class="aeo-vis-num" id="aeo-seo-score-num">72</span><span class="aeo-vis-delta" id="aeo-seo-score-delta"></span></div>
-              </div>
-            </div>
-            <div class="aeo-vis-chart">
-              <svg viewBox="0 0 300 100" preserveAspectRatio="none">
-                <defs><linearGradient id="aeoSeoFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#266df0" stop-opacity=".18"/><stop offset="1" stop-color="#266df0" stop-opacity="0"/></linearGradient></defs>
-                <path class="aeo-vis-area" id="aeo-seo-area" fill="url(#aeoSeoFill)" d="M2,78 C40,74 66,66 96,62 C130,58 156,50 188,40 C220,30 250,24 298,10 L298,100 L2,100 Z"/>
-                <path class="aeo-vis-line" id="aeo-seo-line" d="M2,78 C40,74 66,66 96,62 C130,58 156,50 188,40 C220,30 250,24 298,10"/>
-              </svg>
-            </div>
-            <div class="aeo-vis-models" id="aeo-seo-mini-stats">
-              <div class="aeo-vm"><span class="aeo-vm-top"><span class="aeo-vm-name">Technical health</span></span><span class="aeo-vm-pct" id="aeo-seo-stat-tech" data-to="94" data-suf="%">0%</span></div>
-              <div class="aeo-vm"><span class="aeo-vm-top"><span class="aeo-vm-name">Indexed pages</span></span><span class="aeo-vm-pct" id="aeo-seo-stat-idx" data-to="128" data-suf="/132">0/132</span></div>
-              <div class="aeo-vm"><span class="aeo-vm-top"><span class="aeo-vm-name">Organic visibility</span></span><span class="aeo-vm-pct" id="aeo-seo-stat-org" data-to="24" data-pre="+" data-suf="%">+0%</span></div>
-            </div>
+    <div class="aeo-seo-card" id="aeo-seo-card" aria-label="SEO strategy workspace">
+      <div class="aeo-seo-card-head">
+        <span>SEO strategy</span>
+        <span class="aeo-seo-card-head-r">5 workstreams</span>
+      </div>
+      <div class="aeo-seo-canvas" id="aeo-seo-canvas">
+        <svg class="aeo-seo-svg" id="aeo-seo-svg" aria-hidden="true"></svg>
+        <div class="aeo-seo-hub" id="aeo-seo-hub">
+          <div class="aeo-seo-hub-ring" aria-hidden="true">
+            <svg viewBox="0 0 100 100">
+              <path class="seg seg-a" d="M76 20 A41 41 0 0 1 93 52"/>
+              <path class="seg seg-b" d="M92 54 A41 41 0 0 1 68 88"/>
+              <path class="seg seg-c" d="M66 89 A41 41 0 0 1 28 86"/>
+              <path class="seg" d="M26 84 A41 41 0 0 1 7 48"/>
+              <path class="seg" d="M8 46 A41 41 0 0 1 34 14"/>
+              <path class="seg" d="M36 13 A41 41 0 0 1 74 18"/>
+            </svg>
+          </div>
+          <div class="aeo-seo-hub-shell"></div>
+          <div class="aeo-seo-anchors" id="aeo-seo-anchors" aria-hidden="true"></div>
+          <div class="aeo-seo-hub-label">
+            <div class="aeo-seo-hub-kicker">SEO</div>
+            <div class="aeo-seo-hub-title">Strategy</div>
           </div>
         </div>
-        <div class="aeo-seo-feed">
-          <div class="aeo-seo-feed-head">Live optimization feed</div>
-          <div class="aeo-act-list" id="aeo-seo-feed-list"></div>
-        </div>
+        <div class="aeo-seo-mods" id="aeo-seo-mods"></div>
       </div>
-      <div class="aeo-seo-keywords" id="aeo-seo-keywords"></div>
     </div>
   </div>
 </section>
@@ -130,153 +274,384 @@
 <script id="aeo-seo-script">
 (function(){
   var reduce=false;try{reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;}catch(e){}
-  var CHECK='<svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-  var FEED=[
-    "Missing LocalBusiness schema added",
-    "Service page title improved",
-    "Duplicate metadata fixed",
-    "Internal links added",
-    "Location page indexed",
-    "FAQ structure improved",
-    "Core service page expanded",
-    "Review markup validated"
+  /*
+   * Absolute timeline (ms from sequence start).
+   * Active build ~4200, hold 2400, reset 380. Total loop ~7000.
+   */
+  var T={
+    HUB_ON:0,
+    HUB_LIT:280,
+    L0:500,
+    L1:1150,
+    L2:1750,
+    L3:2450,
+    L4:3150,
+    COMPLETE:4200,
+    HOLD_END:6600,
+    RESET_END:6980,
+    LOOP:7100
+  };
+  var LINE_MS=400;
+  var MOD_LEAD=0.70; /* module starts when path ~70% drawn */
+
+  var LEVERS=[
+    {id:1,title:"Technical SEO",detail:"Crawlability · Indexing · Schema",accent:"#7af5b4",t:T.L0},
+    {id:2,title:"Search Demand & Intent",detail:"Keywords · Buyer questions · Competitors",accent:"#e0a8ff",t:T.L1},
+    {id:3,title:"Site Architecture",detail:"Services · Locations · Internal links",accent:"#2af7f8",t:T.L2},
+    {id:4,title:"Content & On-page",detail:"Service pages · Location pages · FAQs",accent:"#e0a8ff",t:T.L3},
+    {id:5,title:"Authority & Local Signals",detail:"Links · Reviews · Citations",accent:"#d8f86e",t:T.L4}
   ];
-  var KEYWORDS=[
-    {term:"personal injury lawyer miami",from:8,to:3},
-    {term:"car accident attorney miami",from:12,to:5},
-    {term:"free consultation injury lawyer",from:14,to:6}
-  ];
 
-  function alive(root){return document.body.contains(root);}
-  function countFromTo(node,from,to,dur){
-    var t0=null;
-    function step(ts){
-      if(t0==null)t0=ts;
-      var p=Math.min(1,(ts-t0)/dur),e=1-Math.pow(1-p,3);
-      node.textContent=Math.round(from+(to-from)*e);
-      if(p<1)requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
-  }
-  function countStat(node,dur){
-    var to=parseFloat(node.getAttribute("data-to")||"0");
-    var pre=node.getAttribute("data-pre")||"";
-    var suf=node.getAttribute("data-suf")||"";
-    var t0=null;
-    function step(ts){
-      if(t0==null)t0=ts;
-      var p=Math.min(1,(ts-t0)/dur),e=1-Math.pow(1-p,3);
-      node.textContent=pre+Math.round(to*e)+suf;
-      if(p<1)requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
-  }
-  function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
+  function isMobile(){return window.matchMedia("(max-width:760px)").matches;}
+  function pad(n){return n<10?"0"+n:String(n);}
+  function easeOut(p){return 1-Math.pow(1-p,3);}
+  function clamp01(p){return p<0?0:p>1?1:p;}
 
-  function buildFeed(root){
-    var list=root.querySelector("#aeo-seo-feed-list");if(!list)return[];
-    var html="";
-    FEED.forEach(function(txt){
-      html+='<div class="aeo-act-row"><span class="aeo-act-fav aeo-seo-check">'+CHECK+'</span><div class="aeo-act-main"><span class="aeo-act-dom">'+txt+'</span></div></div>';
-    });
-    list.innerHTML=html;
-    return[].slice.call(list.querySelectorAll(".aeo-act-row"));
-  }
-  function buildKeywords(root){
-    var wrap=root.querySelector("#aeo-seo-keywords");if(!wrap)return[];
-    var html="";
-    KEYWORDS.forEach(function(k){
-      html+='<div class="aeo-seo-kw-row"><span class="aeo-seo-kw-term">\u201c'+k.term+'\u201d</span>'+
-        '<span class="aeo-seo-kw-pos"><span class="aeo-seo-kw-old" data-from="'+k.from+'">#'+k.from+'</span>'+
-        '<span class="aeo-seo-kw-arrow">\u2192</span>'+
-        '<span class="aeo-seo-kw-new" data-to="'+k.to+'">#'+k.to+'</span></span></div>';
-    });
+  function buildMods(root){
+    var wrap=root.querySelector("#aeo-seo-mods");if(!wrap)return;
+    var html="",i,L;
+    for(i=0;i<LEVERS.length;i++){
+      L=LEVERS[i];
+      html+='<div class="aeo-seo-mod" data-i="'+i+'" data-id="'+L.id+'">'+
+        '<span class="aeo-seo-mod-bar" aria-hidden="true"></span>'+
+        '<div class="aeo-seo-mod-main">'+
+          '<div class="aeo-seo-mod-top">'+
+            '<span class="aeo-seo-mod-idx">'+pad(L.id)+'</span>'+
+            '<span class="aeo-seo-mod-title">'+L.title+'</span>'+
+          '</div>'+
+          '<div class="aeo-seo-mod-detail">'+L.detail+'</div>'+
+        '</div>'+
+        '<span class="aeo-seo-mod-dot" aria-hidden="true"></span>'+
+      '</div>';
+    }
     wrap.innerHTML=html;
-    return[].slice.call(wrap.querySelectorAll(".aeo-seo-kw-row"));
   }
 
-  function showFinal(root){
-    var scoreNum=root.querySelector("#aeo-seo-score-num"),delta=root.querySelector("#aeo-seo-score-delta");
-    if(scoreNum)scoreNum.textContent="89";
-    if(delta)delta.textContent="+17";
-    var area=root.querySelector("#aeo-seo-area"),line=root.querySelector("#aeo-seo-line");
-    if(area)area.classList.add("in");
-    if(line){line.style.strokeDasharray="";line.style.strokeDashoffset="0";}
-    ["#aeo-seo-stat-tech","#aeo-seo-stat-idx","#aeo-seo-stat-org"].forEach(function(sel){
-      var n=root.querySelector(sel);if(!n)return;
-      countStat(n,1);
-    });
-    root.querySelectorAll(".aeo-act-row").forEach(function(r){r.classList.add("in");});
-    root.querySelectorAll(".aeo-seo-kw-row").forEach(function(r){r.classList.add("in");});
-  }
-
-  function play(root){
-    var scoreNum=root.querySelector("#aeo-seo-score-num"),delta=root.querySelector("#aeo-seo-score-delta");
-    var area=root.querySelector("#aeo-seo-area"),line=root.querySelector("#aeo-seo-line");
-    var feedRows=[].slice.call(root.querySelectorAll(".aeo-act-row"));
-    var kwRows=[].slice.call(root.querySelectorAll(".aeo-seo-kw-row"));
-    if(reduce){showFinal(root);return;}
-
-    if(scoreNum)countFromTo(scoreNum,72,89,900);
-    setTimeout(function(){if(alive(root)&&delta)delta.textContent="+17";},950);
-
-    if(line){
-      var len=460;try{len=line.getTotalLength();}catch(e){}
-      line.style.strokeDasharray=len;line.style.strokeDashoffset=len;
-      line.getBoundingClientRect();
-      line.style.transition="stroke-dashoffset 1.1s cubic-bezier(.33,1,.68,1)";
-      requestAnimationFrame(function(){line.style.strokeDashoffset="0";});
+  function placeAnchors(root){
+    var host=root.querySelector("#aeo-seo-anchors");
+    if(!host)return;
+    if(isMobile()){host.innerHTML="";return;}
+    var angles=[-48,-24,0,24,48];
+    var html="",i,a,x,y;
+    for(i=0;i<angles.length;i++){
+      a=angles[i]*Math.PI/180;
+      x=50+Math.cos(a)*47;
+      y=50+Math.sin(a)*47;
+      html+='<span class="aeo-seo-anchor" data-i="'+i+'" style="left:'+x+'%;top:'+y+'%;--accent:'+LEVERS[i].accent+'"></span>';
     }
-    setTimeout(function(){if(alive(root)&&area)area.classList.add("in");},250);
+    host.innerHTML=html;
+  }
 
-    var statSel=["#aeo-seo-stat-tech","#aeo-seo-stat-idx","#aeo-seo-stat-org"];
-    statSel.forEach(function(sel,i){
-      setTimeout(function(){
-        if(!alive(root))return;
-        var n=root.querySelector(sel);if(n)countStat(n,650);
-      },300+i*110);
+  function layoutPaths(root){
+    var canvas=root.querySelector("#aeo-seo-canvas");
+    var svg=root.querySelector("#aeo-seo-svg");
+    var hub=root.querySelector("#aeo-seo-hub");
+    if(!canvas||!svg||!hub)return [];
+    if(isMobile()){svg.innerHTML="";return [];}
+
+    var cr=canvas.getBoundingClientRect();
+    var hr=hub.getBoundingClientRect();
+    var w=cr.width,h=cr.height;
+    if(w<40||h<40)return [];
+    var hx=hr.left-cr.left+hr.width/2;
+    var hy=hr.top-cr.top+hr.height/2;
+    var hradius=hr.width/2;
+    var mods=[].slice.call(root.querySelectorAll(".aeo-seo-mod"));
+    var ns="http://www.w3.org/2000/svg";
+    var paths=[];
+    svg.setAttribute("viewBox","0 0 "+w+" "+h);
+    svg.setAttribute("width",String(w));
+    svg.setAttribute("height",String(h));
+    svg.innerHTML="";
+
+    mods.forEach(function(mod,i){
+      var mr=mod.getBoundingClientRect();
+      var ex=mr.left-cr.left;
+      var ey=mr.top-cr.top+mr.height/2;
+      var dx=ex-hx,dy=ey-hy,len=Math.hypot(dx,dy)||1;
+      var sx=hx+(dx/len)*hradius;
+      var sy=hy+(dy/len)*hradius;
+      var tx=ex+1,ty=ey;
+      /* Vary curvature slightly per branch */
+      var k=0.40+i*0.035;
+      var c1x=sx+(tx-sx)*k;
+      var c1y=sy+(ty-sy)*0.08;
+      var c2x=tx-(tx-sx)*0.18;
+      var c2y=ty;
+      var d="M"+sx.toFixed(1)+","+sy.toFixed(1)+" C"+c1x.toFixed(1)+","+c1y.toFixed(1)+" "+c2x.toFixed(1)+","+c2y.toFixed(1)+" "+tx.toFixed(1)+","+ty.toFixed(1);
+
+      var base=document.createElementNS(ns,"path");
+      base.setAttribute("class","aeo-seo-path-base");
+      base.setAttribute("d",d);
+      svg.appendChild(base);
+
+      var act=document.createElementNS(ns,"path");
+      act.setAttribute("class","aeo-seo-path-active");
+      act.setAttribute("d",d);
+      act.setAttribute("stroke",LEVERS[i].accent);
+      svg.appendChild(act);
+
+      var plen=act.getTotalLength();
+      act.style.strokeDasharray=String(plen);
+      act.style.strokeDashoffset=String(plen);
+
+      paths.push({base:base,act:act,len:plen,start:LEVERS[i].t});
+    });
+    return paths;
+  }
+
+  function setInitial(root,paths){
+    var hub=root.querySelector("#aeo-seo-hub");
+    var canvas=root.querySelector("#aeo-seo-canvas");
+    if(canvas)canvas.classList.remove("is-resetting");
+    if(hub)hub.classList.remove("is-on","is-lit");
+    [].slice.call(root.querySelectorAll(".aeo-seo-mod")).forEach(function(m){m.classList.remove("is-on");});
+    [].slice.call(root.querySelectorAll(".aeo-seo-anchor")).forEach(function(a){a.classList.remove("is-on");});
+    (paths||[]).forEach(function(P){
+      P.act.classList.remove("is-draw");
+      P.act.style.strokeDasharray=String(P.len);
+      P.act.style.strokeDashoffset=String(P.len);
+      P.act.style.opacity="";
+    });
+  }
+
+  function setComplete(root,paths){
+    var hub=root.querySelector("#aeo-seo-hub");
+    if(hub){hub.classList.add("is-on","is-lit");}
+    [].slice.call(root.querySelectorAll(".aeo-seo-mod")).forEach(function(m){m.classList.add("is-on");});
+    [].slice.call(root.querySelectorAll(".aeo-seo-anchor")).forEach(function(a){a.classList.add("is-on");});
+    (paths||[]).forEach(function(P){
+      P.act.classList.add("is-draw");
+      P.act.style.strokeDashoffset="0";
+    });
+  }
+
+  function applyFrame(root,paths,elapsed,mobile){
+    var hub=root.querySelector("#aeo-seo-hub");
+    var mods=[].slice.call(root.querySelectorAll(".aeo-seo-mod"));
+    var anchors=[].slice.call(root.querySelectorAll(".aeo-seo-anchor"));
+    var canvas=root.querySelector("#aeo-seo-canvas");
+
+    if(elapsed>=T.HOLD_END){
+      /* Stay in reset fade until LOOP clears via paintInitial — avoid a completed flash. */
+      if(canvas)canvas.classList.add("is-resetting");
+      return "RESET";
+    }
+    if(canvas)canvas.classList.remove("is-resetting");
+
+    if(elapsed<T.HUB_ON){
+      if(hub)hub.classList.remove("is-on","is-lit");
+    }else{
+      if(hub)hub.classList.add("is-on");
+      if(elapsed>=T.HUB_LIT&&hub)hub.classList.add("is-lit");
+    }
+
+    LEVERS.forEach(function(L,i){
+      var local=elapsed-L.t;
+      var mod=mods[i];
+      var anc=anchors[i];
+      var P=paths[i];
+
+      if(local<0){
+        if(mod)mod.classList.remove("is-on");
+        if(anc)anc.classList.remove("is-on");
+        if(P){
+          P.act.classList.remove("is-draw");
+          P.act.style.strokeDashoffset=String(P.len);
+        }
+        return;
+      }
+
+      if(anc)anc.classList.add("is-on");
+
+      if(P&&!mobile){
+        var p=clamp01(local/LINE_MS);
+        P.act.classList.add("is-draw");
+        P.act.style.strokeDashoffset=String(P.len*(1-easeOut(p)));
+        if(local>=LINE_MS*MOD_LEAD){if(mod)mod.classList.add("is-on");}
+        else if(mod)mod.classList.remove("is-on");
+      }else{
+        /* Mobile: no SVG; reveal shortly after slot time */
+        if(local>=80){if(mod)mod.classList.add("is-on");}
+        else if(mod)mod.classList.remove("is-on");
+      }
     });
 
-    (async function(){
-      await sleep(650);
-      for(var i=0;i<feedRows.length;i++){
-        if(!alive(root))return;
-        feedRows[i].classList.add("in");
-        await sleep(95);
-      }
-      await sleep(300);
-      for(var j=0;j<kwRows.length;j++){
-        if(!alive(root))return;
-        kwRows[j].classList.add("in");
-        await sleep(130);
-      }
-    })();
+    if(elapsed>=T.COMPLETE)return "COMPLETE";
+    return "PLAY";
   }
 
   function wire(sec){
-    buildFeed(sec);
-    buildKeywords(sec);
+    buildMods(sec);
+    placeAnchors(sec);
     var card=sec.querySelector("#aeo-seo-card");
-    if(!card)return;
-    if(reduce||!("IntersectionObserver" in window)){showFinal(sec);return;}
-    var done=false;
-    var io=new IntersectionObserver(function(entries){
-      for(var i=0;i<entries.length;i++){
-        if(entries[i].isIntersecting&&!done){
-          done=true;io.disconnect();play(sec);
-        }
+    var canvas=sec.querySelector("#aeo-seo-canvas");
+    if(!card||!canvas)return;
+
+    var ctrl={
+      phase:"idle",
+      raf:0,
+      paths:[],
+      t0:0,
+      visible:false,
+      armed:true
+    };
+
+    function stopRaf(){
+      if(ctrl.raf){cancelAnimationFrame(ctrl.raf);ctrl.raf=0;}
+    }
+
+    function paintInitial(){
+      placeAnchors(sec);
+      ctrl.paths=layoutPaths(sec);
+      setInitial(sec,ctrl.paths);
+    }
+
+    function startSequence(){
+      if(reduce){
+        placeAnchors(sec);
+        ctrl.paths=layoutPaths(sec);
+        setComplete(sec,ctrl.paths);
+        ctrl.phase="complete-static";
+        return;
       }
-    },{threshold:.28});
+      stopRaf();
+      paintInitial();
+      ctrl.phase="primed";
+      /* Guarantee initial state paints before timeline advances */
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          if(!ctrl.visible)return;
+          ctrl.phase="playing";
+          ctrl.t0=performance.now();
+          tick(ctrl.t0);
+        });
+      });
+    }
+
+    function tick(now){
+      if(ctrl.phase!=="playing"&&ctrl.phase!=="holding"&&ctrl.phase!=="resetting")return;
+      if(!ctrl.visible){stopRaf();ctrl.phase="paused";return;}
+      var elapsed=now-ctrl.t0;
+      var mobile=isMobile();
+
+      if(elapsed>=T.LOOP){
+        paintInitial();
+        ctrl.t0=performance.now();
+        ctrl.raf=requestAnimationFrame(tick);
+        return;
+      }
+
+      if(elapsed>=T.HOLD_END){
+        ctrl.phase="resetting";
+        applyFrame(sec,ctrl.paths,elapsed,mobile);
+      }else if(elapsed>=T.COMPLETE){
+        ctrl.phase="holding";
+        applyFrame(sec,ctrl.paths,elapsed,mobile);
+      }else{
+        ctrl.phase="playing";
+        applyFrame(sec,ctrl.paths,elapsed,mobile);
+      }
+      ctrl.raf=requestAnimationFrame(tick);
+    }
+
+    function onEnter(){
+      if(!ctrl.armed&&ctrl.phase!=="paused"&&ctrl.phase!=="idle")return;
+      ctrl.visible=true;
+      ctrl.armed=false;
+      startSequence();
+    }
+
+    function onLeave(){
+      ctrl.visible=false;
+      stopRaf();
+      /* Keep visual wherever it was; re-arm only when fully above later */
+      if(ctrl.phase==="playing"||ctrl.phase==="holding"||ctrl.phase==="resetting"||ctrl.phase==="primed"){
+        ctrl.phase="paused";
+      }
+    }
+
+    function rearmIfAbove(){
+      var r=sec.getBoundingClientRect();
+      var vh=window.innerHeight||1;
+      if(r.top>vh){
+        paintInitial();
+        ctrl.armed=true;
+        ctrl.phase="idle";
+        stopRaf();
+      }
+    }
+
+    /* Build dormant geometry now so first paint is correct */
+    paintInitial();
+
+    if(reduce||!("IntersectionObserver" in window)){
+      setComplete(sec,layoutPaths(sec));
+      return;
+    }
+
+    function cardVisibleRatio(){
+      var r=card.getBoundingClientRect();
+      var vh=window.innerHeight||1;
+      var visible=Math.max(0,Math.min(r.bottom,vh)-Math.max(r.top,0));
+      return r.height>0?visible/r.height:0;
+    }
+
+    function tryStartFromVisibility(){
+      var ratio=cardVisibleRatio();
+      if(ratio>=0.28){
+        if(ctrl.phase==="paused"){
+          ctrl.visible=true;
+          startSequence();
+        }else if(ctrl.armed||ctrl.phase==="idle"){
+          onEnter();
+        }
+      }else if(ratio===0){
+        onLeave();
+        rearmIfAbove();
+      }
+    }
+
+    var io=new IntersectionObserver(function(){
+      tryStartFromVisibility();
+    },{threshold:[0,0.2,0.28,0.35,0.5,0.75,1],rootMargin:"0px"});
     io.observe(card);
+
+    window.addEventListener("scroll",function(){
+      tryStartFromVisibility();
+      if(!ctrl.visible)rearmIfAbove();
+    },{passive:true});
+    /* Catch first paint / restored layouts where IO can be late */
+    requestAnimationFrame(tryStartFromVisibility);
+
+    var resizeT=null;
+    window.addEventListener("resize",function(){
+      clearTimeout(resizeT);
+      resizeT=setTimeout(function(){
+        placeAnchors(sec);
+        ctrl.paths=layoutPaths(sec);
+        if(reduce){setComplete(sec,ctrl.paths);return;}
+        if(ctrl.phase==="holding"||ctrl.phase==="complete-static"){
+          setComplete(sec,ctrl.paths);
+        }else if(ctrl.visible&&(ctrl.phase==="playing"||ctrl.phase==="paused"||ctrl.phase==="idle")){
+          /* Restart cleanly after layout change */
+          startSequence();
+        }else{
+          setInitial(sec,ctrl.paths);
+        }
+      },140);
+    });
+
+    sec.__aeoSeoCtrl=ctrl;
+    sec.__aeoSeoRestart=function(){ctrl.armed=true;ctrl.visible=true;startSequence();};
   }
 
   function mount(){
     if(document.getElementById("aeo-seo"))return;
     var plat=document.getElementById("aeo-platform");if(!plat)return;
     var tpl=document.getElementById("aeo-seo-tpl");if(!tpl)return;
-    var frag=tpl.content.cloneNode(true);
-    plat.parentNode.insertBefore(frag,plat.nextSibling);
+    plat.parentNode.insertBefore(tpl.content.cloneNode(true),plat.nextSibling);
     wire(document.getElementById("aeo-seo"));
   }
   var n=0,iv=setInterval(function(){mount();if(++n>70)clearInterval(iv);},150);

@@ -31,7 +31,7 @@
   position:relative;
   isolation:isolate;
   --aeo-stack-slot:54svh;--aeo-stack-hold:0svh;
-  --aeo-stack-peek:18px;
+  --aeo-stack-peek:0px;
   --aeo-stack-radius:var(--aeo-r-2xl);
   height:calc(100svh + var(--aeo-stack-slot) * 3 + var(--aeo-stack-hold));
 }
@@ -91,10 +91,6 @@
 /* ---- shared panel: IDENTICAL dimensions across all four (ORIGINAL sizes) ---- */
 .aeo-panel{position:relative;width:100%;max-width:560px;height:430px;border-radius:var(--aeo-r-xl);overflow:hidden;font-family:var(--font-inter),"Inter",system-ui,sans-serif;text-align:left;box-shadow:var(--aeo-sh-4);transition:transform .55s var(--aeo-e),box-shadow .55s var(--aeo-e)}
 .aeo-panel:hover{transform:translateY(-5px);box-shadow:var(--aeo-sh-lift)}
-/* light that tracks the pointer — the surface reacts, nothing moves */
-.aeo-panel::before{content:"";position:absolute;inset:0;z-index:3;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .5s var(--aeo-e);background:radial-gradient(280px circle at var(--aeo-mx,50%) var(--aeo-my,0%),rgba(38,109,240,.12),transparent 62%)}
-.aeo-panel:hover::before{opacity:1}
-.aeo-panel--code::before{background:radial-gradient(280px circle at var(--aeo-mx,50%) var(--aeo-my,0%),rgba(120,170,255,.15),transparent 62%)}
 .aeo-panel::after{content:"";position:absolute;inset:0;z-index:4;border-radius:inherit;padding:1px;background:linear-gradient(135deg,rgba(38,109,240,.35),rgba(140,110,245,.18) 40%,rgba(38,109,240,0) 70%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;pointer-events:none;transition:background .5s var(--aeo-e)}
 .aeo-panel:hover::after{background:linear-gradient(135deg,rgba(38,109,240,.6),rgba(140,110,245,.34) 42%,rgba(38,109,240,.06) 72%)}
 
@@ -111,7 +107,7 @@
 .aeo-vis-toggle span.on{background:#fff;color:var(--color-black-100,#1c1d1f);box-shadow:0 1px 2px rgba(16,16,16,.12)}
 .aeo-vis-chart{position:relative;height:84px;margin:14px 0 0}
 .aeo-vis-chart svg{width:100%;height:100%;display:block;overflow:visible}
-.aeo-vis-line{fill:none;stroke:var(--color-blue-500,#266df0);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.aeo-vis-line{fill:none;stroke:var(--color-blue-500,#266df0);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 .aeo-vis-area{fill:url(#aeoVisFill);opacity:0;transition:opacity .8s ease .35s}
 .aeo-vis-area.in{opacity:1}
 .aeo-vis-dates{display:flex;justify-content:space-between;font-size:10px;font-weight:500;color:var(--color-black-900,#a4adba);padding:5px 2px 0;font-variant-numeric:tabular-nums}
@@ -246,7 +242,7 @@
   .aeo-stack{height:auto}
   .aeo-stack-pin{position:static;height:auto;display:flex;flex-direction:column;gap:28px;padding:32px 0}
   .aeo-card{position:relative;left:auto;top:auto;width:100%;max-width:1180px;margin:0 auto;transform:none!important;filter:none!important}
-  .aeo-panel,.aeo-panel::before,.aeo-panel::after{transition:none}
+  .aeo-panel,.aeo-panel::after{transition:none}
 }
 </style>
 <script id="aeo-plat-script">
@@ -332,6 +328,20 @@
     "M2,80 C24,80 42,68 64,70 C88,72 104,54 126,56 C148,58 164,44 188,42 C212,40 228,30 250,26 C270,22 286,18 298,12",
     "M2,86 C28,84 44,78 66,72 C90,66 102,68 126,60 C150,52 166,56 188,46 C210,36 226,38 248,28 C268,19 284,14 298,9"
   ];
+  /* Cubic strokes + preserveAspectRatio=none leave hairline gaps at
+     segment joins. Densify to a polyline on the same trajectory so the
+     rendered stroke stays continuous after non-uniform SVG scaling. */
+  function densifyVisPath(pathEl,srcD,step){
+    pathEl.setAttribute("d",srcD);
+    var len=0;try{len=pathEl.getTotalLength();}catch(e){}
+    if(!len)return srcD;
+    var n=Math.max(60,Math.ceil(len/(step||1.5))),i,p,d="";
+    for(i=0;i<=n;i++){
+      p=pathEl.getPointAtLength(len*i/n);
+      d+=(i===0?"M":" L")+p.x.toFixed(2)+","+p.y.toFixed(2);
+    }
+    return d;
+  }
   function startVisibility(){
     var root=document.getElementById("aeo-viz-vis");if(!root)return;
     var a=A();var oa=a?a.aiSvg(a.P_OPENAI):"",px=a?a.aiSvg(a.P_PPLX):"",gm=a?a.GEM_SVG:"",cl=a?a.aiSvg(a.P_CLAUDE):"";
@@ -369,7 +379,7 @@
       var si=0;
       while(alive(root)){
         var sc=SCN[si%SCN.length];
-        var d=VPATHS[sc.path];
+        var d=densifyVisPath(line,VPATHS[sc.path],1.25);
         label.textContent="Mention rate \u00b7 "+sc.ind+" in "+sc.city;
         delta.textContent=sc.delta;
         area.setAttribute("d",d+" L298,100 L2,100 Z");
@@ -382,10 +392,13 @@
         var ranks=[sc.rate,sc.rate-19,sc.rate-33];
         for(i=0;i<fills.length;i++){fills[i].style.transition="none";fills[i].style.width="0%";vals[i].textContent="0%";}
         var len=460;try{len=line.getTotalLength();}catch(e){}
-        line.style.strokeDasharray=len;line.style.strokeDashoffset=len;
+        /* Pad length so dasharray never under-shoots the path (avoids mid-line gaps). */
+        len=Math.ceil(len)+2;
+        line.style.strokeDasharray=String(len);line.style.strokeDashoffset=String(len);
         line.getBoundingClientRect();
         if(reduce){
-          num.textContent=sc.rate+"%";area.classList.add("in");line.style.strokeDashoffset="0";
+          num.textContent=sc.rate+"%";area.classList.add("in");
+          line.style.strokeDasharray="";line.style.strokeDashoffset="";
           for(i=0;i<pcts.length;i++)pcts[i].textContent=sc.m[i]+"%";
           for(i=0;i<fills.length;i++){fills[i].style.width=ranks[i]+"%";vals[i].textContent=ranks[i]+"%";}
           return;
@@ -394,7 +407,10 @@
         line.style.transition="stroke-dashoffset 1.25s cubic-bezier(.33,1,.68,1)";
         line.style.strokeDashoffset="0";
         countTo(num,sc.rate,1200,"%");area.classList.add("in");
-        await sleep(1150);if(!alive(root))return;
+        await sleep(1250);if(!alive(root))return;
+        /* Clear dash so the settled stroke is a single continuous path. */
+        line.style.transition="none";
+        line.style.strokeDasharray="";line.style.strokeDashoffset="";
         for(i=0;i<pcts.length;i++){(function(elp,v){countTo(elp,v,600,"%");})(pcts[i],sc.m[i]);await sleep(110);}
         await sleep(300);if(!alive(root))return;
         for(i=0;i<fills.length;i++){fills[i].style.transition="width 1s cubic-bezier(.33,1,.68,1)";fills[i].style.width=ranks[i]+"%";countTo(vals[i],ranks[i],900,"%");}
@@ -594,9 +610,10 @@
      centered resting position — position-driven, no fade-in. Scroll back
      reverses the same path.
 
-     Occlusion: the incoming card always paints above (z-index = index).
-     Covered cards are CLIPPED to only the strip still geometrically above
-     the next card — borders/shadows in the covered region cannot leak.
+     Occlusion: the incoming card always paints above (z-index = index) and
+     physically covers the one beneath. Each covered card is CLIPPED to the
+     strip still geometrically above its immediate successor — progressive
+     paper-slide cover, no peek strip, no threshold hide of deeper cards.
      No scale-down of covered cards (that created concentric border arcs). */
   // Scroll-driven ease ≈ cubic-bezier(0.22, 1, 0.36, 1): deliberate rise, soft settle.
   function easeStack(t){
@@ -624,7 +641,6 @@
     var slots=n-1;
     var pinEl=sec.querySelector(".aeo-stack-pin");
     var box={top:0,h:0,vh:0,y:0};
-    var STACK_PEEK=18; /* intentional exposed strip when a card is covered */
     function stackRadiusPx(){
       try{
         var raw=getComputedStyle(cards[0]).borderRadius||"24px";
@@ -637,7 +653,8 @@
       c.style.webkitClipPath="";
     }
     /* Clip card A so only the part NOT covered by card B can paint.
-       Geometry is direction-agnostic: same overlap → same clip. */
+       Pure geometry: as B slides up, A's visible strip shrinks continuously
+       until B fully covers A — no peek, no abrupt threshold hide. */
     function clipCoveredByNext(card,next){
       var a=card.getBoundingClientRect();
       var b=next.getBoundingClientRect();
@@ -649,7 +666,7 @@
       var visibleH=Math.max(0,Math.min(localH,b.top-a.top));
       var bottomInset=Math.max(0,localH-visibleH);
       if(bottomInset<0.5){clearClip(card);return;}
-      /* Fully covered with no peek: hide entirely (no border/shadow leak). */
+      /* Fully covered: clip entirely (next card already owns the pixels). */
       if(visibleH<0.5){
         var hide="inset(0 0 "+localH.toFixed(2)+"px 0)";
         card.style.clipPath=hide;
@@ -702,33 +719,21 @@
         var t=easeStack(prog[i]);
         var slide=(1-t)*startVh;
         var nextP=i<n-1?prog[i+1]:0;
-        /* Peek lift only — no scale (scale made covered borders stick out). */
-        var lift=(-STACK_PEEK*nextP).toFixed(2);
-        cards[i].style.transform="translate(-50%,-50%) translateY("+lift+"px) translateY("+slide.toFixed(3)+"vh)";
+        /* No peek-lift: cards share the same resting centre so the next
+           card can cover the previous one completely. */
+        cards[i].style.transform="translate(-50%,-50%) translateY("+slide.toFixed(3)+"vh)";
         cards[i].style.filter="";
         cards[i].style.zIndex=String(i+1);
         cards[i].style.opacity="1";
         cards[i].classList.toggle("aeo-card--front",i===front);
         cards[i].classList.toggle("aeo-card--covered",nextP>0.02);
       }
-      /* Second pass: clip from post-transform geometry.
-         Only the immediate previous card may keep an intentional peek above
-         the front card. Cards deeper in the stack are fully hidden so their
-         borders cannot stack into multiple grey arcs. */
+      /* Second pass: clip each card by its immediate successor from
+         post-transform geometry. Coverage shrinks continuously with
+         scroll — never snap-hide deeper cards at a front threshold. */
       for(i=0;i<n;i++){
-        if(i>front){clearClip(cards[i]);continue;}
-        if(i===front){clearClip(cards[i]);continue;}
-        if(i<front-1){
-          var hHide=cards[i].offsetHeight||0;
-          if(hHide>0){
-            var hide="inset(0 0 "+hHide.toFixed(2)+"px 0)";
-            cards[i].style.clipPath=hide;
-            cards[i].style.webkitClipPath=hide;
-          }else clearClip(cards[i]);
-          continue;
-        }
-        /* i === front - 1 */
-        clipCoveredByNext(cards[i],cards[front]);
+        if(i>=n-1||prog[i+1]<=0){clearClip(cards[i]);continue;}
+        clipCoveredByNext(cards[i],cards[i+1]);
       }
     });
   }
@@ -814,7 +819,6 @@
           }
         }
       }
-      if(window.__aeoSpotlight)sec.querySelectorAll(".aeo-panel").forEach(window.__aeoSpotlight);
       onceInView(document.getElementById("aeo-viz-vis"),startVisibility);
       onceInView(document.getElementById("aeo-viz-web"),startStructure);
       onceInView(document.getElementById("aeo-viz-content"),startContent);

@@ -1,30 +1,45 @@
 <style id="aeo-pricing-style">
 .aeo-subpage .aeo-plat-inner{padding-top:clamp(120px,14vw,170px)}
 .aeo-price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch}
-.aeo-price{position:relative;display:flex;flex-direction:column;background:linear-gradient(180deg,#fff,#fcfdff);border:1px solid rgba(28,29,31,.09);border-radius:var(--aeo-r-xl);padding:30px 28px;box-shadow:var(--aeo-sh-3);transition:transform .5s var(--aeo-e),box-shadow .5s var(--aeo-e),border-color .3s var(--aeo-e);opacity:0;transform:translateY(22px)}
+/* Surface matches homepage .aeo-card inset stroke + panel elevation (--aeo-sh-4). */
+.aeo-price{
+  position:relative;display:flex;flex-direction:column;height:100%;
+  background:#fff;background-image:linear-gradient(180deg,#fff,#fbfcfe);
+  border:none;border-radius:var(--aeo-r-2xl);
+  box-shadow:inset 0 0 0 1px rgba(28,29,31,.08),var(--aeo-sh-4);
+  padding:32px 28px 28px;
+  transition:transform .5s var(--aeo-e),box-shadow .5s var(--aeo-e);
+  opacity:0;transform:translateY(22px);
+}
 .aeo-price.in{opacity:1;transform:none}
-.aeo-price:hover{transform:translateY(-6px);border-color:rgba(38,109,240,.22);box-shadow:var(--aeo-sh-lift)}
-.aeo-price--hot{border-color:transparent;z-index:1}
-/* the popular plan gets a slowly travelling gradient rim and its own glow */
-.aeo-price--hot::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;background:linear-gradient(135deg,#266df0,#8c6ef5 35%,#2dbfa8 60%,#266df0);background-size:220% 220%;-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;pointer-events:none;animation:aeo-rim 9s ease-in-out infinite alternate}
-@keyframes aeo-rim{to{background-position:100% 100%}}
-.aeo-price--hot:hover{border-color:transparent}
-.aeo-price-flag{position:absolute;top:-13px;left:50%;transform:translateX(-50%);font-size:11.5px;font-weight:700;letter-spacing:.03em;color:#fff;background:var(--aeo-grad-accent);padding:5px 14px;border-radius:999px;white-space:nowrap;box-shadow:0 6px 16px -6px rgba(38,109,240,.6),inset 0 1px 0 rgba(255,255,255,.28)}
+.aeo-price:hover{transform:translateY(-4px);box-shadow:inset 0 0 0 1px rgba(28,29,31,.08),var(--aeo-sh-4)}
+/* "Most popular" uses the shared .aeo-pill (Visibility) look — positioning only. */
+.aeo-price-flag{position:absolute;top:-12px;left:50%;transform:translateX(-50%);white-space:nowrap;z-index:1}
 .aeo-price-name{font-family:"Inter Display",Inter,sans-serif;font-size:19px;font-weight:600;color:var(--aeo-ink);letter-spacing:-.018em}
-.aeo-price-sub{margin-top:6px;font-size:13.5px;line-height:1.55;color:var(--aeo-ink-3);font-weight:500;min-height:40px}
-.aeo-price-amount{display:flex;align-items:baseline;gap:7px;margin:18px 0 4px}
+.aeo-price-sub{margin-top:8px;font-size:13.5px;line-height:1.55;color:var(--aeo-ink-3);font-weight:500;min-height:42px}
+.aeo-price-amount{display:flex;align-items:baseline;gap:7px;margin:20px 0 2px}
 .aeo-price-num{font-family:"Inter Display",Inter,sans-serif;font-size:44px;font-weight:700;letter-spacing:-.03em;color:var(--aeo-ink);line-height:1;font-variant-numeric:tabular-nums}
 .aeo-price-per{font-size:14px;font-weight:500;color:var(--aeo-ink-4)}
-.aeo-price-feats{margin:20px 0 26px;padding:18px 0 0;border-top:1px solid var(--aeo-line);display:flex;flex-direction:column;gap:11px;flex:1}
+.aeo-price-feats{margin:22px 0 28px;padding:20px 0 0;border-top:1px solid var(--aeo-line);display:flex;flex-direction:column;gap:12px;flex:1}
 .aeo-price-feat{display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:1.5;color:var(--aeo-ink-2);font-weight:500}
-.aeo-price-feat svg{width:12px;height:12px;flex:none;margin-top:3px;padding:3px;border-radius:999px;color:#16a34a;background:rgba(22,163,74,.10);box-sizing:content-box}
+/* Tick color/soft fill match .aeo-pill (--aeo-accent-ink / --aeo-accent-soft). */
+.aeo-price-feat svg{width:12px;height:12px;flex:none;margin-top:3px;padding:3px;border-radius:999px;color:var(--aeo-accent-ink);background:var(--aeo-accent-soft);box-sizing:content-box}
 .aeo-price-feat.dim{color:var(--aeo-ink-4)}
-.aeo-price .aeo-btn{width:100%}
-.aeo-price-note{text-align:center;margin:26px auto 0;font-size:13.5px;color:var(--aeo-ink-4);font-weight:500}
-@media (min-width:961px){
-  .aeo-price--hot.in{transform:translateY(-10px)}
-  .aeo-price--hot:hover{transform:translateY(-16px)}
+/* CTAs match nav .aeo-nav-book exactly: solid black, white label, no sheen. */
+.aeo-price .aeo-btn{
+  width:100%;margin-top:auto;
+  isolation:isolate;will-change:transform;
+  background-image:none!important;background-color:#141416!important;
+  border-color:#141416;background-clip:border-box;color:#fff;
+  box-shadow:0 1px 2px rgba(16,17,20,.18),0 6px 14px -8px rgba(16,17,20,.32);
 }
+.aeo-price .aeo-btn:hover{
+  background-image:none!important;background-color:#141416!important;background-position:0 0;
+  border-color:#141416;color:#fff;
+  box-shadow:0 1px 2px rgba(16,17,20,.18),0 14px 30px -10px rgba(16,17,20,.44);
+}
+.aeo-price .aeo-btn::after{content:none;display:none}
+.aeo-price-note{text-align:center;margin:26px auto 0;font-size:13.5px;color:var(--aeo-ink-4);font-weight:500}
 
 /* FAQ */
 .aeo-faq{max-width:760px;margin:clamp(72px,9vw,120px) auto 0}
@@ -55,7 +70,6 @@
 @media (max-width:960px){.aeo-price-grid{grid-template-columns:1fr;max-width:460px;margin:0 auto}}
 @media (prefers-reduced-motion: reduce){
   .aeo-price{opacity:1;transform:none;transition:none}
-  .aeo-price--hot::before{animation:none}
   .aeo-faq-wrap{transition:none}
   .aeo-faq summary::after{transition:none}
 }
@@ -71,54 +85,71 @@
     </div>
     <div class="aeo-price-grid">
       <div class="aeo-price">
-        <div class="aeo-price-name">Core</div>
-        <div class="aeo-price-sub">Get found by AI, measured and moving in the right direction.</div>
-        <div class="aeo-price-amount"><span class="aeo-price-num">$2,500</span><span class="aeo-price-per">/month</span></div>
+        <div class="aeo-price-name">Growth</div>
+        <div class="aeo-price-sub">SEO and AI visibility, handled together.</div>
+        <div class="aeo-price-amount"><span class="aeo-price-num">$4,995</span><span class="aeo-price-per">/month</span></div>
         <div class="aeo-price-feats">
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>AI visibility baseline across ChatGPT, Perplexity, Gemini &amp; Claude</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Buyer-question research for your market</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Schema markup on core pages (Organization, LocalBusiness, FAQ)</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>3&ndash;5 answer-ready pages optimized every month</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Monthly AI-mention tracking &amp; reporting call</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>AI visibility tracking across ChatGPT, Gemini, Claude, Perplexity and Google AI search</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Technical SEO, crawlability, indexing, schema and internal linking</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Buyer-intent keyword, prompt, competitor and local search research</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>4&ndash;6 service, location or answer-ready pages created or improved each month</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Google Business Profile, reviews, citations and local authority work</div>
         </div>
-        <a class="aeo-btn aeo-btn--ghost" href="book.html?plan=core">Start with Core</a>
+        <a class="aeo-btn aeo-btn--primary" href="book.html?plan=growth">Start with Growth</a>
       </div>
-      <div class="aeo-price aeo-price--hot">
-        <span class="aeo-price-flag">Most popular</span>
-        <div class="aeo-price-name">Premium</div>
-        <div class="aeo-price-sub">Everything it takes to become the answer in your market.</div>
-        <div class="aeo-price-amount"><span class="aeo-price-num">$5,000</span><span class="aeo-price-per">/month</span></div>
+      <div class="aeo-price">
+        <span class="aeo-pill aeo-price-flag">Most popular</span>
+        <div class="aeo-price-name">Scale</div>
+        <div class="aeo-price-sub">More coverage and faster execution for competitive or multi-location businesses.</div>
+        <div class="aeo-price-amount"><span class="aeo-price-num">$7,995</span><span class="aeo-price-per">/month</span></div>
         <div class="aeo-price-feats">
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in Core</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Broader buyer-intent prompt coverage, tracked against named competitors</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>6&ndash;10 pages or content pieces built every month</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Citation &amp; authority building across directories and review platforms</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Weekly AI-mention monitoring, quarterly strategy review</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in Growth, expanded across more services, locations, prompts and competitors</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>8&ndash;12 service, location or answer-ready pages created or improved each month</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Advanced technical SEO, local search architecture and site improvements</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Digital PR, link earning, citations, reviews and third-party authority campaigns</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Weekly AI + SEO monitoring, priority execution and monthly strategy review</div>
         </div>
-        <a class="aeo-btn aeo-btn--blue" href="book.html?plan=premium">Start with Premium</a>
+        <a class="aeo-btn aeo-btn--primary" href="book.html?plan=scale">Start with Scale</a>
       </div>
       <div class="aeo-price">
         <div class="aeo-price-name">Custom</div>
-        <div class="aeo-price-sub">For multi-location or complex accounts that need a bespoke plan.</div>
+        <div class="aeo-price-sub">Built around your business, market and growth goals.</div>
         <div class="aeo-price-amount"><span class="aeo-price-num">Custom</span></div>
         <div class="aeo-price-feats">
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in Premium</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Custom AI-search strategy for multi-location or complex accounts</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Website rebuild for AI readability and conversion</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Larger-scale authority &amp; PR-led citation campaigns</div>
-          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Dedicated strategist and custom reporting cadence</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Bespoke AI search and SEO across any number of brands, markets or locations</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Custom websites designed and built from scratch, or complete website rebuilds</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Large-scale content, digital PR, authority, reputation and local search programs</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Custom analytics, CRM, CMS, attribution and third-party integrations</div>
+          <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Conversion optimization, custom development and dedicated strategic support</div>
         </div>
-        <a class="aeo-btn aeo-btn--ghost" href="book.html?plan=custom">Talk to us</a>
+        <a class="aeo-btn aeo-btn--primary" href="book.html?plan=custom">Talk to us</a>
       </div>
     </div>
-    <p class="aeo-price-note">Prices in USD. Month to month. Cancel anytime. Everything we build stays yours.</p>
+    <p class="aeo-price-note">Prices in USD. Every engagement is covered by a service agreement. Month-to-month terms are available, and scope is agreed before work starts.</p>
     <div class="aeo-faq">
       <div class="aeo-faq-h"><span class="aeo-pill aeo-pill-center">FAQ</span><h2 class="aeo-h2" style="font-size:clamp(26px,3vw,38px)">Questions, answered</h2></div>
-      <details open><summary>What is answer engine optimization?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">When customers ask ChatGPT, Perplexity, Gemini or Claude &ldquo;who&rsquo;s the best plumber near me?&rdquo;, those engines pick a handful of businesses to recommend. AEO is the work of making sure your business is one of them: structured data, content the engines want to quote, and the reviews and citations they check before recommending anyone.</div></div></details>
-      <details><summary>How long until I see results?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Most clients see their mention rate start moving within 30&ndash;60 days. The full effect typically lands around 90 days, once new pages and citations have been crawled and picked up by the engines.</div></div></details>
-      <details><summary>How do you measure &ldquo;recommended by AI&rdquo;?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Every month we run hundreds of real customer questions through each AI engine and count how often your business is named. That gives you a mention rate: a single number you can watch climb, benchmarked against your competitors.</div></div></details>
-      <details><summary>Do I need a new website?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">No. We work with your existing site. We add structured data, fix what AI can&rsquo;t read, and publish new pages inside your current setup. You keep full ownership of everything.</div></div></details>
-      <details><summary>What happens if I cancel?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Everything stays yours: the schema, the pages, the citations and the reviews. There are no lock-ins and nothing is removed. Most of the work keeps compounding after we stop.</div></div></details>
+      <details open><summary>What is answer engine optimization (AEO)?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Answer engine optimization, or AEO, is the work of making your business easier for AI search tools to find, understand, cite and recommend. We improve your website, content and wider online presence so your business has a stronger chance of appearing when customers ask AI who to choose.</div></div></details>
+      <details><summary>Is AEO the same as GEO or AI SEO?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Broadly, yes. AEO, GEO and AI SEO are different names for overlapping work focused on visibility in AI-generated search and answers. We use AEO because the outcome is simple: helping your business become one of the answers customers see.</div></div></details>
+      <details><summary>How is AEO different from SEO?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">SEO focuses on visibility in traditional search results, while AEO focuses on visibility in AI-generated answers and recommendations. The two share many of the same foundations, which is why Answered Labs combines SEO and AEO rather than treating them as separate services.</div></div></details>
+      <details><summary>Does Answered Labs include SEO?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Yes. SEO is built into Growth, Scale and Custom. We work on crawlability, indexing, technical issues, schema, internal linking, service and location pages, content and local search foundations alongside AI visibility.</div></div></details>
+      <details><summary>Why does AEO matter for local service businesses?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Customers are increasingly using AI to compare providers, find local businesses and decide who to contact. If your business is missing from those answers, a competitor can enter the customer&rsquo;s shortlist before they ever reach your website.</div></div></details>
+      <details><summary>Which AI platforms do you optimize for?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">We track major answer engines and AI search experiences including ChatGPT, Gemini, Claude, Perplexity and Google AI search. The exact mix can change as platforms and customer behaviour change.</div></div></details>
+      <details><summary>How do you measure AI visibility?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">We test a defined set of real buyer questions across major AI platforms and track how often your business appears, which competitors appear and which sources influence the answers. We combine that with SEO rankings, organic traffic and conversion data where available so we can measure progress over time rather than relying on a single screenshot.</div></div></details>
+      <details><summary>What do you actually change?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">We change whatever is most likely to be limiting your visibility. That can include technical SEO, schema, site structure, internal linking, service and location pages, answer-ready content, Google Business Profile, reviews, citations, business listings, backlinks and third-party authority.</div></div></details>
+      <details><summary>How long does AEO take to work?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Most engagements use the first 90 days to establish the baseline, fix the foundations, improve priority pages and start building authority. Some movement can happen sooner, but meaningful gains depend on your market, competition and the state of your existing site.</div></div></details>
+      <details><summary>Can you guarantee that ChatGPT or Google will recommend my business?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">No. No agency controls what an AI system or search engine chooses to surface. We can measure where you are missing, improve the signals those systems rely on and keep testing what moves your visibility.</div></div></details>
+      <details><summary>Do I need a new website?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Usually not. We can work with most existing websites. If the site itself is holding back search visibility, conversion or our ability to make the right changes, we will tell you and recommend the cleanest way forward.</div></div></details>
+      <details><summary>Can Answered Labs build a new website for me?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Yes. Custom engagements can include a new website designed and built from scratch, or a complete rebuild of an existing site. We build the site around search visibility, conversion and the needs of your business rather than treating it as a separate design exercise.</div></div></details>
+      <details><summary>Can you work alongside my existing SEO or web agency?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Yes. We can work alongside an existing SEO, paid media, web or internal team. We agree responsibilities before work starts so there is no duplicated work or confusion over who is handling what.</div></div></details>
+      <details><summary>Do you work with multi-location businesses?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Yes. Scale and Custom can cover multiple services, cities, locations or brands, with separate search and AI visibility work where needed. Larger programs are scoped around the number of markets and the amount of execution required.</div></div></details>
+      <details><summary>What does authority building mean?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Authority building is the work of strengthening the trusted signals about your business outside your own website. Depending on the market, that can include reviews, reputable directories, industry sites, earned media, backlinks and other credible third-party mentions.</div></div></details>
+      <details><summary>Do you use AI to create content?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">We use AI where it makes the work faster, but we do not mass-publish generic AI content. Every page needs to be accurate, useful, specific to your business and good enough that a real customer would want to read it.</div></div></details>
+      <details><summary>What&rsquo;s the difference between Growth and Scale?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Growth gives you the complete SEO and AEO foundation plus consistent monthly execution. Scale increases the amount of content, market coverage, authority work and monitoring for businesses competing across more services, locations or search terms.</div></div></details>
+      <details><summary>How much does Answered Labs cost?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Growth is $4,995 per month and Scale is $7,995 per month. Custom is scoped around the work required, so there is no fixed Custom price.</div></div></details>
+      <details><summary>How are engagements structured?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Every engagement is covered by a service agreement that sets out the scope, price and term before we start. Month-to-month terms are available. Larger Custom projects may use a different structure depending on the work involved.</div></div></details>
+      <details><summary>Who is Answered Labs best for?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Answered Labs is built for established US service businesses where search drives high-value customers and the owner wants the work handled for them. We are especially well suited to local and multi-location businesses competing in home services, legal, dental, healthcare and other high-intent service categories.</div></div></details>
+      <details><summary>What do you need from us to get started?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">Usually we need access to your website and analytics, your core services and locations, and a short list of the competitors you care about. If you use Google Search Console or Google Business Profile, access to those helps too. We handle the rest.</div></div></details>
+      <details><summary>Is there one trick that makes AI recommend a business?</summary><div class="aeo-faq-wrap"><div class="aeo-faq-a">No. AI visibility comes from a combination of strong search foundations, clear and useful content, accurate business information and credible signals across the wider web. We focus on improving that whole system rather than selling a single technical trick.</div></div></details>
     </div>
     <div class="aeo-cta-band">
       <div class="bg"><i></i><i></i></div>
@@ -138,21 +169,25 @@
   function wireFaq(){
     var list=document.querySelectorAll(".aeo-faq details");
     if(!list.length)return;
+    function setExpanded(d,on){
+      var sum=d.querySelector("summary");
+      if(sum)sum.setAttribute("aria-expanded",on?"true":"false");
+    }
     function collapse(d,instant){
       var w=d.querySelector(".aeo-faq-wrap");
       if(!w||!d.open)return;
-      if(instant||reduce){d.open=false;w.style.height="";return;}
+      if(instant||reduce){d.open=false;w.style.height="";setExpanded(d,false);return;}
       w.style.height=w.scrollHeight+"px";
       w.getBoundingClientRect();
       w.style.height="0px";
       w.addEventListener("transitionend",function h(){
         w.removeEventListener("transitionend",h);
-        d.open=false;w.style.height="";
+        d.open=false;w.style.height="";setExpanded(d,false);
       });
     }
     function expand(d){
       var w=d.querySelector(".aeo-faq-wrap");
-      d.open=true;
+      d.open=true;setExpanded(d,true);
       if(!w)return;
       if(reduce){w.style.height="auto";return;}
       w.style.height="0px";
@@ -164,12 +199,21 @@
       });
     }
     for(var i=0;i<list.length;i++){
-      (function(d){
+      (function(d,idx){
         if(d.getAttribute("data-aeo")==="1")return;
         d.setAttribute("data-aeo","1");
         var w=d.querySelector(".aeo-faq-wrap");
-        if(d.open&&w)w.style.height="auto";
+        var a=d.querySelector(".aeo-faq-a");
         var sum=d.querySelector("summary");
+        if(a){
+          if(!a.id)a.id="aeo-faq-a-"+idx;
+          a.setAttribute("role","region");
+        }
+        if(sum){
+          sum.setAttribute("aria-expanded",d.open?"true":"false");
+          if(a&&a.id)sum.setAttribute("aria-controls",a.id);
+        }
+        if(d.open&&w)w.style.height="auto";
         if(!sum)return;
         sum.addEventListener("click",function(ev){
           ev.preventDefault();
@@ -177,7 +221,7 @@
           for(var j=0;j<list.length;j++)if(list[j]!==d)collapse(list[j]);
           expand(d);
         });
-      })(list[i]);
+      })(list[i],i);
     }
   }
   function mount(){

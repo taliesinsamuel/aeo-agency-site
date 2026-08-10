@@ -2,7 +2,18 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-PORT="${PORT:-8081}"
+# Prefer PORT from environment, else from .env, else 8082.
+if [ -z "${PORT:-}" ] && [ -f .env ]; then
+  PORT="$(python3 - <<'PY'
+from pathlib import Path
+for line in Path(".env").read_text().splitlines():
+  if line.startswith("PORT="):
+    print(line.split("=", 1)[1].strip().strip('"').strip("'"))
+    break
+PY
+)"
+fi
+PORT="${PORT:-8082}"
 export PORT
 
 # Reclaim the port if a previous server is still holding it.

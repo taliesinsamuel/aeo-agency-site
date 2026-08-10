@@ -5,15 +5,25 @@
     { "source": "/contact.html", "destination": "/127.0.0.1_8081/dl/contact.html" },
     { "source": "/pricing.html", "destination": "/127.0.0.1_8081/dl/pricing.html" },
     { "source": "/book.html", "destination": "/127.0.0.1_8081/dl/book.html" },
+    { "source": "/privacy.html", "destination": "/127.0.0.1_8081/dl/privacy.html" },
+    { "source": "/terms.html", "destination": "/127.0.0.1_8081/dl/terms.html" },
     { "source": "/contact", "destination": "/127.0.0.1_8081/dl/contact.html" },
     { "source": "/pricing", "destination": "/127.0.0.1_8081/dl/pricing.html" },
-    { "source": "/book", "destination": "/127.0.0.1_8081/dl/book.html" }
+    { "source": "/book", "destination": "/127.0.0.1_8081/dl/book.html" },
+    { "source": "/privacy", "destination": "/127.0.0.1_8081/dl/privacy.html" },
+    { "source": "/terms", "destination": "/127.0.0.1_8081/dl/terms.html" }
   ],
   "headers": [
     {
       "source": "/api/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "no-store" }
+      ]
+    },
+    {
+      "source": "/404.html",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
       ]
     }
   ]

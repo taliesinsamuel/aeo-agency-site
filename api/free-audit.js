@@ -1,7 +1,11 @@
 /**
  * POST /api/free-audit
  * Server-side Free Audit lead capture → HubSpot CRM (EU1).
- * Requires HUBSPOT_ACCESS_TOKEN (private app token). Never exposed to the client.
+ * Requires HUBSPOT_ACCESS_TOKEN (private app / service key). Never exposed to the client.
+ *
+ * Required HubSpot scopes:
+ *   crm.objects.contacts.read
+ *   crm.objects.contacts.write
  */
 
 const HUBSPOT_BASE = "https://api-eu1.hubapi.com";
@@ -220,8 +224,8 @@ async function findContactByEmail(token, email) {
           ],
         },
       ],
-      properties: ["email", "website"],
-      limit: 1,
+      properties: ["email", "website", "lifecyclestage"],
+      limit: 5,
     },
   });
   if (!result.ok) {
@@ -234,54 +238,15 @@ async function findContactByEmail(token, email) {
   return results[0] || null;
 }
 
-async function createContact(token, email, website) {
-  const result = await hubspotFetch("/crm/v3/objects/contacts", {
-    method: "POST",
-    token,
-    body: {
-      properties: {
-        email,
-        website,
-      },
-    },
-  });
-  if (result.ok) return { contact: result.data, created: true };
-
-  // Conflict / duplicate — recover by id in message or search, then update
-  if (result.status === 409) {
-    let existingId = null;
-    const msg =
-      (result.data && (result.data.message || result.data.error)) || "";
-    const m = String(msg).match(/Existing ID:\s*(\d+)/i);
-    if (m) existingId = m[1];
-    if (!existingId) {
-      const existing = await findContactByEmail(token, email);
-      if (existing && existing.id) existingId = existing.id;
-    }
-    if (existingId) {
-      const contact = await updateContact(token, existingId, website);
-      return { contact, created: false };
-    }
-  }
-
-  const err = new Error("hubspot_create_failed");
-  err.hubspotStatus = result.status;
-  err.hubspotData = result.data;
-  throw err;
-}
-
-async function updateContact(token, id, website) {
-  const result = await hubspotFetch("/crm/v3/objects/contacts/" + encodeURIComponent(id), {
-    method: "PATCH",
-    token,
-    body: {
-      properties: {
-        website,
-      },
-    },
-  });
+async function getContactById(token, id) {
+  const result = await hubspotFetch(
+    "/crm/v3/objects/contacts/" +
+      encodeURIComponent(id) +
+      "?properties=email,website,lifecyclestage",
+    { method: "GET", token }
+  );
   if (!result.ok) {
-    const err = new Error("hubspot_update_failed");
+    const err = new Error("hubspot_get_failed");
     err.hubspotStatus = result.status;
     err.hubspotData = result.data;
     throw err;
@@ -289,50 +254,127 @@ async function updateContact(token, id, website) {
   return result.data;
 }
 
-async function createFreeAuditNote(token, contactId, email, website) {
-  // Association type 202 = note → contact (HubSpot-defined)
-  const result = await hubspotFetch("/crm/v3/objects/notes", {
-    method: "POST",
-    token,
-    body: {
-      properties: {
-        hs_timestamp: String(Date.now()),
-        hs_note_body:
-          "Free Audit request via answeredlabs.com\nEmail: " +
-          email +
-          "\nWebsite: " +
-          website +
-          "\nSource: Free Audit form",
-      },
-      associations: [
-        {
-          to: { id: String(contactId) },
-          types: [
-            {
-              associationCategory: "HUBSPOT_DEFINED",
-              associationTypeId: 202,
-            },
-          ],
-        },
-      ],
-    },
-  });
-  if (!result.ok) {
-    // Contact upsert already succeeded — log and continue
-    console.warn("[free-audit] note create failed", result.status);
+/**
+ * Progressive property sets for create:
+ * 1) email + website + lifecyclestage
+ * 2) email + website (if lifecycle rejected)
+ * 3) email only (if website rejected)
+ */
+function createPropertyAttempts(email, website) {
+  const attempts = [];
+  if (website) {
+    attempts.push({ email, website, lifecyclestage: "lead" });
+    attempts.push({ email, website });
+  } else {
+    attempts.push({ email, lifecyclestage: "lead" });
   }
+  attempts.push({ email });
+  return attempts;
+}
+
+async function createContact(token, email, website) {
+  const attempts = createPropertyAttempts(email, website);
+  let result = null;
+
+  for (let i = 0; i < attempts.length; i++) {
+    const properties = attempts[i];
+    result = await hubspotFetch("/crm/v3/objects/contacts", {
+      method: "POST",
+      token,
+      body: { properties },
+    });
+    if (result.ok) return { contact: result.data, created: true };
+
+    // Conflict / duplicate — recover by id, then update
+    if (result.status === 409) {
+      let existingId = null;
+      const msg = (result.data && (result.data.message || result.data.error)) || "";
+      const m = String(msg).match(/Existing ID:\s*(\d+)/i);
+      if (m) existingId = m[1];
+      if (!existingId) {
+        const existing = await findContactByEmail(token, email);
+        if (existing && existing.id) existingId = existing.id;
+      }
+      if (existingId) {
+        const contact = await updateContact(token, existingId, website);
+        return { contact, created: false };
+      }
+      break;
+    }
+
+    // Retry without optional props on 400; other errors stop.
+    if (result.status !== 400 || i === attempts.length - 1) break;
+    console.warn(
+      "[free-audit] contact create rejected properties; retrying with reduced set",
+      result.status
+    );
+  }
+
+  const err = new Error("hubspot_create_failed");
+  err.hubspotStatus = result ? result.status : 0;
+  err.hubspotData = result ? result.data : null;
+  throw err;
+}
+
+/**
+ * Update website (and attempt lifecycle=lead) without overwriting unrelated fields.
+ * Lifecycle rejection must not fail the submission.
+ */
+async function updateContact(token, id, website) {
+  const attempts = [];
+  if (website) {
+    attempts.push({ website, lifecyclestage: "lead" });
+    attempts.push({ website });
+  } else {
+    attempts.push({ lifecyclestage: "lead" });
+  }
+
+  let last = null;
+  for (let i = 0; i < attempts.length; i++) {
+    last = await hubspotFetch("/crm/v3/objects/contacts/" + encodeURIComponent(id), {
+      method: "PATCH",
+      token,
+      body: { properties: attempts[i] },
+    });
+    if (last.ok) return last.data;
+    if (last.status !== 400 || i === attempts.length - 1) break;
+    console.warn(
+      "[free-audit] contact update rejected optional props; retrying reduced set",
+      last.status
+    );
+  }
+
+  // Website/lifecycle rejection must not block an existing-contact path.
+  if (last && last.status === 400) {
+    console.warn("[free-audit] contact update property rejection; retaining contact", last.status);
+    return getContactById(token, id);
+  }
+
+  const err = new Error("hubspot_update_failed");
+  err.hubspotStatus = last ? last.status : 0;
+  err.hubspotData = last ? last.data : null;
+  throw err;
+}
+
+function resolveHubSpotToken() {
+  const candidates = [
+    process.env.HUBSPOT_ACCESS_TOKEN,
+    process.env.HUBSPOT_PRIVATE_APP_TOKEN,
+  ];
+  for (const raw of candidates) {
+    if (typeof raw === "string" && raw.trim()) return raw.trim();
+  }
+  return "";
 }
 
 async function upsertHubSpotContact(token, email, website) {
   const existing = await findContactByEmail(token, email);
   if (existing && existing.id) {
     const contact = await updateContact(token, existing.id, website);
-    await createFreeAuditNote(token, existing.id, email, website);
     return { id: existing.id, created: false, contact };
   }
   const { contact, created } = await createContact(token, email, website);
   const id = contact && contact.id;
-  if (id) await createFreeAuditNote(token, id, email, website);
   return { id, created, contact };
 }
 
@@ -408,15 +450,17 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  const token = process.env.HUBSPOT_ACCESS_TOKEN;
-  if (!token || !String(token).trim()) {
-    console.error("[free-audit] HUBSPOT_ACCESS_TOKEN is not configured");
+  const token = resolveHubSpotToken();
+  if (!token) {
+    console.error(
+      "[free-audit] HubSpot token missing. Set HUBSPOT_ACCESS_TOKEN in the server environment."
+    );
     json(res, 503, { ok: false, error: "service_unavailable" });
     return;
   }
 
   try {
-    const result = await upsertHubSpotContact(String(token).trim(), email, website);
+    const result = await upsertHubSpotContact(token, email, website);
     json(res, 200, {
       ok: true,
       created: !!result.created,
@@ -448,9 +492,13 @@ module.exports = async function handler(req, res) {
   }
 };
 
-// Exported for local tests
+// Exported for local tests / live verification helpers
 module.exports._test = {
   normalizeEmail,
   isValidEmail,
   normalizeWebsite,
+  findContactByEmail,
+  getContactById,
+  resolveHubSpotToken,
+  upsertHubSpotContact,
 };
