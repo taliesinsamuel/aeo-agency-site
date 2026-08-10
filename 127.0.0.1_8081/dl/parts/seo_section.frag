@@ -1,7 +1,7 @@
 <style id="aeo-seo-style">
 /* ============================================================
    SEO SECTION — homepage-only. Strategy workspace animation.
-   Accents from .aeo-step--lime / --violet / --cyan below.
+   Coherent Answered Labs blue / cool-slate connection system.
    ============================================================ */
 #aeo-seo{
   background:transparent!important;
@@ -11,32 +11,49 @@
 }
 #aeo-seo .aeo-plat-bg{display:none}
 #aeo-seo .aeo-plat-inner{padding-bottom:clamp(28px,3.4vw,48px)}
+
+/* Descenders (g/p/q/y/j) clip under background-clip:text + tight line-height.
+   Scoped fix only — preserve global .aeo-h2 elsewhere. */
+#aeo-seo .aeo-h2{
+  line-height:1.2;
+  padding:.1em 0 .2em;
+  overflow:visible;
+  -webkit-box-decoration-break:clone;
+  box-decoration-break:clone;
+  /* Keep gradient paint box large enough for full glyph metrics */
+  background-origin:padding-box;
+  -webkit-background-origin:padding-box;
+  background-size:100% 130%;
+  background-position:center 35%;
+}
+
 @media (prefers-reduced-motion:reduce){
   #aeo-seo{margin-top:0}
 }
 
 .aeo-seo-card{
-  --seo-lime:#7af5b4;
-  --seo-lime-hi:#d8f86e;
-  --seo-violet:#e0a8ff;
-  --seo-violet-hi:#f0c8ff;
-  --seo-cyan:#2af7f8;
-  --seo-cyan-hi:#8accff;
-  --seo-ink:#f5f6f7;
-  --seo-mute:#8e97a5;
+  --seo-blue:#266df0;
+  --seo-blue-soft:#5c8bf5;
+  --seo-blue-hi:#8bb4ff;
+  --seo-blue-dim:rgba(38,109,240,.42);
+  --seo-ink:#f2f4f7;
+  --seo-mute:#8a93a3;
+  --seo-mute-2:#6a7280;
   --seo-line:#262b33;
+  --seo-line-2:#2e3540;
   --seo-bg:#0b0d10;
-  --seo-raised:#14181e;
+  --seo-raised:#12161c;
+  --seo-raised-2:#161b22;
+  --seo-path-idle:rgba(130,148,175,.16);
+  --seo-path-active:var(--seo-blue);
   position:relative;
   max-width:1180px;margin:0 auto;
   background:
-    radial-gradient(42% 58% at 34% 48%,rgba(122,245,180,.04),transparent 62%),
-    radial-gradient(36% 48% at 72% 28%,rgba(224,168,255,.035),transparent 64%),
-    radial-gradient(40% 52% at 76% 78%,rgba(42,247,248,.03),transparent 66%),
-    linear-gradient(180deg,#111419 0%,var(--seo-bg) 52%,#090b0e 100%);
+    radial-gradient(46% 56% at 28% 50%,rgba(38,109,240,.055),transparent 68%),
+    linear-gradient(180deg,#101318 0%,var(--seo-bg) 54%,#090b0e 100%);
   border:1px solid var(--seo-line);
   border-radius:var(--aeo-r-2xl);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 24px 56px -34px rgba(0,0,0,.55);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 24px 56px -34px rgba(0,0,0,.55);
   overflow:hidden;
   color:var(--seo-ink);
   box-sizing:border-box;
@@ -45,26 +62,30 @@
 
 .aeo-seo-card-head{
   display:flex;align-items:center;justify-content:space-between;gap:16px;
-  padding:12px 22px;
+  padding:11px 22px;
   border-bottom:1px solid var(--seo-line);
-  font-size:11px;font-weight:500;letter-spacing:.02em;color:var(--seo-mute);
+  font-size:11px;font-weight:500;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--seo-mute-2);
 }
-.aeo-seo-card-head-r{color:#6a7280;font-variant-numeric:tabular-nums}
+.aeo-seo-card-head-r{
+  color:#5c6573;font-variant-numeric:tabular-nums;
+  letter-spacing:.06em;text-transform:none;font-size:11px;
+}
 
 .aeo-seo-canvas{
   position:relative;
   width:100%;
-  height:clamp(448px,50vw,520px);
-  min-height:448px;
-  padding:20px 24px 24px;
+  height:clamp(460px,52vw,540px);
+  min-height:460px;
+  padding:28px 28px 30px;
 }
 .aeo-seo-canvas::before{
-  content:"";position:absolute;inset:14px 16px 16px;
-  border:1px solid rgba(255,255,255,.035);
+  content:"";position:absolute;inset:16px 18px 18px;
+  border:1px solid rgba(255,255,255,.028);
   border-radius:14px;
   background:
-    radial-gradient(42% 55% at 30% 48%,rgba(255,255,255,.03),transparent 70%),
-    linear-gradient(180deg,rgba(255,255,255,.012),transparent 40%);
+    radial-gradient(38% 48% at 26% 50%,rgba(38,109,240,.04),transparent 72%),
+    linear-gradient(180deg,rgba(255,255,255,.01),transparent 42%);
   pointer-events:none;
 }
 
@@ -73,163 +94,224 @@
   pointer-events:none;z-index:1;overflow:visible;
 }
 .aeo-seo-path-base{
-  fill:none;stroke:rgba(255,255,255,.08);stroke-width:1;stroke-linecap:round;stroke-linejoin:round;
+  fill:none;stroke:var(--seo-path-idle);stroke-width:1.15;
+  stroke-linecap:round;stroke-linejoin:round;
 }
 .aeo-seo-path-active{
-  fill:none;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;
-  opacity:0;
-  stroke-opacity:.88;
+  fill:none;stroke:var(--seo-path-active);stroke-width:1.35;
+  stroke-linecap:round;stroke-linejoin:round;
+  opacity:0;stroke-opacity:.92;
 }
 .aeo-seo-path-active.is-draw{opacity:1}
-.aeo-seo-signal{opacity:0;pointer-events:none}
+.aeo-seo-path-active.is-done{stroke-opacity:.55}
+.aeo-seo-signal{
+  fill:#c5d9ff;
+  opacity:0;
+  pointer-events:none;
+}
 
-/* Hub */
+/* Hub — root node */
 .aeo-seo-hub{
   position:absolute;z-index:4;
-  left:28%;top:50%;
-  width:152px;height:152px;
-  margin:-76px 0 0 -76px;
-  opacity:1;transform:scale(.985);
-  transition:transform .35s cubic-bezier(.22,1,.36,1);
+  left:24%;top:50%;
+  width:148px;height:148px;
+  margin:-74px 0 0 -74px;
+  opacity:0;transform:scale(.97);
+  transition:opacity .55s cubic-bezier(.22,1,.36,1),transform .55s cubic-bezier(.22,1,.36,1);
 }
-.aeo-seo-hub.is-on{transform:scale(1)}
+.aeo-seo-hub.is-on{opacity:1;transform:scale(1)}
 .aeo-seo-hub-shell{
   position:absolute;inset:0;border-radius:999px;
   background:
-    radial-gradient(120% 90% at 34% 26%,rgba(255,255,255,.035),transparent 46%),
-    linear-gradient(180deg,#151a21,#0f1318 58%,#0c1015);
-  border:1px solid rgba(255,255,255,.09);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 14px 32px -18px rgba(0,0,0,.7);
-  transition:background .35s ease,border-color .35s ease,box-shadow .35s ease;
+    radial-gradient(70% 70% at 50% 42%,rgba(38,109,240,.07),transparent 58%),
+    radial-gradient(120% 90% at 36% 24%,rgba(255,255,255,.04),transparent 48%),
+    linear-gradient(180deg,#161b22,#10141a 56%,#0c1015);
+  border:1px solid rgba(160,176,200,.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    inset 0 0 0 1px rgba(0,0,0,.35),
+    0 18px 36px -20px rgba(0,0,0,.75);
+  transition:border-color .4s ease,box-shadow .4s ease,background .4s ease;
 }
 .aeo-seo-hub.is-on .aeo-seo-hub-shell{
-  background:
-    radial-gradient(120% 90% at 34% 26%,rgba(255,255,255,.07),transparent 46%),
-    linear-gradient(180deg,#171c24,#10141a 58%,#0d1116);
-  border-color:rgba(255,255,255,.12);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 14px 32px -18px rgba(0,0,0,.7);
+  border-color:rgba(170,188,214,.18);
+}
+.aeo-seo-hub.is-lit .aeo-seo-hub-shell{
+  border-color:rgba(92,139,245,.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    inset 0 0 0 1px rgba(0,0,0,.3),
+    0 0 0 1px rgba(38,109,240,.06),
+    0 18px 36px -20px rgba(0,0,0,.75);
 }
 .aeo-seo-hub-ring{
-  position:absolute;inset:-6px;border-radius:inherit;pointer-events:none;opacity:.3;
-  transition:opacity .4s ease;
+  position:absolute;inset:-5px;border-radius:inherit;pointer-events:none;opacity:0;
+  transition:opacity .5s ease;
 }
 .aeo-seo-hub.is-on .aeo-seo-hub-ring{opacity:.55}
 .aeo-seo-hub.is-lit .aeo-seo-hub-ring{opacity:1}
 .aeo-seo-hub-ring svg{width:100%;height:100%;display:block}
-.aeo-seo-hub-ring .seg{fill:none;stroke-width:1.35;stroke-linecap:round;stroke:rgba(255,255,255,.1)}
-.aeo-seo-hub-ring .seg-a{stroke:rgba(122,245,180,.55)}
-.aeo-seo-hub-ring .seg-b{stroke:rgba(224,168,255,.55)}
-.aeo-seo-hub-ring .seg-c{stroke:rgba(42,247,248,.52)}
+.aeo-seo-hub-ring .seg{
+  fill:none;stroke-width:1.1;stroke-linecap:round;
+  stroke:rgba(130,148,175,.22);
+}
+.aeo-seo-hub-ring .seg-a{stroke:rgba(38,109,240,.38)}
+.aeo-seo-hub-ring .seg-b{stroke:rgba(92,139,245,.28)}
 .aeo-seo-hub-label{
   position:absolute;inset:0;z-index:2;
   display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
 }
 .aeo-seo-hub-kicker{
-  font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6f7886;margin-bottom:3px;
+  font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:#6f7886;margin-bottom:4px;
 }
 .aeo-seo-hub-title{
   font-family:"Inter Display",Inter,sans-serif;
-  font-size:19px;font-weight:600;letter-spacing:-.02em;color:var(--seo-ink);line-height:1.1;
+  font-size:19px;font-weight:600;letter-spacing:-.022em;color:var(--seo-ink);line-height:1.15;
 }
 .aeo-seo-anchors{position:absolute;inset:0;z-index:5;pointer-events:none}
 .aeo-seo-anchor{
-  position:absolute;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:999px;
-  background:#1a2028;border:1px solid rgba(255,255,255,.18);
-  transition:background .25s ease,border-color .25s ease,box-shadow .25s ease;
+  position:absolute;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:999px;
+  background:#1a212b;border:1px solid rgba(140,156,178,.28);
+  transition:background .35s ease,border-color .35s ease,box-shadow .35s ease,transform .35s ease;
+  transform:scale(1);
+}
+.aeo-seo-anchor.is-pulse{
+  background:var(--seo-blue-soft);border-color:var(--seo-blue-hi);
+  box-shadow:0 0 0 3px rgba(38,109,240,.16);
+  transform:scale(1.15);
 }
 .aeo-seo-anchor.is-on{
-  background:var(--accent);border-color:var(--accent);
+  background:var(--seo-blue);border-color:rgba(139,180,255,.75);
   box-shadow:0 0 0 2px rgba(11,13,16,.55);
+  transform:scale(1);
 }
 
-/* Workstream modules — constellation panels, not a uniform stack */
+/* Workstream nodes — compact technical panels, vertical stack */
 .aeo-seo-mod{
   position:absolute;z-index:3;
-  display:grid;grid-template-columns:auto 1fr auto;align-items:center;column-gap:8px;
-  min-height:58px;
-  background:linear-gradient(180deg,#181d25 0%,#13181f 100%);
-  border:1px solid #2a313b;
-  border-radius:11px;
-  padding:9px 11px 9px 0;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
-  opacity:0;
-  transform:translate3d(-12px,4px,0);
+  display:grid;grid-template-columns:auto 1fr auto;align-items:center;column-gap:9px;
+  min-height:56px;
+  width:278px;
+  left:58%;
+  background:linear-gradient(180deg,var(--seo-raised-2) 0%,var(--seo-raised) 100%);
+  border:1px solid var(--seo-line-2);
+  border-radius:9px;
+  padding:9px 12px 9px 0;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+  opacity:.3;
+  transform:translate3d(0,6px,0);
   pointer-events:none;
+  transition:opacity .5s cubic-bezier(.22,1,.36,1),transform .55s cubic-bezier(.22,1,.36,1),border-color .45s ease,background .45s ease,box-shadow .45s ease;
 }
 .aeo-seo-mod.is-on{
   opacity:1;
   transform:translate3d(0,0,0);
-  transition:opacity .28s cubic-bezier(.22,1,.36,1),transform .28s cubic-bezier(.22,1,.36,1);
+  border-color:rgba(92,139,245,.32);
+  background:linear-gradient(180deg,#191e27 0%,#141920 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 10px 24px -18px rgba(0,0,0,.55);
   pointer-events:auto;
 }
 .aeo-seo-mod-bar{
-  width:2px;align-self:stretch;margin:10px 0;border-radius:0 2px 2px 0;
-  background:var(--accent);opacity:.28;transition:opacity .25s ease;
+  width:2px;align-self:stretch;margin:11px 0;border-radius:0 2px 2px 0;
+  background:var(--seo-blue);opacity:.18;transition:opacity .35s ease;
 }
-.aeo-seo-mod.is-on .aeo-seo-mod-bar{opacity:.95}
-.aeo-seo-mod-main{min-width:0;padding-left:9px}
-.aeo-seo-mod-top{display:flex;align-items:baseline;gap:6px;min-width:0}
+.aeo-seo-mod.is-on .aeo-seo-mod-bar{opacity:.9}
+.aeo-seo-mod-main{min-width:0;padding-left:10px}
+.aeo-seo-mod-top{display:flex;align-items:baseline;gap:7px;min-width:0}
 .aeo-seo-mod-idx{
-  font-size:9px;font-weight:600;letter-spacing:.05em;color:#555e6b;font-variant-numeric:tabular-nums;
-  flex:0 0 auto;
+  font-size:9px;font-weight:600;letter-spacing:.06em;color:#555e6b;
+  font-variant-numeric:tabular-nums;flex:0 0 auto;
 }
 .aeo-seo-mod-title{
-  font-size:13.5px;font-weight:600;letter-spacing:-.014em;color:var(--seo-ink);line-height:1.2;
-  opacity:0;transition:opacity .2s ease;
+  font-size:13.5px;font-weight:600;letter-spacing:-.015em;color:var(--seo-ink);line-height:1.25;
+  opacity:.55;transition:opacity .3s ease;
 }
-.aeo-seo-mod.is-on .aeo-seo-mod-title{opacity:1;transition-delay:.06s}
+.aeo-seo-mod.is-on .aeo-seo-mod-title{opacity:1;transition-delay:.05s}
 .aeo-seo-mod-detail{
-  margin-top:2px;font-size:11px;font-weight:500;color:var(--seo-mute);line-height:1.3;
-  opacity:0;transition:opacity .2s ease;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  margin-top:2px;font-size:11px;font-weight:500;color:var(--seo-mute);line-height:1.35;
+  opacity:.4;transition:opacity .3s ease;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.aeo-seo-mod.is-on .aeo-seo-mod-detail{opacity:1;transition-delay:.12s}
+.aeo-seo-mod.is-on .aeo-seo-mod-detail{opacity:1;transition-delay:.1s}
 .aeo-seo-mod-dot{
-  width:5px;height:5px;border-radius:999px;margin-right:1px;align-self:start;margin-top:8px;
-  border:1px solid rgba(255,255,255,.14);background:transparent;
-  transition:background .25s ease,border-color .25s ease;
+  width:5px;height:5px;border-radius:999px;margin-right:1px;align-self:start;margin-top:9px;
+  border:1px solid rgba(140,156,178,.22);background:transparent;
+  transition:background .3s ease,border-color .3s ease,box-shadow .3s ease;
 }
-.aeo-seo-mod.is-on .aeo-seo-mod-dot{background:var(--accent);border-color:var(--accent)}
+.aeo-seo-mod.is-on .aeo-seo-mod-dot{
+  background:var(--seo-blue);border-color:var(--seo-blue-soft);
+  box-shadow:0 0 0 2px rgba(38,109,240,.12);
+}
 
-/* Desktop constellation — deliberate fan, varied X offsets */
-.aeo-seo-mod[data-i="0"]{--accent:var(--seo-lime); left:52%; top:7%; width:246px}
-.aeo-seo-mod[data-i="1"]{--accent:var(--seo-violet); left:61%; top:26%; width:288px}
-.aeo-seo-mod[data-i="2"]{--accent:var(--seo-cyan); left:68%; top:45%; width:254px}
-.aeo-seo-mod[data-i="3"]{--accent:var(--seo-violet); left:58%; top:64%; width:272px}
-.aeo-seo-mod[data-i="4"]{--accent:var(--seo-lime-hi); left:49%; top:82%; width:296px}
+/* Deliberate vertical stack — equal spacing, shared left edge */
+.aeo-seo-mod[data-i="0"]{top:8%}
+.aeo-seo-mod[data-i="1"]{top:26.5%}
+.aeo-seo-mod[data-i="2"]{top:45%}
+.aeo-seo-mod[data-i="3"]{top:63.5%}
+.aeo-seo-mod[data-i="4"]{top:82%}
 
-.aeo-seo-canvas.is-resetting .aeo-seo-mod.is-on,
+.aeo-seo-canvas.is-resetting .aeo-seo-mod.is-on{
+  transition:opacity 1s cubic-bezier(.4,0,.2,1),transform 1s cubic-bezier(.4,0,.2,1),border-color 1s ease!important;
+  opacity:.28!important;
+  transform:translate3d(0,3px,0)!important;
+  border-color:var(--seo-line-2)!important;
+}
 .aeo-seo-canvas.is-resetting .aeo-seo-path-active.is-draw{
-  transition:opacity .35s ease!important;
-  opacity:0!important;
+  transition:opacity 1s cubic-bezier(.4,0,.2,1),stroke-opacity 1s ease!important;
+  opacity:.12!important;
 }
-.aeo-seo-canvas.is-resetting .aeo-seo-anchor.is-on{
-  background:#1a2028!important;border-color:rgba(255,255,255,.18)!important;box-shadow:none!important;
+.aeo-seo-canvas.is-resetting .aeo-seo-anchor.is-on,
+.aeo-seo-canvas.is-resetting .aeo-seo-anchor.is-pulse{
+  transition:background .9s ease,border-color .9s ease,box-shadow .9s ease,transform .9s ease!important;
+  background:#1a212b!important;
+  border-color:rgba(140,156,178,.28)!important;
+  box-shadow:none!important;
+  transform:scale(1)!important;
+}
+.aeo-seo-canvas.is-resetting .aeo-seo-hub{
+  transition:opacity 1.15s ease!important;
+  opacity:.85!important;
+}
+.aeo-seo-canvas.is-resetting .aeo-seo-mod-title,
+.aeo-seo-canvas.is-resetting .aeo-seo-mod-detail,
+.aeo-seo-canvas.is-resetting .aeo-seo-mod-bar,
+.aeo-seo-canvas.is-resetting .aeo-seo-mod-dot{
+  transition:opacity .9s ease!important;
+}
+
+@media (max-width:980px) and (min-width:761px){
+  .aeo-seo-hub{left:20%;width:136px;height:136px;margin:-68px 0 0 -68px}
+  .aeo-seo-mod{left:52%;width:min(278px,42vw)}
+  .aeo-seo-hub-title{font-size:17px}
 }
 
 @media (max-width:760px){
   .aeo-seo-card-head{padding:11px 16px}
-  .aeo-seo-canvas{height:auto;min-height:0;padding:16px 14px 18px}
+  .aeo-seo-canvas{height:auto;min-height:0;padding:18px 14px 20px}
   .aeo-seo-svg{display:none}
   .aeo-seo-hub{
-    position:relative;left:auto;top:auto;margin:4px auto 18px;
-    width:148px;height:148px;
+    position:relative;left:auto;top:auto;margin:6px auto 20px;
+    width:132px;height:132px;
   }
+  .aeo-seo-hub-title{font-size:17px}
   .aeo-seo-anchors{display:none}
   .aeo-seo-mods{display:flex;flex-direction:column;gap:10px}
   .aeo-seo-mod{
     position:relative;left:auto!important;top:auto!important;width:100%!important;
-    transform:translate3d(-10px,0,0);
+    transform:translate3d(0,8px,0);
   }
-  .aeo-seo-mod.is-on{transform:none}
+  .aeo-seo-mod.is-on{transform:translate3d(0,0,0)}
 }
 
 @media (prefers-reduced-motion:reduce){
-  .aeo-seo-hub,.aeo-seo-mod,.aeo-seo-mod-title,.aeo-seo-mod-detail,.aeo-seo-hub-shell,.aeo-seo-hub-ring{transition:none!important}
-  .aeo-seo-hub,.aeo-seo-hub.is-on{transform:none}
+  .aeo-seo-hub,.aeo-seo-mod,.aeo-seo-mod-title,.aeo-seo-mod-detail,
+  .aeo-seo-hub-shell,.aeo-seo-hub-ring,.aeo-seo-anchor,.aeo-seo-path-active{transition:none!important}
+  .aeo-seo-hub,.aeo-seo-hub.is-on{opacity:1;transform:none}
   .aeo-seo-mod,.aeo-seo-mod.is-on{opacity:1;transform:none}
   .aeo-seo-mod-title,.aeo-seo-mod-detail{opacity:1!important}
-  .aeo-seo-path-active{opacity:1}
+  .aeo-seo-path-active{opacity:1;stroke-opacity:.55}
   .aeo-seo-hub-ring{opacity:1}
+  .aeo-seo-signal{display:none}
 }
 </style>
 <template id="aeo-seo-tpl">
@@ -250,12 +332,9 @@
         <div class="aeo-seo-hub" id="aeo-seo-hub">
           <div class="aeo-seo-hub-ring" aria-hidden="true">
             <svg viewBox="0 0 100 100">
-              <path class="seg seg-a" d="M76 20 A41 41 0 0 1 93 52"/>
-              <path class="seg seg-b" d="M92 54 A41 41 0 0 1 68 88"/>
-              <path class="seg seg-c" d="M66 89 A41 41 0 0 1 28 86"/>
-              <path class="seg" d="M26 84 A41 41 0 0 1 7 48"/>
-              <path class="seg" d="M8 46 A41 41 0 0 1 34 14"/>
-              <path class="seg" d="M36 13 A41 41 0 0 1 74 18"/>
+              <circle class="seg" cx="50" cy="50" r="46" stroke-dasharray="8 10" transform="rotate(-90 50 50)"/>
+              <path class="seg seg-a" d="M74 18 A44 44 0 0 1 92 50"/>
+              <path class="seg seg-b" d="M92 52 A44 44 0 0 1 70 88"/>
             </svg>
           </div>
           <div class="aeo-seo-hub-shell"></div>
@@ -277,35 +356,37 @@
 
   /*
    * Absolute timeline (ms from sequence start).
-   * Active build ~4200, hold 2400, reset 380. Total loop ~7000.
+   * Build ~5.8s · hold ~3.6s · reset ~1.05s · brief pause · loop.
    */
   var T={
     HUB_ON:0,
-    HUB_LIT:280,
-    L0:500,
-    L1:1150,
-    L2:1750,
-    L3:2450,
-    L4:3150,
-    COMPLETE:4200,
-    HOLD_END:6600,
-    RESET_END:6980,
-    LOOP:7100
+    HUB_LIT:580,
+    L0:780,
+    L1:1880,
+    L2:2980,
+    L3:4080,
+    L4:5180,
+    COMPLETE:6100,
+    HOLD_END:9700,
+    RESET_END:10750,
+    LOOP:11100
   };
-  var LINE_MS=400;
-  var MOD_LEAD=0.70; /* module starts when path ~70% drawn */
+  var LINE_MS=720;
+  var MOD_LEAD=0.82;
+  var SIGNAL_R=2.4;
 
   var LEVERS=[
-    {id:1,title:"Technical SEO",detail:"Crawlability · Indexing · Schema",accent:"#7af5b4",t:T.L0},
-    {id:2,title:"Search Demand & Intent",detail:"Keywords · Buyer questions · Competitors",accent:"#e0a8ff",t:T.L1},
-    {id:3,title:"Site Architecture",detail:"Services · Locations · Internal links",accent:"#2af7f8",t:T.L2},
-    {id:4,title:"Content & On-page",detail:"Service pages · Location pages · FAQs",accent:"#e0a8ff",t:T.L3},
-    {id:5,title:"Authority & Local Signals",detail:"Links · Reviews · Citations",accent:"#d8f86e",t:T.L4}
+    {id:1,title:"Technical SEO",detail:"Crawlability · Indexing · Schema",t:T.L0},
+    {id:2,title:"Search Demand & Intent",detail:"Keywords · Buyer questions · Competitors",t:T.L1},
+    {id:3,title:"Site Architecture",detail:"Services · Locations · Internal links",t:T.L2},
+    {id:4,title:"Content & On-page",detail:"Service pages · Location pages · FAQs",t:T.L3},
+    {id:5,title:"Authority & Local Signals",detail:"Links · Reviews · Citations",t:T.L4}
   ];
 
   function isMobile(){return window.matchMedia("(max-width:760px)").matches;}
   function pad(n){return n<10?"0"+n:String(n);}
   function easeOut(p){return 1-Math.pow(1-p,3);}
+  function easeInOut(p){return p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;}
   function clamp01(p){return p<0?0:p>1?1:p;}
 
   function buildMods(root){
@@ -332,13 +413,14 @@
     var host=root.querySelector("#aeo-seo-anchors");
     if(!host)return;
     if(isMobile()){host.innerHTML="";return;}
-    var angles=[-48,-24,0,24,48];
+    /* Ports fan toward the right-side stack */
+    var angles=[-42,-21,0,21,42];
     var html="",i,a,x,y;
     for(i=0;i<angles.length;i++){
       a=angles[i]*Math.PI/180;
-      x=50+Math.cos(a)*47;
-      y=50+Math.sin(a)*47;
-      html+='<span class="aeo-seo-anchor" data-i="'+i+'" style="left:'+x+'%;top:'+y+'%;--accent:'+LEVERS[i].accent+'"></span>';
+      x=50+Math.cos(a)*46.5;
+      y=50+Math.sin(a)*46.5;
+      html+='<span class="aeo-seo-anchor" data-i="'+i+'" style="left:'+x+'%;top:'+y+'%"></span>';
     }
     host.innerHTML=html;
   }
@@ -365,21 +447,36 @@
     svg.setAttribute("height",String(h));
     svg.innerHTML="";
 
+    var anchors=[].slice.call(root.querySelectorAll(".aeo-seo-anchor"));
     mods.forEach(function(mod,i){
       var mr=mod.getBoundingClientRect();
       var ex=mr.left-cr.left;
       var ey=mr.top-cr.top+mr.height/2;
-      var dx=ex-hx,dy=ey-hy,len=Math.hypot(dx,dy)||1;
-      var sx=hx+(dx/len)*hradius;
-      var sy=hy+(dy/len)*hradius;
-      var tx=ex+1,ty=ey;
-      /* Vary curvature slightly per branch */
-      var k=0.40+i*0.035;
-      var c1x=sx+(tx-sx)*k;
-      var c1y=sy+(ty-sy)*0.08;
-      var c2x=tx-(tx-sx)*0.18;
+      /* Line origin = geometric center of the matching port dot (same geometry). */
+      var anc=anchors[i];
+      var ar=anc?anc.getBoundingClientRect():null;
+      var sx,sy;
+      if(ar){
+        sx=ar.left-cr.left+ar.width/2;
+        sy=ar.top-cr.top+ar.height/2;
+      }else{
+        var dx=ex-hx,dy=ey-hy,len=Math.hypot(dx,dy)||1;
+        sx=hx+(dx/len)*(hradius-1);
+        sy=hy+(dy/len)*(hradius-1);
+      }
+      var tx=ex-0.5;
+      var ty=ey;
+
+      /* Consistent horizontal-biased Bezier: leave hub cleanly, settle into node */
+      var spanX=tx-sx;
+      var c1x=sx+spanX*0.38;
+      var c1y=sy+(ty-sy)*0.12;
+      var c2x=tx-spanX*0.22;
       var c2y=ty;
-      var d="M"+sx.toFixed(1)+","+sy.toFixed(1)+" C"+c1x.toFixed(1)+","+c1y.toFixed(1)+" "+c2x.toFixed(1)+","+c2y.toFixed(1)+" "+tx.toFixed(1)+","+ty.toFixed(1);
+      var d="M"+sx.toFixed(2)+","+sy.toFixed(2)+
+            " C"+c1x.toFixed(2)+","+c1y.toFixed(2)+" "+
+            c2x.toFixed(2)+","+c2y.toFixed(2)+" "+
+            tx.toFixed(2)+","+ty.toFixed(2);
 
       var base=document.createElementNS(ns,"path");
       base.setAttribute("class","aeo-seo-path-base");
@@ -389,41 +486,65 @@
       var act=document.createElementNS(ns,"path");
       act.setAttribute("class","aeo-seo-path-active");
       act.setAttribute("d",d);
-      act.setAttribute("stroke",LEVERS[i].accent);
       svg.appendChild(act);
+
+      var signal=document.createElementNS(ns,"circle");
+      signal.setAttribute("class","aeo-seo-signal");
+      signal.setAttribute("r",String(SIGNAL_R));
+      signal.setAttribute("cx",sx.toFixed(2));
+      signal.setAttribute("cy",sy.toFixed(2));
+      svg.appendChild(signal);
 
       var plen=act.getTotalLength();
       act.style.strokeDasharray=String(plen);
       act.style.strokeDashoffset=String(plen);
 
-      paths.push({base:base,act:act,len:plen,start:LEVERS[i].t});
+      paths.push({base:base,act:act,signal:signal,len:plen,start:LEVERS[i].t,sx:sx,sy:sy});
     });
     return paths;
   }
 
-  function setInitial(root,paths){
+  function setInitial(root,paths,opts){
+    opts=opts||{};
     var hub=root.querySelector("#aeo-seo-hub");
     var canvas=root.querySelector("#aeo-seo-canvas");
     if(canvas)canvas.classList.remove("is-resetting");
-    if(hub)hub.classList.remove("is-on","is-lit");
+    if(hub){
+      if(opts.keepHub){
+        hub.classList.add("is-on");
+        hub.classList.remove("is-lit");
+      }else{
+        hub.classList.remove("is-on","is-lit");
+      }
+    }
     [].slice.call(root.querySelectorAll(".aeo-seo-mod")).forEach(function(m){m.classList.remove("is-on");});
-    [].slice.call(root.querySelectorAll(".aeo-seo-anchor")).forEach(function(a){a.classList.remove("is-on");});
+    [].slice.call(root.querySelectorAll(".aeo-seo-anchor")).forEach(function(a){a.classList.remove("is-on","is-pulse");});
     (paths||[]).forEach(function(P){
-      P.act.classList.remove("is-draw");
+      P.act.classList.remove("is-draw","is-done");
       P.act.style.strokeDasharray=String(P.len);
       P.act.style.strokeDashoffset=String(P.len);
       P.act.style.opacity="";
+      if(P.signal){
+        P.signal.style.opacity="0";
+        P.signal.setAttribute("cx",P.sx.toFixed(2));
+        P.signal.setAttribute("cy",P.sy.toFixed(2));
+      }
     });
   }
 
   function setComplete(root,paths){
     var hub=root.querySelector("#aeo-seo-hub");
+    var canvas=root.querySelector("#aeo-seo-canvas");
+    if(canvas)canvas.classList.remove("is-resetting");
     if(hub){hub.classList.add("is-on","is-lit");}
     [].slice.call(root.querySelectorAll(".aeo-seo-mod")).forEach(function(m){m.classList.add("is-on");});
-    [].slice.call(root.querySelectorAll(".aeo-seo-anchor")).forEach(function(a){a.classList.add("is-on");});
+    [].slice.call(root.querySelectorAll(".aeo-seo-anchor")).forEach(function(a){
+      a.classList.remove("is-pulse");a.classList.add("is-on");
+    });
     (paths||[]).forEach(function(P){
-      P.act.classList.add("is-draw");
+      P.act.classList.add("is-draw","is-done");
       P.act.style.strokeDashoffset="0";
+      if(P.signal)P.signal.style.opacity="0";
     });
   }
 
@@ -434,8 +555,8 @@
     var canvas=root.querySelector("#aeo-seo-canvas");
 
     if(elapsed>=T.HOLD_END){
-      /* Stay in reset fade until LOOP clears via paintInitial — avoid a completed flash. */
       if(canvas)canvas.classList.add("is-resetting");
+      (paths||[]).forEach(function(P){if(P.signal)P.signal.style.opacity="0";});
       return "RESET";
     }
     if(canvas)canvas.classList.remove("is-resetting");
@@ -455,25 +576,48 @@
 
       if(local<0){
         if(mod)mod.classList.remove("is-on");
-        if(anc)anc.classList.remove("is-on");
+        if(anc)anc.classList.remove("is-on","is-pulse");
         if(P){
-          P.act.classList.remove("is-draw");
+          P.act.classList.remove("is-draw","is-done");
           P.act.style.strokeDashoffset=String(P.len);
+          if(P.signal)P.signal.style.opacity="0";
         }
         return;
       }
 
-      if(anc)anc.classList.add("is-on");
-
       if(P&&!mobile){
         var p=clamp01(local/LINE_MS);
+        var drawn=easeOut(p);
         P.act.classList.add("is-draw");
-        P.act.style.strokeDashoffset=String(P.len*(1-easeOut(p)));
+        P.act.style.strokeDashoffset=String(P.len*(1-drawn));
+
+        /* Port brightens while signal travels, then settles */
+        if(anc){
+          if(p<1){anc.classList.add("is-pulse");anc.classList.remove("is-on");}
+          else{anc.classList.remove("is-pulse");anc.classList.add("is-on");}
+        }
+
+        /* Subtle travelling highlight along the active path */
+        if(P.signal){
+          if(p>0.02&&p<0.98){
+            var pt=P.act.getPointAtLength(P.len*drawn);
+            P.signal.setAttribute("cx",pt.x.toFixed(2));
+            P.signal.setAttribute("cy",pt.y.toFixed(2));
+            var fade=p<.12?easeInOut(p/.12):(p>.82?easeInOut((1-p)/.18):1);
+            P.signal.style.opacity=String(0.42*fade);
+          }else{
+            P.signal.style.opacity="0";
+          }
+        }
+
+        if(p>=1)P.act.classList.add("is-done");
+        else P.act.classList.remove("is-done");
+
         if(local>=LINE_MS*MOD_LEAD){if(mod)mod.classList.add("is-on");}
         else if(mod)mod.classList.remove("is-on");
       }else{
-        /* Mobile: no SVG; reveal shortly after slot time */
-        if(local>=80){if(mod)mod.classList.add("is-on");}
+        if(anc){anc.classList.remove("is-pulse");anc.classList.add("is-on");}
+        if(local>=90){if(mod)mod.classList.add("is-on");}
         else if(mod)mod.classList.remove("is-on");
       }
     });
@@ -502,10 +646,10 @@
       if(ctrl.raf){cancelAnimationFrame(ctrl.raf);ctrl.raf=0;}
     }
 
-    function paintInitial(){
+    function paintInitial(opts){
       placeAnchors(sec);
       ctrl.paths=layoutPaths(sec);
-      setInitial(sec,ctrl.paths);
+      setInitial(sec,ctrl.paths,opts);
     }
 
     function startSequence(){
@@ -519,7 +663,6 @@
       stopRaf();
       paintInitial();
       ctrl.phase="primed";
-      /* Guarantee initial state paints before timeline advances */
       requestAnimationFrame(function(){
         requestAnimationFrame(function(){
           if(!ctrl.visible)return;
@@ -537,7 +680,8 @@
       var mobile=isMobile();
 
       if(elapsed>=T.LOOP){
-        paintInitial();
+        /* Soft loop: keep Strategy hub present; fade branches only */
+        paintInitial({keepHub:true});
         ctrl.t0=performance.now();
         ctrl.raf=requestAnimationFrame(tick);
         return;
@@ -566,7 +710,6 @@
     function onLeave(){
       ctrl.visible=false;
       stopRaf();
-      /* Keep visual wherever it was; re-arm only when fully above later */
       if(ctrl.phase==="playing"||ctrl.phase==="holding"||ctrl.phase==="resetting"||ctrl.phase==="primed"){
         ctrl.phase="paused";
       }
@@ -583,7 +726,6 @@
       }
     }
 
-    /* Build dormant geometry now so first paint is correct */
     paintInitial();
 
     if(reduce||!("IntersectionObserver" in window)){
@@ -622,7 +764,6 @@
       tryStartFromVisibility();
       if(!ctrl.visible)rearmIfAbove();
     },{passive:true});
-    /* Catch first paint / restored layouts where IO can be late */
     requestAnimationFrame(tryStartFromVisibility);
 
     var resizeT=null;
@@ -635,7 +776,6 @@
         if(ctrl.phase==="holding"||ctrl.phase==="complete-static"){
           setComplete(sec,ctrl.paths);
         }else if(ctrl.visible&&(ctrl.phase==="playing"||ctrl.phase==="paused"||ctrl.phase==="idle")){
-          /* Restart cleanly after layout change */
           startSequence();
         }else{
           setInitial(sec,ctrl.paths);

@@ -95,7 +95,7 @@
           <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>4&ndash;6 service, location or answer-ready pages created or improved each month</div>
           <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Google Business Profile, reviews, citations and local authority work</div>
         </div>
-        <a class="aeo-btn aeo-btn--primary" href="book.html?plan=growth">Start with Growth</a>
+        <a class="aeo-btn aeo-btn--primary" href="/book?plan=growth">Start with Growth</a>
       </div>
       <div class="aeo-price">
         <span class="aeo-pill aeo-price-flag">Most popular</span>
@@ -109,7 +109,7 @@
           <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Digital PR, link earning, citations, reviews and third-party authority campaigns</div>
           <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Weekly AI + SEO monitoring, priority execution and monthly strategy review</div>
         </div>
-        <a class="aeo-btn aeo-btn--primary" href="book.html?plan=scale">Start with Scale</a>
+        <a class="aeo-btn aeo-btn--primary" href="/book?plan=scale">Start with Scale</a>
       </div>
       <div class="aeo-price">
         <div class="aeo-price-name">Custom</div>
@@ -122,7 +122,7 @@
           <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Custom analytics, CRM, CMS, attribution and third-party integrations</div>
           <div class="aeo-price-feat"><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l3.5 3.5L16 5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Conversion optimization, custom development and dedicated strategic support</div>
         </div>
-        <a class="aeo-btn aeo-btn--primary" href="book.html?plan=custom">Talk to us</a>
+        <a class="aeo-btn aeo-btn--primary" href="/book?plan=custom">Talk to us</a>
       </div>
     </div>
     <p class="aeo-price-note">Prices in USD. Every engagement is covered by a service agreement. Month-to-month terms are available, and scope is agreed before work starts.</p>
@@ -155,7 +155,7 @@
       <div class="bg"><i></i><i></i></div>
       <h2>Be the business AI recommends.</h2>
       <p>Start with a free audit. See your mention rate, your competitors&rsquo;, and exactly what it takes to win.</p>
-      <a class="aeo-btn aeo-btn--blue" href="contact.html">Get your free audit</a>
+      <a class="aeo-btn aeo-btn--blue" href="/free-audit">Get your free audit</a>
     </div>
   </div>
 </section>

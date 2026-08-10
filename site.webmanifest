@@ -1,0 +1,29 @@
+{
+  "name": "Answered Labs",
+  "short_name": "Answered Labs",
+  "description": "Answered Labs is an answer engine optimization agency for local businesses. We improve websites, content, structured data and authority so AI search systems and search engines can understand, cite and recommend the business.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "browser",
+  "background_color": "#ffffff",
+  "theme_color": "#1c1d1f",
+  "lang": "en-US",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}

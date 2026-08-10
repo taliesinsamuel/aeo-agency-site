@@ -749,6 +749,69 @@
      viewport size. .aeo-stack's own height shrinks by the same delta so
      the sticky "stuck" duration, and therefore the scroll-to-progress
      mapping every card transition relies on, is untouched. */
+  /* Deep-link helper for footer "What we do" links.
+     Maps a card index to the scrollY that produces that card's stable
+     resting progress inside the EXISTING stack choreography — same
+     g/travel/topOff model as wireStack. Does not alter animation. */
+  window.__aeoScrollToStackCard=function(cardIndex,opts){
+    opts=opts||{};
+    var stack=document.getElementById("aeo-stack");
+    if(!stack)return false;
+    var cards=stack.querySelectorAll(".aeo-card");
+    var n=cards.length;
+    if(!n)return false;
+    var i=cardIndex|0;
+    if(i<0)i=0;
+    if(i>n-1)i=n-1;
+    var behavior=opts.behavior||(reduce?"auto":"smooth");
+    if(stack.classList.contains("aeo-stack--static")){
+      var card=cards[i];
+      if(!card)return false;
+      try{card.scrollIntoView({behavior:behavior,block:"center"});}
+      catch(e){card.scrollIntoView(true);}
+      return true;
+    }
+    var pin=stack.querySelector(".aeo-stack-pin");
+    if(!pin)return false;
+    var vh=window.innerHeight||document.documentElement.clientHeight||0;
+    var y=window.pageYOffset||document.documentElement.scrollTop||0;
+    var rect=stack.getBoundingClientRect();
+    var stackTop=rect.top+y;
+    var pinH=pin.getBoundingClientRect().height||vh;
+    var travel=rect.height-pinH;
+    if(!(travel>0))return false;
+    var topOff=parseFloat(pin.style.top)||0;
+    /* Resting g from the live progress model (slots = n-1):
+       cards 2..n fully arrive at g = i/slots; land ~92% through each
+       card's arrival slice so the card is settled and the next has not
+       begun covering. Card 1 lives at the sticky start — advance only
+       enough to clear the section intro when topOff allows, and never
+       past the point where card 2 has meaningfully risen. */
+    var slots=n-1;
+    var g=0;
+    if(slots>0){
+      if(i<=0){
+        var nav=88;
+        var gClear=Math.max(0,(topOff-nav)/travel);
+        var gMax=0.08/slots;
+        g=Math.min(gMax,gClear);
+      }else if(i>=n-1){
+        g=((n-2)+0.92)/slots;
+        if(g>1)g=1;
+      }else{
+        g=(i-0.08)/slots;
+      }
+    }
+    var targetY=stackTop-topOff+g*travel;
+    var maxY=Math.max(0,(document.documentElement.scrollHeight||document.body.scrollHeight||0)-vh);
+    if(targetY<0)targetY=0;
+    if(targetY>maxY)targetY=maxY;
+    try{window.scrollTo({top:targetY,behavior:behavior});}
+    catch(e){window.scrollTo(0,targetY);}
+    if(window.__aeoScrollKick)try{window.__aeoScrollKick();}catch(e){}
+    return true;
+  };
+
   var STACK_MARGIN=64;
   function sizeStackPin(sec,pin,cards){
     var vh=window.innerHeight,i,h,maxH=0;

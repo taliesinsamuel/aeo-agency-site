@@ -16,7 +16,23 @@ fi
 PORT="${PORT:-8082}"
 export PORT
 
-# Reclaim the port if a previous server is still holding it.
+LOG="/tmp/aeo-serve-${PORT}.log"
+PIDFILE="/tmp/aeo-serve-${PORT}.pid"
+
+# Reuse a healthy existing server instead of killing it (prevents browse flakes).
+if curl -fsS -m 1 -o /dev/null "http://127.0.0.1:${PORT}/" 2>/dev/null; then
+  api_code="$(curl -sS -m 1 -o /dev/null -w "%{http_code}" "http://127.0.0.1:${PORT}/api/free-audit" 2>/dev/null || true)"
+  if [ "$api_code" = "405" ] || [ "$api_code" = "400" ] || [ "$api_code" = "415" ] || [ "$api_code" = "503" ]; then
+    if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+      echo "Already serving http://127.0.0.1:$PORT/ (pid $(cat "$PIDFILE"), log $LOG)"
+    else
+      echo "Already serving http://127.0.0.1:$PORT/ (existing process, log $LOG)"
+    fi
+    exit 0
+  fi
+fi
+
+# Reclaim the port only when nothing healthy is serving.
 for _ in 1 2 3 4 5; do
   if lsof -ti "tcp:$PORT" >/dev/null 2>&1; then
     lsof -ti "tcp:$PORT" | xargs kill -9 2>/dev/null || true
@@ -31,15 +47,16 @@ if lsof -ti "tcp:$PORT" >/dev/null 2>&1; then
   exit 1
 fi
 
-# Detach from the terminal so closing the tab does not kill the site.
+# Detach from the terminal / agent shell so the site keeps running.
 # Node server: static site + POST /api/free-audit (loads .env if present).
-nohup node scripts/local-site-server.js >/tmp/aeo-serve.log 2>&1 &
-echo $! >/tmp/aeo-serve.pid
+nohup node scripts/local-site-server.js >>"$LOG" 2>&1 &
+echo $! >"$PIDFILE"
+disown || true
 
 sleep 1
-if ! kill -0 "$(cat /tmp/aeo-serve.pid)" 2>/dev/null; then
-  echo "Server failed to start. See /tmp/aeo-serve.log" >&2
-  cat /tmp/aeo-serve.log >&2 || true
+if ! kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+  echo "Server failed to start. See $LOG" >&2
+  tail -50 "$LOG" >&2 || true
   exit 1
 fi
-echo "Serving http://127.0.0.1:$PORT/ (pid $(cat /tmp/aeo-serve.pid), log /tmp/aeo-serve.log)"
+echo "Serving http://127.0.0.1:$PORT/ (pid $(cat "$PIDFILE"), log $LOG)"

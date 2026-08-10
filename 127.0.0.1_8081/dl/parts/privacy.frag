@@ -51,6 +51,8 @@
         <ul>
           <li><strong>HubSpot</strong>, for customer relationship management, lead capture, forms, and website analytics;</li>
           <li><strong>Calendly</strong>, for appointment scheduling;</li>
+          <li><strong>Google Analytics</strong>, for website traffic and usage analytics;</li>
+          <li><strong>Microsoft Clarity</strong>, for interaction analytics such as heatmaps and session recordings;</li>
           <li><strong>Vercel</strong>, for website hosting and related infrastructure; and</li>
           <li><strong>Cloudflare</strong>, where used for DNS, content delivery, security, or related infrastructure.</li>
         </ul>
@@ -67,7 +69,7 @@
 
         <h2>5. Cookies and similar technologies</h2>
         <p>We and the providers that support this website may use cookies, local storage, and similar technologies.</p>
-        <p>For example, HubSpot may use cookies and related technologies to recognize visitors, understand website activity, associate activity with submitted forms where applicable, and help us analyze use of the website.</p>
+        <p>For example, HubSpot may use cookies and related technologies to recognize visitors, understand website activity, associate activity with submitted forms where applicable, and help us analyze use of the website. Google Analytics may use cookies and similar technologies to measure traffic and usage. Microsoft Clarity may use cookies and similar technologies to understand how visitors interact with pages, including aggregated heatmaps and session recordings.</p>
         <p>Hosting, content-delivery, and security providers may also process technical information necessary to deliver and protect the website.</p>
         <p>You can control or delete cookies through your browser settings. Restricting certain cookies may affect some website functionality.</p>
         <p>Some web browsers offer a &ldquo;Do Not Track&rdquo; signal. Because there is no universally adopted standard for responding to these signals, our website does not currently respond to browser Do Not Track signals.</p>

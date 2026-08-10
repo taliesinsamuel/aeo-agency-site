@@ -1,29 +1,120 @@
 {
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.answeredlabs.com" }],
+      "destination": "https://answeredlabs.com/:path*",
+      "permanent": true
+    },
+    { "source": "/contact", "destination": "/free-audit", "permanent": true },
+    { "source": "/contact/", "destination": "/free-audit", "permanent": true },
+    { "source": "/contact.html", "destination": "/free-audit", "permanent": true },
+    { "source": "/pricing.html", "destination": "/pricing", "permanent": true },
+    { "source": "/book.html", "destination": "/book", "permanent": true },
+    { "source": "/privacy.html", "destination": "/privacy", "permanent": true },
+    { "source": "/terms.html", "destination": "/terms", "permanent": true },
+    { "source": "/index.html", "destination": "/", "permanent": true },
+    { "source": "/pricing/", "destination": "/pricing", "permanent": true },
+    { "source": "/free-audit/", "destination": "/free-audit", "permanent": true },
+    { "source": "/book/", "destination": "/book", "permanent": true },
+    { "source": "/privacy/", "destination": "/privacy", "permanent": true },
+    { "source": "/terms/", "destination": "/terms", "permanent": true },
+    { "source": "/127.0.0.1_8081/dl/pricing.html", "destination": "/pricing", "permanent": true },
+    { "source": "/127.0.0.1_8081/dl/contact.html", "destination": "/free-audit", "permanent": true },
+    { "source": "/127.0.0.1_8081/dl/book.html", "destination": "/book", "permanent": true },
+    { "source": "/127.0.0.1_8081/dl/privacy.html", "destination": "/privacy", "permanent": true },
+    { "source": "/127.0.0.1_8081/dl/terms.html", "destination": "/terms", "permanent": true },
+    { "source": "/127.0.0.1_8081/dl/404.html", "destination": "/404", "permanent": true },
+    { "source": "/127.0.0.1_8081/dl/", "destination": "/", "permanent": true },
+    { "source": "/127.0.0.1_8081/dl", "destination": "/", "permanent": true },
+    { "source": "/127.0.0.1_8081/dl/ua=:path*", "destination": "/", "permanent": true }
+  ],
   "rewrites": [
     { "source": "/", "destination": "/127.0.0.1_8081/dl/" },
-    { "source": "/index.html", "destination": "/127.0.0.1_8081/dl/" },
-    { "source": "/contact.html", "destination": "/127.0.0.1_8081/dl/contact.html" },
-    { "source": "/pricing.html", "destination": "/127.0.0.1_8081/dl/pricing.html" },
-    { "source": "/book.html", "destination": "/127.0.0.1_8081/dl/book.html" },
-    { "source": "/privacy.html", "destination": "/127.0.0.1_8081/dl/privacy.html" },
-    { "source": "/terms.html", "destination": "/127.0.0.1_8081/dl/terms.html" },
-    { "source": "/contact", "destination": "/127.0.0.1_8081/dl/contact.html" },
+    { "source": "/free-audit", "destination": "/127.0.0.1_8081/dl/contact.html" },
     { "source": "/pricing", "destination": "/127.0.0.1_8081/dl/pricing.html" },
     { "source": "/book", "destination": "/127.0.0.1_8081/dl/book.html" },
     { "source": "/privacy", "destination": "/127.0.0.1_8081/dl/privacy.html" },
-    { "source": "/terms", "destination": "/127.0.0.1_8081/dl/terms.html" }
+    { "source": "/terms", "destination": "/127.0.0.1_8081/dl/terms.html" },
+    { "source": "/assets/:path*", "destination": "/127.0.0.1_8081/dl/assets/:path*" }
   ],
   "headers": [
     {
       "source": "/api/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "no-store" }
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
       ]
     },
     {
       "source": "/404.html",
       "headers": [
         { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+      ]
+    },
+    {
+      "source": "/robots.txt",
+      "headers": [
+        { "key": "Content-Type", "value": "text/plain; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    },
+    {
+      "source": "/sitemap.xml",
+      "headers": [
+        { "key": "Content-Type", "value": "application/xml; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    },
+    {
+      "source": "/llms.txt",
+      "headers": [
+        { "key": "Content-Type", "value": "text/plain; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    },
+    {
+      "source": "/site.webmanifest",
+      "headers": [
+        { "key": "Content-Type", "value": "application/manifest+json; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=86400" }
+      ]
+    },
+    {
+      "source": "/og-image.png",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/apple-touch-icon.png",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/favicon.ico",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/favicon.svg",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.html",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
       ]
     }
   ]

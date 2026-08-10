@@ -332,17 +332,17 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
       var a=as[i],h=a.getAttribute("href")||"";
       if(!h)continue;
       if(/^(#|mailto:|tel:)/.test(h))continue;
-      if(/^(\.\/|pricing\.html|contact\.html|book\.html|privacy\.html|terms\.html|index\.html)/.test(h))continue;
-      if(h.indexOf("./#")===0)continue;
+      if(/^(?:\.\/|#|\/(?:pricing|free-audit|contact|book|privacy|terms|assets)(?:\/|$|\?)|pricing\.html|contact\.html|book\.html|privacy\.html|terms\.html|index\.html)/.test(h))continue;
+      if(h.indexOf("./#")===0||h.indexOf("/#")===0)continue;
       // Never rewrite third-party integration destinations
       if(/calendly\.com|hubspot\.com|hs-scripts\.com|hsforms\.com|hubapi\.com/i.test(h))continue;
       var n=null;
-      if(/sign-in/i.test(h))n="contact.html";
-      else if(/app\.eSOZMHKB8k26|app\.attio/i.test(h))n="contact.html";
-      else if(/pricing/i.test(h))n="pricing.html";
-      else if(h.charAt(0)==="/"&&h.length>1)n="./";
-      else if(h==="/")n="./";
-      else if(/^https?:\/\//i.test(h)&&h.indexOf("127.0.0.1")===-1)n="./";
+      if(/sign-in/i.test(h))n="/free-audit";
+      else if(/app\.eSOZMHKB8k26|app\.attio/i.test(h))n="/free-audit";
+      else if(/pricing/i.test(h))n="/pricing";
+      else if(h.charAt(0)==="/"&&h.length>1)n="/";
+      else if(h==="/")n="/";
+      else if(/^https?:\/\//i.test(h)&&h.indexOf("127.0.0.1")===-1&&h.indexOf("answeredlabs.com")===-1)n="/";
       if(n)a.setAttribute("href",n);
       // hide sign-in style links
       if(/^\s*(sign in|log in)\s*$/i.test(a.textContent||""))a.style.display="none";
@@ -358,9 +358,9 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
     if(nav&&nav.getAttribute("data-aeo")!=="1"){
       nav.setAttribute("data-aeo","1");
       nav.innerHTML='<div class="aeo-nav">'+
-        '<a class="aeo-nav-brand" href="./" aria-label="Answered Labs home"><img class="aeo-logo" src="/127.0.0.1_8081/dl/assets/answered-labs-website-logo-black.svg" alt="Answered Labs" width="204" height="22" decoding="async"></a>'+
-        '<div class="aeo-nav-links"><span class="aeo-nav-hl" aria-hidden="true"></span><a href="./">Home</a><a href="pricing.html">Pricing</a><a href="contact.html">Free audit</a></div>'+
-        '<div class="aeo-nav-right"><a class="aeo-btn aeo-btn--primary aeo-nav-book" href="book.html">'+
+        '<a class="aeo-nav-brand" href="/" aria-label="Answered Labs home"><img class="aeo-logo" src="/assets/answered-labs-website-logo-black.svg" alt="Answered Labs" width="204" height="22" decoding="async"></a>'+
+        '<div class="aeo-nav-links"><span class="aeo-nav-hl" aria-hidden="true"></span><a href="/">Home</a><a href="/pricing">Pricing</a><a href="/free-audit">Free audit</a></div>'+
+        '<div class="aeo-nav-right"><a class="aeo-btn aeo-btn--primary aeo-nav-book" href="/book">'+
           '<span class="aeo-nav-book-full">Book a Call</span><span class="aeo-nav-book-short" aria-hidden="true">Call</span>'+
         '</a></div>'+
       '</div>';
@@ -393,14 +393,14 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
     f.className="aeo-foot";
     f.innerHTML='<div class="aeo-foot-glow"></div><div class="aeo-foot-inner">'+
       '<div class="aeo-foot-top">'+
-        '<div class="aeo-foot-brand"><a href="./" aria-label="Answered Labs home"><img class="aeo-logo" src="/127.0.0.1_8081/dl/assets/answered-labs-website-logo-white.svg" alt="Answered Labs" width="242" height="26" decoding="async"></a><p>The answer engine optimization agency for local businesses. Be the business AI recommends.</p></div>'+
+        '<div class="aeo-foot-brand"><a href="/" aria-label="Answered Labs home"><img class="aeo-logo" src="/assets/answered-labs-website-logo-white.svg" alt="Answered Labs" width="242" height="26" decoding="async"></a><p>The answer engine optimization agency for local businesses. Be the business AI recommends.</p></div>'+
         '<div class="aeo-foot-cols">'+
-          '<div class="aeo-foot-col"><h4>What we do</h4><a href="./#aeo-platform">AI visibility tracking</a><a href="./#aeo-platform">Site structure &amp; schema</a><a href="./#aeo-platform">Content AI quotes</a><a href="./#aeo-platform">Reviews &amp; citations</a></div>'+
-          '<div class="aeo-foot-col"><h4>Company</h4><a href="pricing.html">Pricing</a><a href="contact.html">Free audit</a><a href="book.html">Book a call</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></div>'+
-          '<div class="aeo-foot-col"><h4>Contact</h4><a href="mailto:hello@answeredlabs.com">hello@answeredlabs.com</a><a href="contact.html">Get in touch</a></div>'+
+          '<div class="aeo-foot-col"><h4>What we do</h4><a href="/#visibility">AI visibility tracking</a><a href="/#site-structure">Site structure &amp; schema</a><a href="/#content">Content AI quotes</a><a href="/#authority">Reviews &amp; citations</a></div>'+
+          '<div class="aeo-foot-col"><h4>Company</h4><a href="/pricing">Pricing</a><a href="/free-audit">Free audit</a><a href="/book">Book a call</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></div>'+
+          '<div class="aeo-foot-col"><h4>Contact</h4><a href="mailto:hello@answeredlabs.com">hello@answeredlabs.com</a><a href="/free-audit">Get in touch</a></div>'+
         '</div>'+
       '</div>'+
-      '<div class="aeo-foot-bottom"><span>\u00a9 2026 Answered Labs. All rights reserved.</span><span><a href="privacy.html">Privacy</a> \u00b7 <a href="terms.html">Terms</a></span></div>'+
+      '<div class="aeo-foot-bottom"><span>\u00a9 2026 Answered Labs. All rights reserved.</span><span><a href="/privacy">Privacy</a> \u00b7 <a href="/terms">Terms</a></span></div>'+
     '</div>';
   }
 
@@ -418,7 +418,7 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
       var t=(b.textContent||"").replace(/\s+/g," ").trim();
       if(!CTA_RE.test(t))continue;
       var a=document.createElement("a");
-      a.setAttribute("href",CTA_BOOK_RE.test(t)?"book.html":"contact.html");
+      a.setAttribute("href",CTA_BOOK_RE.test(t)?"/book":"/free-audit");
       a.setAttribute("data-aeo-cta","1");
       a.className=b.className;
       a.innerHTML=b.innerHTML;
@@ -432,7 +432,7 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
       fm.setAttribute("data-aeo-cta","1");
       fm.addEventListener("submit",function(ev){
         ev.preventDefault();
-        window.location.href="contact.html";
+        window.location.href="/free-audit";
       });
     }
   }
@@ -540,7 +540,62 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
     },{passive:true});
   };
 
-  function tick(){fixNav();wireNavHighlight();fixFooter();fixLinks();fixCtas();wireHeader();wireParallax();scanReveal();}
+  /* Footer "What we do" → stable resting scroll-state of each stack card.
+     Hashes are meaningful (#visibility etc.) but must not rely on native
+     element jump: card visibility is a scroll-progress state inside
+     #aeo-stack. platform.frag exposes window.__aeoScrollToStackCard. */
+  function wireStackDeepLinks(){
+    if(document.documentElement.getAttribute("data-aeo-stack-dl")==="1")return;
+    document.documentElement.setAttribute("data-aeo-stack-dl","1");
+    var MAP={visibility:0,"site-structure":1,content:2,authority:3};
+    function hashIndex(h){
+      var key=String(h||"").replace(/^#/,"").toLowerCase();
+      return Object.prototype.hasOwnProperty.call(MAP,key)?MAP[key]:null;
+    }
+    function isSecondaryPage(){
+      return /\/(?:pricing|contact|free-audit|book|privacy|terms)(?:\.html)?\/?$/i.test(location.pathname||"");
+    }
+    function go(index,behavior){
+      var tries=0;
+      (function attempt(){
+        if(typeof window.__aeoScrollToStackCard==="function"&&
+           window.__aeoScrollToStackCard(index,{behavior:behavior}))return;
+        if(++tries<100)setTimeout(attempt,50);
+      })();
+    }
+    document.addEventListener("click",function(ev){
+      var t=ev.target;
+      while(t&&t!==document&&!(t.tagName&&t.tagName.toLowerCase()==="a"))t=t.parentNode;
+      if(!t||!t.getAttribute)return;
+      var href=t.getAttribute("href")||"";
+      var m=href.match(/^(?:\.\/|\/)?#(visibility|site-structure|content|authority)$/i);
+      if(!m)return;
+      /* From pricing/contact/etc., let the browser navigate home+#hash. */
+      if(isSecondaryPage())return;
+      ev.preventDefault();
+      var key=m[1].toLowerCase();
+      var idx=MAP[key];
+      if((location.hash||"").toLowerCase()!=="#"+key){
+        try{history.pushState(null,"","#"+key);}
+        catch(e){location.hash=key;}
+      }
+      go(idx,reduce?"auto":"smooth");
+    },true);
+    function onHashNav(){
+      var idx=hashIndex(location.hash);
+      if(idx==null)return;
+      go(idx,"auto");
+    }
+    window.addEventListener("popstate",onHashNav);
+    window.addEventListener("hashchange",onHashNav);
+    var initial=hashIndex(location.hash);
+    if(initial!=null){
+      try{if("scrollRestoration" in history)history.scrollRestoration="manual";}catch(e){}
+      go(initial,"auto");
+    }
+  }
+
+  function tick(){fixNav();wireNavHighlight();fixFooter();fixLinks();fixCtas();wireHeader();wireParallax();scanReveal();wireStackDeepLinks();}
   var n=0,iv=setInterval(function(){tick();if(++n>80)clearInterval(iv);},160);
   document.addEventListener("DOMContentLoaded",tick);
   window.addEventListener("load",tick);

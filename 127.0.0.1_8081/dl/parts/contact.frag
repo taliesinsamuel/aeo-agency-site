@@ -164,8 +164,8 @@
           <div class="aeo-cb"><span class="aeo-cb-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span><div><div class="aeo-cb-t">30-minute walkthrough</div><div class="aeo-cb-m">A call on what the numbers mean and the fastest path to moving them.</div></div></div>
           <p class="aeo-cmail">Prefer email? <a href="mailto:hello@answeredlabs.com">hello@answeredlabs.com</a></p>
         </div>
-        <div class="aeo-form-panel" id="aeo-audit-card">
-          <form id="aeo-audit-form" novalidate>
+        <div class="aeo-form-panel" id="aeo-audit-card" data-clarity-mask="true">
+          <form id="aeo-audit-form" novalidate data-clarity-mask="true">
             <h3 class="aeo-form-h">Request your free audit</h3>
             <p class="aeo-form-s">Takes 30 seconds. Then pick a time for your free walkthrough call.</p>
             <div class="aeo-field">
@@ -184,7 +184,7 @@
             </div>
             <button class="aeo-btn aeo-btn--primary" type="submit" id="aeo-audit-continue" aria-busy="false">Schedule my free audit call</button>
             <div class="aeo-form-err" id="aeo-audit-form-err" role="alert" aria-live="polite"></div>
-            <p class="aeo-form-fine">No commitment. We never sell your data. <a href="privacy.html">Privacy</a></p>
+            <p class="aeo-form-fine">No commitment. We never sell your data. <a href="/privacy">Privacy</a></p>
           </form>
           <div class="aeo-audit-step2" id="aeo-audit-step2">
             <h3 class="aeo-form-h">Pick a time for your audit call</h3>
@@ -265,18 +265,19 @@
       try{
         var url=baseUrl;
         if(email)url+=(url.indexOf("?")>=0?"&":"?")+"email="+encodeURIComponent(email);
+        var utm=(window.__aeoAnalytics&&window.__aeoAnalytics.calendlyUtm)
+          ? window.__aeoAnalytics.calendlyUtm({utmMedium:"free_audit",utmCampaign:"free_audit"})
+          : {utmSource:"answered_website",utmMedium:"free_audit",utmCampaign:"free_audit"};
         window.Calendly.initInlineWidget({
           url:url,
           parentElement:embed,
           prefill:{email:email||""},
-          utm:{
-            utmSource:"answered_website",
-            utmMedium:"free_audit",
-            utmCampaign:"free_audit",
-            utmContent:(website||"").slice(0,200)
-          },
+          utm:utm,
           resize:true
         });
+        if(window.__aeoAnalytics&&window.__aeoAnalytics.onCalendlyOpen){
+          window.__aeoAnalytics.onCalendlyOpen({booking_source:"free_audit",cta_location:"free_audit"});
+        }
       }catch(err){
         if(loading){loading.hidden=false;loading.textContent="Couldn\u2019t load the calendar. Please refresh.";}
         if(embed)embed.hidden=true;
@@ -296,6 +297,13 @@
     var emailInp=document.getElementById("af-email");
     var webErr=document.getElementById("af-web-err");
     var emailErr=document.getElementById("af-email-err");
+    function onAuditFieldInteract(){
+      if(window.__aeoAnalytics&&window.__aeoAnalytics.markFreeAuditStart){
+        window.__aeoAnalytics.markFreeAuditStart();
+      }
+    }
+    if(webInp){webInp.addEventListener("focus",onAuditFieldInteract,{once:true});webInp.addEventListener("input",onAuditFieldInteract,{once:true});}
+    if(emailInp){emailInp.addEventListener("focus",onAuditFieldInteract,{once:true});emailInp.addEventListener("input",onAuditFieldInteract,{once:true});}
     window.addEventListener("message",function(e){
       if(!(window.__aeoIsCalendlyEvent&&window.__aeoIsCalendlyEvent(e)))return;
       if(e.data.event==="calendly.event_scheduled"){
@@ -392,15 +400,32 @@
       },function(err){
         if(err){
           var code=err&&err.message?String(err.message):"";
-          if(code==="rate_limited")showFormError("Too many attempts. Please wait a minute and try again.");
-          else if(code==="email_invalid"||code==="email_required"){markInvalid(emailInp,emailErr,"Enter a valid business email");clearFormError();}
-          else if(code==="website_invalid"){markInvalid(webInp,webErr,"Enter a valid website (e.g. yourbusiness.com)");clearFormError();}
+          var A=window.__aeoAnalytics;
+          if(code==="rate_limited"){
+            showFormError("Too many attempts. Please wait a minute and try again.");
+            if(A&&A.onFreeAuditError)A.onFreeAuditError("rate_limited");
+          }
+          else if(code==="email_invalid"||code==="email_required"){
+            markInvalid(emailInp,emailErr,"Enter a valid business email");clearFormError();
+            if(A&&A.onFreeAuditError)A.onFreeAuditError("validation_error");
+          }
+          else if(code==="website_invalid"){
+            markInvalid(webInp,webErr,"Enter a valid website (e.g. yourbusiness.com)");clearFormError();
+            if(A&&A.onFreeAuditError)A.onFreeAuditError("validation_error");
+          }
           else if(code==="service_unavailable"||code==="crm_auth_failed"||code==="crm_unavailable"||code==="crm_rejected"||code==="upstream_timeout"||code.indexOf("HTTP_")==0){
             showFormError("We couldn\u2019t save your details. Please try again, or email hello@answeredlabs.com.");
+            if(A&&A.onFreeAuditError)A.onFreeAuditError("server_error");
           }
-          else showFormError("We couldn\u2019t save your details. Please try again, or email hello@answeredlabs.com.");
+          else {
+            showFormError("We couldn\u2019t save your details. Please try again, or email hello@answeredlabs.com.");
+            if(A&&A.onFreeAuditError)A.onFreeAuditError("network_error");
+          }
           unlock();
           return;
+        }
+        if(window.__aeoAnalytics&&window.__aeoAnalytics.onGenerateLead){
+          window.__aeoAnalytics.onGenerateLead({cta_location:"free_audit"});
         }
         goSchedule();
       });

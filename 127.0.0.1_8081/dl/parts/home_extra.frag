@@ -314,10 +314,15 @@
 }
 /* Attio's absolute stripe wash wrapper (children already hidden) */
 .aeo-close .aeo-final > .pointer-events-none.absolute.inset-0{display:none!important}
+/* Unify stats + CTA: tighten the shared vertical gap (no seam divider) */
+.aeo-close .aeo-stats-inner{padding-bottom:clamp(40px,4.2vw,62px)}
+.aeo-close .aeo-final .py-30{padding-top:84px!important}
+@media (max-width:1023px){
+  .aeo-close .aeo-final .py-30{padding-top:56px!important}
+}
 
 /* ---- closing CTA (Attio's markup, our surface) ---- */
 .aeo-final{position:relative;background:linear-gradient(180deg,#0d0f12,#0a0b0d)!important}
-.aeo-final::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;z-index:3;background:linear-gradient(90deg,transparent,rgba(38,109,240,.42) 22%,rgba(96,150,255,.62) 50%,rgba(140,110,245,.42) 72%,transparent);pointer-events:none}
 .aeo-final::after{content:"";position:absolute;inset:0;z-index:3;background-image:var(--aeo-noise);opacity:.05;mix-blend-mode:overlay;pointer-events:none}
 .aeo-final-glow{position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(46% 62% at 50% 112%,rgba(38,109,240,.32),transparent 68%),radial-gradient(34% 48% at 16% -14%,rgba(140,110,245,.20),transparent 70%);animation:aeo-final-breathe 13s ease-in-out infinite alternate}
 @keyframes aeo-final-breathe{to{opacity:.7}}

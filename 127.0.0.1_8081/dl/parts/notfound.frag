@@ -56,8 +56,8 @@
       <h1 class="aeo-h2">Page not found</h1>
       <p class="aeo-404-lede">The page you&rsquo;re looking for doesn&rsquo;t exist or may have moved.</p>
       <div class="aeo-404-actions">
-        <a class="aeo-btn aeo-btn--primary" href="./">Back to home</a>
-        <a class="aeo-btn aeo-btn--ghost" href="book.html">Book a call</a>
+        <a class="aeo-btn aeo-btn--primary" href="/">Back to home</a>
+        <a class="aeo-btn aeo-btn--ghost" href="/book">Book a call</a>
       </div>
     </div>
   </div>

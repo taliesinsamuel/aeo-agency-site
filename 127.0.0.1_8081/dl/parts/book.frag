@@ -114,12 +114,14 @@
       if(embed)embed.hidden=false;
       var prefill={};
       if(params.email)prefill.email=params.email;
-      var utm={
-        utmSource:"answered_website",
+      var bookingSource=params.source==="audit"?"free_audit":(params.plan?"pricing":"direct_book_call");
+      var utmExtra={
         utmMedium:params.source==="audit"?"free_audit":"book_a_call",
         utmCampaign:params.plan?("plan_"+params.plan):"book_a_call"
       };
-      if(params.website)utm.utmContent=params.website.slice(0,200);
+      var utm=(window.__aeoAnalytics&&window.__aeoAnalytics.calendlyUtm)
+        ? window.__aeoAnalytics.calendlyUtm(utmExtra)
+        : {utmSource:"answered_website",utmMedium:utmExtra.utmMedium,utmCampaign:utmExtra.utmCampaign};
       try{
         var url=baseUrl;
         if(params.email)url+=(url.indexOf("?")>=0?"&":"?")+"email="+encodeURIComponent(params.email);
@@ -130,6 +132,12 @@
           utm:utm,
           resize:true
         });
+        if(window.__aeoAnalytics&&window.__aeoAnalytics.onCalendlyOpen){
+          window.__aeoAnalytics.onCalendlyOpen({
+            booking_source:bookingSource,
+            cta_location:(window.__aeoAnalytics.getBookingContext&&window.__aeoAnalytics.getBookingContext().cta_location)||"unknown"
+          });
+        }
       }catch(err){
         if(loading){loading.hidden=false;loading.textContent="Couldn\u2019t load the calendar. Please refresh.";}
         if(embed)embed.hidden=true;

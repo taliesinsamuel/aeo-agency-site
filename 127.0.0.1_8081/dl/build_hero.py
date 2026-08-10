@@ -193,53 +193,11 @@ INJECT = r"""
 .aeo-hero [class~="h-svh"]{height:auto!important;min-height:0!important;margin-top:64px;padding-top:0!important;padding-bottom:80px!important;align-items:flex-start!important}
 .aeo-hero [class*="100svh"]{position:absolute!important;inset:0!important;height:100%!important;min-height:0!important}
 .aeo-hero [class*="-mb-["]{margin-bottom:0!important}
-/* AI engine logo tiles (shared mark used by hero rotator) */
-.aeo-ai-sq{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;box-shadow:0 1px 2px rgba(16,17,20,.16),0 4px 10px -4px rgba(16,17,20,.28);flex:none}
+/* AI engine logo tiles under the sub-line */
+.aeo-ai-row{display:inline-flex;align-items:center;gap:7px;vertical-align:middle;margin-left:4px}
+.aeo-ai-sq{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;box-shadow:0 1px 2px rgba(16,17,20,.16),0 4px 10px -4px rgba(16,17,20,.28);transition:transform .3s var(--aeo-e-spring,cubic-bezier(.34,1.32,.52,1)),box-shadow .3s cubic-bezier(.22,1,.36,1)}
+.aeo-ai-sq:hover{transform:translateY(-2px) scale(1.06);box-shadow:0 2px 4px rgba(16,17,20,.16),0 10px 20px -6px rgba(16,17,20,.34)}
 .aeo-ai-sq svg{width:15px;height:15px;display:block}
-/* Hero sub-line: slightly larger type + single rotating AI platform */
-.aeo-hero p.aeo-hero-sub,
-.aeo-hero p:has(.aeo-ai-rot){
-  font-size:20.5px!important; /* ~14% over Attio's 18px supporting copy */
-  letter-spacing:-.2px;
-}
-.aeo-ai-rot{
-  display:inline-flex;align-items:center;vertical-align:middle;
-  margin-left:6px;white-space:nowrap;
-}
-.aeo-ai-rot-slot{
-  position:relative;display:inline-block;
-  height:1.4em;min-width:9.75em; /* fits [icon] Perplexity — no layout shift */
-  vertical-align:-0.28em;overflow:hidden;
-}
-.aeo-ai-rot-item{
-  position:absolute;left:0;top:50%;
-  display:inline-flex;align-items:center;gap:7px;
-  white-space:nowrap;pointer-events:none;
-  opacity:0;
-  transform:translate3d(0,calc(-50% + 8px),0);
-  filter:blur(2px);
-  transition:
-    opacity .62s cubic-bezier(.22,1,.36,1),
-    transform .62s cubic-bezier(.22,1,.36,1),
-    filter .62s cubic-bezier(.22,1,.36,1);
-  will-change:opacity,transform,filter;
-}
-.aeo-ai-rot-item.is-in{
-  opacity:1;
-  transform:translate3d(0,-50%,0);
-  filter:blur(0);
-}
-.aeo-ai-rot-item.is-out{
-  opacity:0;
-  transform:translate3d(0,calc(-50% - 8px),0);
-  filter:blur(2px);
-}
-.aeo-ai-rot-name{
-  font-weight:600;letter-spacing:-.01em;
-  color:var(--aeo-ink,#1c1d1f);
-}
-.aeo-ai-rot .aeo-ai-sq{width:22px;height:22px;border-radius:7px;box-shadow:0 1px 2px rgba(16,17,20,.14),0 3px 8px -4px rgba(16,17,20,.24)}
-.aeo-ai-rot .aeo-ai-sq svg{width:13px;height:13px}
 /* Mobile: Attio swaps to a separate md:hidden scene — keep chat readable there */
 @media (max-width:767px){
   .aeo-window{height:min(52vh,420px);border-radius:15px;animation:none;box-shadow:0 1px 2px rgba(16,17,20,.05),0 18px 36px -20px rgba(28,29,31,.26)}
@@ -248,19 +206,8 @@ INJECT = r"""
   [data-home-hero="mobile-scene"] .aeo-window{height:min(48vh,400px);opacity:1!important}
   .aeo-body{font-size:14.5px}
   .aeo-thread{padding:16px 14px 8px}
-  .aeo-hero p.aeo-hero-sub,.aeo-hero p:has(.aeo-ai-rot){font-size:19px!important}
-  .aeo-ai-rot-slot{min-width:9.25em}
-  .aeo-ai-rot .aeo-ai-sq{width:20px;height:20px;border-radius:6px}
-  .aeo-ai-rot .aeo-ai-sq svg{width:12px;height:12px}
 }
-@media (prefers-reduced-motion: reduce){
-  .aeo-caret{animation:none}.aeo-think span{animation:none}.aeo-tok,.aeo-biz{animation:none;opacity:1;transform:none}.aeo-stage,.aeo-stage::before,.aeo-window{animation:none}
-  .aeo-ai-rot-item{
-    filter:none!important;
-    transform:translate3d(0,-50%,0)!important;
-    transition:opacity .55s ease!important;
-  }
-}
+@media (prefers-reduced-motion: reduce){.aeo-caret{animation:none}.aeo-think span{animation:none}.aeo-tok,.aeo-biz{animation:none;opacity:1;transform:none}.aeo-stage,.aeo-stage::before,.aeo-window{animation:none}}
 </style>
 <script id="aeo-script">
 (function(){
@@ -294,61 +241,16 @@ INJECT = r"""
     var id="aeoGem"+(++gemSeq);
     return '<svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="'+id+'" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#4285F4"/><stop offset=".52" stop-color="#9168C0"/><stop offset="1" stop-color="#D96570"/></linearGradient></defs><path fill="url(#'+id+')" d="'+P_GEM+'"/></svg>';
   }
-  function aiTile(name,bg,col,inner,extra){return '<span class="aeo-ai-sq" title="'+name+'" aria-hidden="true" style="background:'+bg+';color:'+col+';'+(extra||'')+'">'+inner+'</span>';}
-  function aiPlatforms(){
-    return [
-      {n:"ChatGPT",bg:"#000",col:"#fff",inner:aiSvg(P_OPENAI)},
-      {n:"Perplexity",bg:"#20808D",col:"#fff",inner:aiSvg(P_PPLX)},
-      {n:"Gemini",bg:"#fff",col:"#000",inner:gemSvg(),extra:"border:1px solid #d9dde3"},
-      {n:"Claude",bg:"#D97757",col:"#fff",inner:aiSvg(P_CLAUDE)}
-    ];
-  }
+  function aiTile(name,bg,col,inner,extra){return '<span class="aeo-ai-sq" title="'+name+'" style="background:'+bg+';color:'+col+';'+(extra||'')+'">'+inner+'</span>';}
   function aiRow(){
-    var plats=aiPlatforms(),html="",i;
-    for(i=0;i<plats.length;i++){
-      var p=plats[i];
-      html+='<span class="aeo-ai-rot-item'+(i===0?" is-in":"")+'" data-i="'+i+'"'+(i===0?"":' aria-hidden="true"')+'>'+
-        aiTile(p.n,p.bg,p.col,p.inner,p.extra||"")+
-        '<span class="aeo-ai-rot-name">'+p.n+'</span></span>';
-    }
-    return '<span class="aeo-ai-rot" data-aeo-ai="1"><span class="aeo-ai-rot-slot" aria-live="polite">'+html+'</span></span>';
+    return '<span class="aeo-ai-row" data-aeo-ai="1">'+
+      aiTile("ChatGPT","#000","#fff",aiSvg(P_OPENAI))+
+      aiTile("Perplexity","#20808D","#fff",aiSvg(P_PPLX))+
+      aiTile("Gemini","#fff","#000",gemSvg(),"border:1px solid #d9dde3")+
+      aiTile("Claude","#D97757","#fff",aiSvg(P_CLAUDE))+
+    '</span>';
   }
   function subHtml(){return 'We get local businesses recommended by '+aiRow();}
-  function wireAiRotators(root){
-    var HOLD=2800,TRANS=620;
-    var nodes=(root||document).querySelectorAll(".aeo-ai-rot:not([data-aeo-rot-on])");
-    for(var r=0;r<nodes.length;r++){
-      (function(rot){
-        rot.setAttribute("data-aeo-rot-on","1");
-        var items=[].slice.call(rot.querySelectorAll(".aeo-ai-rot-item"));
-        if(items.length<2)return;
-        var i=0;
-        function clearTimer(){if(rot._aeoRotTO){clearTimeout(rot._aeoRotTO);rot._aeoRotTO=null;}}
-        function go(){
-          if(!document.body.contains(rot)){clearTimer();return;}
-          var cur=items[i], next=(i+1)%items.length, nxt=items[next];
-          cur.classList.remove("is-in");
-          cur.classList.add("is-out");
-          cur.setAttribute("aria-hidden","true");
-          nxt.classList.remove("is-out");
-          // ensure enter-from-below pose before activating
-          void nxt.offsetWidth;
-          nxt.classList.add("is-in");
-          nxt.removeAttribute("aria-hidden");
-          setTimeout(function(){
-            /* Snap outgoing item back to the enter pose without a visible reverse tween */
-            cur.style.transition="none";
-            cur.classList.remove("is-out");
-            void cur.offsetWidth;
-            cur.style.transition="";
-          },TRANS+40);
-          i=next;
-          rot._aeoRotTO=setTimeout(go,HOLD+TRANS);
-        }
-        rot._aeoRotTO=setTimeout(go,HOLD);
-      })(nodes[r]);
-    }
-  }
   // expose brand logos for the platform section animations
   window.__AEO={aiSvg:aiSvg,aiTile:aiTile,P_OPENAI:P_OPENAI,P_PPLX:P_PPLX,P_GEM:P_GEM,P_CLAUDE:P_CLAUDE,gemSvg:gemSvg,get GEM_SVG(){return gemSvg();}};
 
@@ -383,13 +285,7 @@ INJECT = r"""
   function applyText(){
     var s=getHero(); if(!s)return;
     s.querySelectorAll("h1").forEach(function(h){ if(h.innerHTML!==HEAD_HTML)h.innerHTML=HEAD_HTML; });
-    s.querySelectorAll("p").forEach(function(p){
-      var t=p.textContent||"";
-      if(!(/recommended by|Attio is the CRM/.test(t)))return;
-      if(!p.querySelector(".aeo-ai-rot"))p.innerHTML=subHtml();
-      p.classList.add("aeo-hero-sub");
-    });
-    wireAiRotators(s);
+    s.querySelectorAll("p").forEach(function(p){ var t=p.textContent||""; if((/recommended by|Attio is the CRM/.test(t))&&!p.querySelector(".aeo-ai-row"))p.innerHTML=subHtml(); });
   }
   function findMobileMock(){
     var scene=document.querySelector('[data-home-hero="mobile-scene"]');
@@ -518,6 +414,9 @@ INJECT = INJECT.replace("%%HEAD%%", json.dumps(HEAD)).replace("%%HEAD_HTML%%", j
 PLATFORM = open("parts/platform.frag", encoding="utf-8").read()
 
 CHROME = open("parts/chrome.frag", encoding="utf-8").read()
+# Shared GA4 + Clarity measurement layer (non-visual). Injected before CHROME
+# on every page so helpers exist before nav/form/booking scripts run.
+ANALYTICS = open("parts/analytics.frag", encoding="utf-8").read()
 # Homepage-only "Search foundations" SEO section, inserted between the
 # stacked-cards platform section and "How it works" (never on subpages).
 SEO = open("parts/seo_section.frag", encoding="utf-8").read()
@@ -532,104 +431,70 @@ HEROGRID = open("parts/hero_grid.frag", encoding="utf-8").read()
 # Secondary-page-only floating square field (never injected on home).
 FLOATFIELD = open("parts/float_field.frag", encoding="utf-8").read()
 
-html = re.sub(
-    r"<title>.*?</title>",
-    "<title>Answered Labs: Be the business that AI recommends</title>",
-    html,
-    count=1,
-    flags=re.S,
-)
-html = html.replace("</body>", INJECT + HEROGRID + CHROME + PLATFORM + SEO + HOMEXTRA + STORY + "</body>", 1)
+import seo as aeo_seo
+
+html = html.replace("</body>", INJECT + HEROGRID + ANALYTICS + CHROME + PLATFORM + SEO + HOMEXTRA + STORY + "</body>", 1)
 
 html = apply_favicons(html)
 html = fix_next_asset_paths(html)
+html = aeo_seo.apply_page_seo(html, "home")
+html = aeo_seo.apply_body_seo_cleanup(html)
 
 open(LIVE, "w", encoding="utf-8").write(html)
 print("wrote", LIVE, "(", len(html), "bytes )")
 
 # ============================================================
-#  SUBPAGES (pricing, contact) — same Attio chrome, own content
+#  SUBPAGES (pricing, contact) - same Attio chrome, own content
 # ============================================================
-def build_page(fname, title, frag_path):
+def build_page(fname, page_key, frag_path):
     page = open(SRC, encoding="utf-8").read()
-    page = re.sub(r"<title>.*?</title>", "<title>" + title + "</title>", page, count=1, flags=re.S)
     page = page.replace("Start for free", "Get your free audit")
     page = page.replace("Talk to sales", "Book a call")
     frag = open(frag_path, encoding="utf-8").read()
-    # CHROME + FLOATFIELD + page content. Homepage build above never
-    # receives FLOATFIELD — keeps home square field untouched.
-    page = page.replace("</body>", CHROME + FLOATFIELD + frag + "</body>", 1)
+    # ANALYTICS + CHROME + FLOATFIELD + page content. Homepage build above never
+    # receives FLOATFIELD - keeps home square field untouched.
+    page = page.replace("</body>", ANALYTICS + CHROME + FLOATFIELD + frag + "</body>", 1)
     page = apply_favicons(page)
     page = fix_next_asset_paths(page)
-    open(fname, "w", encoding="utf-8").write(page)
-    print("wrote", fname, "(", len(page), "bytes )")
-
-build_page("pricing.html", "Pricing: Answered Labs, the AEO agency", "parts/pricing.frag")
-build_page("contact.html", "Get your free audit | Answered Labs", "parts/contact.frag")
-build_page("book.html", "Book a call | Answered Labs", "parts/book.frag")
-
-LEGAL_STYLE = open("parts/legal_style.frag", encoding="utf-8").read()
-
-def build_meta_page(fname, title, description, frag_path, extra_head="", prefix_frag=""):
-    page = open(SRC, encoding="utf-8").read()
-    page = re.sub(r"<title>.*?</title>", "<title>" + title + "</title>", page, count=1, flags=re.S)
-    page = page.replace("Start for free", "Get your free audit")
-    page = page.replace("Talk to sales", "Book a call")
-    meta = (
-        '<meta name="description" content="' + description + '">'
-        + extra_head
-    )
-    if re.search(r"<meta\b[^>]*name=[\"']description[\"']", page, flags=re.I):
-        page = re.sub(
-            r"<meta\b[^>]*name=[\"']description[\"'][^>]*>",
-            meta,
-            page,
-            count=1,
-            flags=re.I,
-        )
-    else:
-        page = re.sub(
-            r"(<title>.*?</title>)",
-            r"\1" + meta,
-            page,
-            count=1,
-            flags=re.S,
-        )
-    frag = open(frag_path, encoding="utf-8").read()
-    page = page.replace(
-        "</body>",
-        CHROME + FLOATFIELD + prefix_frag + frag + "</body>",
-        1,
-    )
-    page = apply_favicons(page)
-    page = fix_next_asset_paths(page)
+    page = aeo_seo.apply_page_seo(page, page_key)
+    page = aeo_seo.apply_body_seo_cleanup(page)
     open(fname, "w", encoding="utf-8").write(page)
     print("wrote", fname, "(", len(page), "bytes )")
     return page
 
-build_meta_page(
-    "privacy.html",
-    "Privacy Policy | Answered Labs",
-    "How Answered Labs handles personal information collected through the website, Free Audit form, and booking tools.",
-    "parts/privacy.frag",
-    prefix_frag=LEGAL_STYLE,
-)
-build_meta_page(
-    "terms.html",
-    "Terms | Answered Labs",
-    "Terms of use for the Answered Labs website.",
-    "parts/terms.frag",
-    prefix_frag=LEGAL_STYLE,
-)
-nf = build_meta_page(
-    "404.html",
-    "Page not found | Answered Labs",
-    "The page you are looking for does not exist.",
-    "parts/notfound.frag",
-    extra_head='<meta name="robots" content="noindex, nofollow">',
-)
+build_page("pricing.html", "pricing", "parts/pricing.frag")
+build_page("contact.html", "free_audit", "parts/contact.frag")
+build_page("book.html", "book", "parts/book.frag")
+
+LEGAL_STYLE = open("parts/legal_style.frag", encoding="utf-8").read()
+
+def build_meta_page(fname, page_key, frag_path, prefix_frag=""):
+    page = open(SRC, encoding="utf-8").read()
+    page = page.replace("Start for free", "Get your free audit")
+    page = page.replace("Talk to sales", "Book a call")
+    frag = open(frag_path, encoding="utf-8").read()
+    page = page.replace(
+        "</body>",
+        ANALYTICS + CHROME + FLOATFIELD + prefix_frag + frag + "</body>",
+        1,
+    )
+    page = apply_favicons(page)
+    page = fix_next_asset_paths(page)
+    page = aeo_seo.apply_page_seo(page, page_key)
+    page = aeo_seo.apply_body_seo_cleanup(page)
+    open(fname, "w", encoding="utf-8").write(page)
+    print("wrote", fname, "(", len(page), "bytes )")
+    return page
+
+build_meta_page("privacy.html", "privacy", "parts/privacy.frag", prefix_frag=LEGAL_STYLE)
+build_meta_page("terms.html", "terms", "parts/terms.frag", prefix_frag=LEGAL_STYLE)
+nf = build_meta_page("404.html", "notfound", "parts/notfound.frag")
 
 # Vercel serves /404.html from the deployment root with HTTP 404.
 root_404 = os.path.abspath(os.path.join("..", "..", "404.html"))
 open(root_404, "w", encoding="utf-8").write(nf)
 print("wrote", root_404, "(", len(nf), "bytes )")
+
+repo_root = os.path.abspath(os.path.join("..", ".."))
+aeo_seo.write_site_files(repo_root)
+print("wrote robots.txt, sitemap.xml, llms.txt, IndexNow key, site.webmanifest")

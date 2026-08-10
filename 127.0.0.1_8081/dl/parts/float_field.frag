@@ -140,6 +140,23 @@ body > div.flex,
     alphaBins:40 // homepage tonal bin resolution
   };
 
+  // Pricing / Free Audit / Book only:
+  // - ~28% fewer squares (density)
+  // - proportional position remap on viewport resize (even distribution)
+  // Size, opacity, physics, sparkle, and cursor behavior stay identical.
+  // 404 and other float-field hosts keep the default CFG / resize behavior.
+  var evenResizeRemap=false;
+  try{
+    var densPath=(location.pathname||"").toLowerCase();
+    if(/\/(pricing|contact|free-audit|book)(\.html)?\/?$/.test(densPath)){
+      var densKeep=0.72;
+      CFG.areaPerParticle=Math.round(CFG.areaPerParticle/densKeep);
+      CFG.countMin=Math.round(CFG.countMin*densKeep);
+      CFG.countMax=Math.round(CFG.countMax*densKeep);
+      evenResizeRemap=true;
+    }
+  }catch(e){}
+
   function clamp(v,a,b){return v<a?a:(v>b?b:v);}
   function rand(a,b){return a+Math.random()*(b-a);}
   function hypot(x,y){return Math.sqrt(x*x+y*y);}
@@ -261,7 +278,26 @@ body > div.flex,
 
   var _densPt={x:0,y:0};
 
+  // Map existing particle positions into the new viewport so density stays
+  // approximately uniform across the current width/height after resize.
+  // Avoids left/right clustering when expanding half-screen → full-screen.
+  function remapField(prevW,prevH){
+    if(!evenResizeRemap||!parts||!prevW||!prevH)return;
+    if(prevW===w&&prevH===h)return;
+    var sx=w/prevW, sy=h/prevH;
+    if(Math.abs(sx-1)<0.0005&&Math.abs(sy-1)<0.0005)return;
+    var i,p;
+    for(i=0;i<parts.length;i++){
+      p=parts[i];
+      if(!p)continue;
+      p.x*=sx; p.y*=sy;
+      p.densTx*=sx; p.densTy*=sy;
+      wrapPos(p);
+    }
+  }
+
   function resize(){
+    var prevW=w, prevH=h;
     dpr=Math.min(window.devicePixelRatio||1,2);
     w=window.innerWidth; h=window.innerHeight;
     canvas.width=Math.round(w*dpr);
@@ -271,6 +307,9 @@ body > div.flex,
     ctx.setTransform(dpr,0,0,dpr,0,0);
 
     cellW=w/densCols; cellH=h/densRows;
+
+    // Remap first so kept particles span the new viewport, not the old one.
+    if(parts&&prevW>0&&prevH>0)remapField(prevW,prevH);
 
     var next=countFor(w,h);
     if(!parts||parts.length!==next){

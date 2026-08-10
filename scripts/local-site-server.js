@@ -3,7 +3,7 @@
  * Local production-shaped server:
  * - static files from repo root (same layout as Vercel)
  * - POST /api/free-audit → HubSpot handler
- * - clean URL rewrites matching vercel.json
+ * - clean URL rewrites + permanent redirects matching vercel.json
  */
 const http = require("http");
 const fs = require("fs");
@@ -12,7 +12,6 @@ const { URL } = require("url");
 const handler = require("../api/free-audit.js");
 
 const ROOT = path.join(__dirname, "..");
-const PORT = Number(process.env.PORT || 8081);
 
 function loadEnv() {
   const envPath = path.join(ROOT, ".env");
@@ -34,17 +33,38 @@ function loadEnv() {
   }
 }
 
+// Load .env BEFORE resolving PORT (otherwise PORT=8082 in .env is ignored).
 loadEnv();
+const PORT = Number(process.env.PORT || 8082);
+
+// Permanent redirects (301) to canonical clean URLs.
+const REDIRECTS = [
+  ["/contact", "/free-audit"],
+  ["/contact/", "/free-audit"],
+  ["/contact.html", "/free-audit"],
+  ["/pricing.html", "/pricing"],
+  ["/book.html", "/book"],
+  ["/privacy.html", "/privacy"],
+  ["/terms.html", "/terms"],
+  ["/index.html", "/"],
+  ["/pricing/", "/pricing"],
+  ["/free-audit/", "/free-audit"],
+  ["/book/", "/book"],
+  ["/privacy/", "/privacy"],
+  ["/terms/", "/terms"],
+  ["/127.0.0.1_8081/dl/pricing.html", "/pricing"],
+  ["/127.0.0.1_8081/dl/contact.html", "/free-audit"],
+  ["/127.0.0.1_8081/dl/book.html", "/book"],
+  ["/127.0.0.1_8081/dl/privacy.html", "/privacy"],
+  ["/127.0.0.1_8081/dl/terms.html", "/terms"],
+  ["/127.0.0.1_8081/dl/404.html", "/404"],
+  ["/127.0.0.1_8081/dl/", "/"],
+  ["/127.0.0.1_8081/dl", "/"],
+];
 
 const REWRITES = [
   ["/", "/127.0.0.1_8081/dl/"],
-  ["/index.html", "/127.0.0.1_8081/dl/"],
-  ["/contact.html", "/127.0.0.1_8081/dl/contact.html"],
-  ["/pricing.html", "/127.0.0.1_8081/dl/pricing.html"],
-  ["/book.html", "/127.0.0.1_8081/dl/book.html"],
-  ["/privacy.html", "/127.0.0.1_8081/dl/privacy.html"],
-  ["/terms.html", "/127.0.0.1_8081/dl/terms.html"],
-  ["/contact", "/127.0.0.1_8081/dl/contact.html"],
+  ["/free-audit", "/127.0.0.1_8081/dl/contact.html"],
   ["/pricing", "/127.0.0.1_8081/dl/pricing.html"],
   ["/book", "/127.0.0.1_8081/dl/book.html"],
   ["/privacy", "/127.0.0.1_8081/dl/privacy.html"],
@@ -59,6 +79,8 @@ const MIME = {
   ".js": "text/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".json": "application/json",
+  ".webmanifest": "application/manifest+json; charset=utf-8",
+  ".xml": "application/xml; charset=utf-8",
   ".svg": "image/svg+xml",
   ".png": "image/png",
   ".jpg": "image/jpeg",
@@ -72,9 +94,19 @@ const MIME = {
   ".txt": "text/plain; charset=utf-8",
 };
 
+function resolveRedirect(pathname) {
+  for (const [from, to] of REDIRECTS) {
+    if (pathname === from) return to;
+  }
+  return null;
+}
+
 function resolveUrlPath(pathname) {
   for (const [from, to] of REWRITES) {
     if (pathname === from) return to;
+  }
+  if (pathname.startsWith("/assets/")) {
+    return "/127.0.0.1_8081/dl" + pathname;
   }
   return pathname;
 }
@@ -107,19 +139,25 @@ function sendNotFound(res) {
 
 function sendFile(res, filePath) {
   fs.stat(filePath, (err, st) => {
-    if (err) {
+    if (err || !st) {
       sendNotFound(res);
       return;
     }
     let target = filePath;
     if (st.isDirectory()) {
-      target = path.join(filePath, "index.html");
-      if (!fs.existsSync(target)) {
-        // Symlink index in dl/ points at the long ua= filename
-        const entries = fs.readdirSync(filePath);
-        const html = entries.find((e) => e.endsWith(".html") && e.startsWith("ua="));
-        if (html) target = path.join(filePath, html);
-        else {
+      const indexHtml = path.join(filePath, "index.html");
+      if (fs.existsSync(indexHtml)) target = indexHtml;
+      else {
+        // Homepage scrape folder: pick the ua=*.html live file.
+        try {
+          const entries = fs.readdirSync(filePath);
+          const html = entries.find((e) => e.endsWith(".html") && e.startsWith("ua="));
+          if (html) target = path.join(filePath, html);
+          else {
+            sendNotFound(res);
+            return;
+          }
+        } catch (e) {
           sendNotFound(res);
           return;
         }
@@ -128,6 +166,9 @@ function sendFile(res, filePath) {
     const ext = path.extname(target).toLowerCase();
     res.statusCode = 200;
     res.setHeader("Content-Type", MIME[ext] || "application/octet-stream");
+    if (ext === ".html") {
+      res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
+    }
     fs.createReadStream(target).pipe(res);
   });
 }
@@ -135,9 +176,20 @@ function sendFile(res, filePath) {
 const server = http.createServer((req, res) => {
   const u = new URL(req.url || "/", "http://127.0.0.1");
   if (u.pathname === "/api/free-audit" || u.pathname === "/api/free-audit/") {
+    res.setHeader("X-Robots-Tag", "noindex, nofollow");
     handler(req, res);
     return;
   }
+
+  const redirected = resolveRedirect(u.pathname);
+  if (redirected) {
+    const dest = redirected + (u.search || "");
+    res.statusCode = 301;
+    res.setHeader("Location", dest);
+    res.end();
+    return;
+  }
+
   const rewritten = resolveUrlPath(u.pathname);
   const filePath = safeJoin(ROOT, rewritten);
   if (!filePath) {
@@ -148,8 +200,17 @@ const server = http.createServer((req, res) => {
   sendFile(res, filePath);
 });
 
+server.on("error", (err) => {
+  console.error(
+    "Failed to bind http://127.0.0.1:" + PORT + "/",
+    err && err.message ? err.message : err
+  );
+  process.exit(1);
+});
+
 server.listen(PORT, "127.0.0.1", () => {
   console.log("Serving http://127.0.0.1:" + PORT + "/ (static + /api/free-audit)");
+  console.log("pid", process.pid);
   const token =
     (process.env.HUBSPOT_ACCESS_TOKEN && process.env.HUBSPOT_ACCESS_TOKEN.trim()) ||
     (process.env.HUBSPOT_PRIVATE_APP_TOKEN && process.env.HUBSPOT_PRIVATE_APP_TOKEN.trim()) ||

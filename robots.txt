@@ -1,0 +1,20 @@
+# Answered Labs - https://answeredlabs.com
+User-agent: *
+Allow: /
+
+# Keep API endpoints out of content discovery
+Disallow: /api/
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+Sitemap: https://answeredlabs.com/sitemap.xml
