@@ -26,7 +26,7 @@ header nav[data-aeo="1"]{display:block;position:relative;width:100%;box-sizing:b
 .aeo-nav-toggle-bars,.aeo-nav-toggle-bars::before,.aeo-nav-toggle-bars::after{display:block;width:16px;height:1.5px;background:currentColor;border-radius:1px;position:relative}
 .aeo-nav-toggle-bars::before,.aeo-nav-toggle-bars::after{content:"";position:absolute;left:0}
 .aeo-nav-toggle-bars::before{top:-5px}.aeo-nav-toggle-bars::after{top:5px}
-.aeo-nav-drawer{display:none}
+.aeo-nav-drawer,.aeo-nav-backdrop{display:none;pointer-events:none}
 #aeo-platform{display:block}
 @media (max-width:1023px){
   .aeo-nav{grid-template-columns:minmax(0,1fr) auto;gap:10px}
@@ -767,11 +767,22 @@ header[data-aeo-scrolled="1"]{background-color:#fff!important;-webkit-backdrop-f
 .aeo-nav-toggle[aria-expanded="true"] .aeo-nav-toggle-bars{background:transparent}
 .aeo-nav-toggle[aria-expanded="true"] .aeo-nav-toggle-bars::before{top:0;transform:rotate(45deg)}
 .aeo-nav-toggle[aria-expanded="true"] .aeo-nav-toggle-bars::after{top:0;transform:rotate(-45deg)}
+/* Mobile menu panel + backdrop are position:fixed and live on <body> after
+   wireMobileNav(). Absolute positioning inside the sticky/isolated header
+   was clipped on iOS Safari, so scroll-lock engaged with an invisible menu. */
+.aeo-nav-backdrop{
+  display:none;position:fixed;inset:0;z-index:100;
+  background:rgba(16,17,20,.22);pointer-events:none;
+}
+.aeo-nav-backdrop.is-open{display:block;pointer-events:auto}
 .aeo-nav-drawer{
-  display:none;position:absolute;left:12px;right:12px;top:calc(100% + 8px);z-index:50;
+  display:none;position:fixed;left:12px;right:12px;top:64px;z-index:101;
   padding:10px;border:1px solid rgba(28,29,31,.1);border-radius:14px;background:#fff;
   box-shadow:0 1px 2px rgba(16,17,20,.06),0 18px 40px -20px rgba(16,17,20,.35);
+  max-height:min(70vh,calc(100dvh - 80px));overflow:auto;-webkit-overflow-scrolling:touch;
+  pointer-events:none;
 }
+.aeo-nav-drawer.is-open{pointer-events:auto}
 .aeo-nav-drawer a{
   display:block;padding:12px 14px;border-radius:10px;color:#2e3238;text-decoration:none;
   font-size:15px;font-weight:500;letter-spacing:-.006em;
@@ -860,7 +871,13 @@ header nav[data-aeo="1"]{
     padding-bottom:15px;
   }
 }
-html.aeo-nav-open,body.aeo-nav-open{overflow:hidden;touch-action:none}
+/* Open-state marker only. Do NOT overflow:hidden or position:fixed the root —
+   both break position:sticky on iOS Safari (header vanishes; menu looks frozen).
+   Scroll is blocked in JS via touchmove/wheel while the fixed backdrop is open.
+   overflow-anchor:none stops WebKit scroll-anchoring jumps when the overlay mounts.
+   Never use touch-action:none on html/body. */
+html.aeo-nav-open,body.aeo-nav-open{overflow-anchor:none}
+html.aeo-nav-open .sticky.top-0:has(>header){z-index:110}
 @media (max-width:1023px){
   .aeo-nav{gap:10px;grid-template-columns:minmax(0,1fr) auto;align-items:center}
   .aeo-nav-links{display:none}
@@ -870,6 +887,9 @@ html.aeo-nav-open,body.aeo-nav-open{overflow:hidden;touch-action:none}
   .aeo-nav-drawer.is-open{display:block}
   .aeo-nav-brand{min-width:0}
   .aeo-nav-brand .aeo-logo{height:20px;max-width:min(180px,58vw)}
+}
+@media (min-width:1024px){
+  .aeo-nav-backdrop,.aeo-nav-drawer{display:none!important;pointer-events:none!important}
 }
 @media (max-width:420px){
   .aeo-nav-brand .aeo-logo{height:18px;max-width:min(160px,56vw)}
@@ -1041,44 +1061,166 @@ html.aeo-nav-open,body.aeo-nav-open{overflow:hidden;touch-action:none}
     var drawer=nav.querySelector(".aeo-nav-drawer");
     if(!toggle||!drawer)return;
     nav.setAttribute("data-aeo-nav-wired","1");
+    /* Escape sticky/isolated header clipping on iOS: mount panel + backdrop on body. */
+    var backdrop=document.getElementById("aeo-nav-backdrop");
+    if(!backdrop){
+      backdrop=document.createElement("div");
+      backdrop.id="aeo-nav-backdrop";
+      backdrop.className="aeo-nav-backdrop";
+      backdrop.setAttribute("hidden","");
+      backdrop.setAttribute("aria-hidden","true");
+    }
+    if(backdrop.parentNode!==document.body)document.body.appendChild(backdrop);
+    if(drawer.parentNode!==document.body)document.body.appendChild(drawer);
     var lastFocus=null;
+    var lockedY=0;
+    var lockActive=false;
+    var pinTimer=null;
+    var finePointer=false;
+    try{finePointer=window.matchMedia("(hover:hover) and (pointer:fine)").matches;}catch(e){}
+    function scrollYNow(){
+      return window.scrollY||window.pageYOffset||
+        (document.scrollingElement&&document.scrollingElement.scrollTop)||
+        document.documentElement.scrollTop||document.body.scrollTop||0;
+    }
+    function setScrollY(y){
+      try{window.scrollTo({top:y,left:0,behavior:"instant"});}catch(e){
+        try{window.scrollTo(0,y);}catch(e0){}
+      }
+      try{
+        if(document.scrollingElement)document.scrollingElement.scrollTop=y;
+        document.documentElement.scrollTop=y;
+      }catch(e2){}
+    }
+    function placeDrawer(){
+      var sticky=document.querySelector(".sticky.top-0:has(>header)")||document.querySelector("header");
+      var top=64;
+      if(sticky){
+        var r=sticky.getBoundingClientRect();
+        top=Math.max(8,Math.round(r.bottom+8));
+      }
+      drawer.style.top=top+"px";
+    }
+    function onTouchMove(e){
+      if(!lockActive)return;
+      var t=e.target;
+      if(drawer.contains(t))return;
+      if(toggle.contains(t))return;
+      e.preventDefault();
+    }
+    function onWheel(e){
+      if(!lockActive)return;
+      var t=e.target;
+      if(drawer.contains(t))return;
+      e.preventDefault();
+    }
+    function holdScroll(){
+      if(!lockActive)return;
+      if(Math.abs(scrollYNow()-lockedY)>1)setScrollY(lockedY);
+    }
+    function clearPinTimer(){
+      if(pinTimer){clearInterval(pinTimer);pinTimer=null;}
+    }
+    function lockScroll(explicitY){
+      if(lockActive)return;
+      lockedY=(typeof explicitY==="number"&&isFinite(explicitY))?explicitY:scrollYNow();
+      lockActive=true;
+      document.documentElement.classList.add("aeo-nav-open");
+      document.body.classList.add("aeo-nav-open");
+      document.addEventListener("touchmove",onTouchMove,{passive:false});
+      document.addEventListener("wheel",onWheel,{passive:false});
+      document.addEventListener("scroll",holdScroll,{passive:true});
+      holdScroll();
+      clearPinTimer();
+      var n=0;
+      pinTimer=setInterval(function(){
+        holdScroll();
+        if(++n>24)clearPinTimer();
+      },16);
+    }
+    function unlockScroll(){
+      clearPinTimer();
+      document.documentElement.classList.remove("aeo-nav-open");
+      document.body.classList.remove("aeo-nav-open");
+      document.removeEventListener("touchmove",onTouchMove,{passive:false});
+      document.removeEventListener("wheel",onWheel,{passive:false});
+      document.removeEventListener("scroll",holdScroll,{passive:true});
+      if(!lockActive)return;
+      lockActive=false;
+      var y=lockedY;
+      setScrollY(y);
+      try{requestAnimationFrame(function(){setScrollY(y);});}catch(e){}
+      /* WebKit sometimes applies overlay-related scroll anchoring after the
+         open class is removed — re-pin across a couple of turns. */
+      setTimeout(function(){setScrollY(y);},0);
+      setTimeout(function(){setScrollY(y);},32);
+      setTimeout(function(){setScrollY(y);},100);
+    }
     function setOpen(open){
+      open=!!open;
+      var wasOpen=drawer.classList.contains("is-open");
+      if(open===wasOpen){
+        if(!open)unlockScroll();
+        return;
+      }
+      if(open){
+        lockScroll(lockedY);
+        placeDrawer();
+      }
       drawer.classList.toggle("is-open",open);
-      if(open)drawer.removeAttribute("hidden");else drawer.setAttribute("hidden","");
+      backdrop.classList.toggle("is-open",open);
+      if(open){
+        drawer.removeAttribute("hidden");
+        backdrop.removeAttribute("hidden");
+      }else{
+        drawer.setAttribute("hidden","");
+        backdrop.setAttribute("hidden","");
+      }
+      backdrop.setAttribute("aria-hidden",open?"false":"true");
       toggle.setAttribute("aria-expanded",open?"true":"false");
       toggle.setAttribute("aria-label",open?"Close menu":"Open menu");
-      document.documentElement.classList.toggle("aeo-nav-open",open);
-      document.body.classList.toggle("aeo-nav-open",open);
+      if(!open)unlockScroll();
       if(open){
         lastFocus=document.activeElement;
-        var first=drawer.querySelector("a,button");
-        if(first)try{first.focus({preventScroll:true});}catch(e){}
-      }else if(lastFocus&&typeof lastFocus.focus==="function"){
+        /* Autofocus/focus restore on touch can move iOS scroll and hide sticky chrome. */
+        if(finePointer){
+          var first=drawer.querySelector("a,button");
+          if(first)try{first.focus({preventScroll:true});}catch(e){}
+        }
+      }else if(finePointer&&lastFocus&&typeof lastFocus.focus==="function"){
         try{lastFocus.focus({preventScroll:true});}catch(e){}
+        lastFocus=null;
+      }else{
         lastFocus=null;
       }
     }
     function isOpen(){return drawer.classList.contains("is-open");}
+    function closeMenu(){if(isOpen())setOpen(false);}
     toggle.addEventListener("click",function(e){
       e.preventDefault();
       e.stopPropagation();
+      if(!isOpen())lockedY=scrollYNow();
       setOpen(!isOpen());
+    });
+    backdrop.addEventListener("click",function(e){
+      e.preventDefault();
+      closeMenu();
     });
     drawer.addEventListener("click",function(e){
       var a=e.target&&e.target.closest?e.target.closest("a"):null;
       if(a)setOpen(false);
     });
-    document.addEventListener("click",function(e){
-      if(!isOpen())return;
-      if(nav.contains(e.target))return;
-      setOpen(false);
-    });
     document.addEventListener("keydown",function(e){
-      if(e.key==="Escape"&&isOpen()){setOpen(false);toggle.focus();}
+      if(e.key==="Escape"&&isOpen()){setOpen(false);try{toggle.focus();}catch(err){}}
     });
     window.addEventListener("resize",function(){
-      if(window.matchMedia("(min-width:1024px)").matches&&isOpen())setOpen(false);
+      if(window.matchMedia("(min-width:1024px)").matches){closeMenu();return;}
+      if(isOpen())placeDrawer();
     });
+    /* BFCache / Safari back must never restore a locked body with a closed menu. */
+    window.addEventListener("pageshow",function(){setOpen(false);});
+    window.addEventListener("pagehide",function(){setOpen(false);});
+    setOpen(false);
   }
   /* ---- nav: one highlight surface that travels between links on hover ---- */
   function wireNavHighlight(){

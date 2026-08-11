@@ -733,7 +733,7 @@ header nav[data-aeo="1"]{display:block;position:relative;width:100%;box-sizing:b
 .aeo-nav-toggle-bars,.aeo-nav-toggle-bars::before,.aeo-nav-toggle-bars::after{display:block;width:16px;height:1.5px;background:currentColor;border-radius:1px;position:relative}
 .aeo-nav-toggle-bars::before,.aeo-nav-toggle-bars::after{content:"";position:absolute;left:0}
 .aeo-nav-toggle-bars::before{top:-5px}.aeo-nav-toggle-bars::after{top:5px}
-.aeo-nav-drawer{display:none}
+.aeo-nav-drawer,.aeo-nav-backdrop{display:none;pointer-events:none}
 #aeo-platform{display:block}
 @media (max-width:1023px){
   .aeo-nav{grid-template-columns:minmax(0,1fr) auto;gap:10px}
