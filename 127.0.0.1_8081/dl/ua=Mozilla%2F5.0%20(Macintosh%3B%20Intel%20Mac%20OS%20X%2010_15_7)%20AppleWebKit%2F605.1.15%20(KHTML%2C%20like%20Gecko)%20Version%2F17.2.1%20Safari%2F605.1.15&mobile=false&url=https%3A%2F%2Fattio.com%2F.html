@@ -7,11 +7,12 @@
 [data-home-hero="desktop-window"]{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
 .aeo-stage,.aeo-window{opacity:1!important;visibility:visible!important}
 .sticky.top-0:has(>header){background-color:#fff}
-header{background-color:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
-header > [class*="backdrop-blur"]{display:none!important}
-header nav[data-aeo="1"]{display:block;position:relative;width:100%;box-sizing:border-box;padding-top:8px;padding-bottom:7px}
+/* Site chrome header only — not Privacy/Terms <header class="aeo-legal-intro">. */
+.sticky.top-0 > header{background-color:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.sticky.top-0 > header > [class*="backdrop-blur"]{display:none!important}
+.sticky.top-0 > header nav[data-aeo="1"],header nav[data-aeo="1"]{display:block;position:relative;width:100%;box-sizing:border-box;padding-top:8px;padding-bottom:7px}
 @media (min-width:1024px){
-  header nav[data-aeo="1"]{padding-top:16px;padding-bottom:15px}
+  .sticky.top-0 > header nav[data-aeo="1"],header nav[data-aeo="1"]{padding-top:16px;padding-bottom:15px}
 }
 .aeo-nav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;width:100%;font-family:var(--font-inter),"Inter",system-ui,sans-serif;font-size:15px;font-weight:500}
 .aeo-nav-brand{display:inline-flex;align-items:center;justify-self:start;text-decoration:none;padding:4px 2px;min-width:0}
@@ -1408,6 +1409,21 @@ html{scroll-padding-top:88px}
 
 /* ---- headings / lead ---- */
 .aeo-h2{font-family:"Inter Display",Inter,sans-serif;font-weight:600;font-size:clamp(32px,4.4vw,54px);line-height:1.04;letter-spacing:-.028em;margin:0;text-wrap:balance;background:linear-gradient(176deg,#131417 42%,#41506a);-webkit-background-clip:text;background-clip:text;color:transparent}
+/* background-clip:text paints only inside the padding box. On Pricing /
+   Free Audit intros the y/g/p descenders sit ~4px below the line box, so
+   the H1 itself crops the glyph (overflow stays visible). Expand the paint
+   box — do not raise global line-height. */
+.aeo-plat-intro .aeo-h2,
+.aeo-contact-intro .aeo-h2{
+  padding:.06em 0 .18em;
+  overflow:visible;
+  -webkit-box-decoration-break:clone;
+  box-decoration-break:clone;
+  background-origin:padding-box;
+  -webkit-background-origin:padding-box;
+  background-size:100% 135%;
+  background-position:center 38%;
+}
 .aeo-lead{font-size:clamp(16.5px,1.35vw,19.5px);line-height:1.52;color:var(--aeo-ink-3);margin:18px auto 0;max-width:58ch;font-weight:500;letter-spacing:-.008em;text-wrap:balance}
 
 /* ---- ambient blobs ---- */
@@ -1517,11 +1533,12 @@ html{scroll-padding-top:88px}
 .aeo-hero::before{content:"";position:absolute;inset:-10% 0 0;z-index:0;pointer-events:none;will-change:transform;transform:translate3d(0,var(--aeo-par,0px),0);background:radial-gradient(42% 46% at 16% 10%,rgba(38,109,240,.11),transparent 70%),radial-gradient(36% 42% at 84% 6%,rgba(140,110,245,.10),transparent 70%),radial-gradient(34% 40% at 52% 52%,rgba(38,190,170,.07),transparent 72%);animation:aeo-hero-hue 20s ease-in-out infinite alternate}
 @keyframes aeo-hero-hue{to{filter:hue-rotate(16deg)}}
 
-/* ---- header: turns to glass once you leave the hero ---- */
-header{transition:background-color .35s var(--aeo-e),box-shadow .35s var(--aeo-e),backdrop-filter .35s var(--aeo-e)}
+/* ---- site chrome header only (sticky nav). Do not target page <header>
+   landmarks such as .aeo-legal-intro on Privacy/Terms. ---- */
+.sticky.top-0 > header{transition:background-color .35s var(--aeo-e),box-shadow .35s var(--aeo-e),backdrop-filter .35s var(--aeo-e)}
 /* Glass-on-scroll disabled: translucent + backdrop-filter jitters on iOS Safari.
    Opaque white + hairline rule only (see header rules below). */
-header[data-aeo-scrolled="1"]{background-color:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:0 1px 0 rgba(16,17,20,.06)}
+.sticky.top-0 > header[data-aeo-scrolled="1"]{background-color:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:0 1px 0 rgba(16,17,20,.06)}
 
 /* ---- nav ----
    A true 3-column grid, not flex space-between: the two outer columns
@@ -1658,7 +1675,7 @@ body > div.flex.min-h-screen.max-w-screen.flex-col.justify-between{
   pointer-events:none;
   z-index:0;
 }
-header{
+.sticky.top-0 > header{
   position:relative;
   z-index:1;
   background-color:#fff!important;
@@ -1667,14 +1684,14 @@ header{
   backdrop-filter:none!important;
   opacity:1!important;
 }
-header[data-aeo-scrolled="1"]{
+.sticky.top-0 > header[data-aeo-scrolled="1"]{
   background-color:#fff!important;
   -webkit-backdrop-filter:none!important;
   backdrop-filter:none!important;
   box-shadow:0 1px 0 rgba(16,17,20,.06);
 }
-header > .absolute.inset-0.-z-1,
-header > [class*="backdrop-blur"]{
+.sticky.top-0 > header > .absolute.inset-0.-z-1,
+.sticky.top-0 > header > [class*="backdrop-blur"]{
   display:none!important;
   -webkit-backdrop-filter:none!important;
   backdrop-filter:none!important;

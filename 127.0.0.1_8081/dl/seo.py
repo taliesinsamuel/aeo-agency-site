@@ -714,11 +714,12 @@ FIRST_PAINT_CSS = """<style id="aeo-first-paint">
 [data-home-hero="desktop-window"]{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
 .aeo-stage,.aeo-window{opacity:1!important;visibility:visible!important}
 .sticky.top-0:has(>header){background-color:#fff}
-header{background-color:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
-header > [class*="backdrop-blur"]{display:none!important}
-header nav[data-aeo="1"]{display:block;position:relative;width:100%;box-sizing:border-box;padding-top:8px;padding-bottom:7px}
+/* Site chrome header only — not Privacy/Terms <header class="aeo-legal-intro">. */
+.sticky.top-0 > header{background-color:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.sticky.top-0 > header > [class*="backdrop-blur"]{display:none!important}
+.sticky.top-0 > header nav[data-aeo="1"],header nav[data-aeo="1"]{display:block;position:relative;width:100%;box-sizing:border-box;padding-top:8px;padding-bottom:7px}
 @media (min-width:1024px){
-  header nav[data-aeo="1"]{padding-top:16px;padding-bottom:15px}
+  .sticky.top-0 > header nav[data-aeo="1"],header nav[data-aeo="1"]{padding-top:16px;padding-bottom:15px}
 }
 .aeo-nav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;width:100%;font-family:var(--font-inter),"Inter",system-ui,sans-serif;font-size:15px;font-weight:500}
 .aeo-nav-brand{display:inline-flex;align-items:center;justify-self:start;text-decoration:none;padding:4px 2px;min-width:0}

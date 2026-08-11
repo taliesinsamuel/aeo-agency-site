@@ -58,6 +58,15 @@ html.aeo-legal-page .aeo-blob{
 
 .aeo-legal-intro{
   margin:0 0 clamp(56px,7vw,80px);
+  /* Sit on the dark legal canvas — never inherit site-nav white <header> paint. */
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+  border:0!important;
+  opacity:1!important;
 }
 .aeo-legal-kicker{
   display:inline-block;
