@@ -17,12 +17,13 @@ LIVE = [f for f in glob.glob("*.html") if f.startswith("ua=")][0]
 # with query strings folded into the filename (e.g. "foo.svg?dpl=X" -> "foo_dpl=X.svg",
 # and "/_next/image?url=A&w=B" saved as a literal directory "/_next/image/url=A&w=B").
 # Without this rewrite every JS/CSS/image request 404s and the page renders blank.
-# Stable site-root favicons (files live at repo root: /favicon.ico, /favicon.svg).
-# ?v=2 busts Chrome's aggressive favicon cache after the path change from the
-# nested scraper asset directory.
+# Stable site-root favicons (files live at repo root).
+# ?v=3 busts browser/CDN caches after replacing wrong ICO/apple-touch rasters
+# with the official Answered Labs favicon artwork.
 FAVICON_LINKS = (
-    '<link rel="icon" href="/favicon.ico?v=2" sizes="any">'
-    '<link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">'
+    '<link rel="icon" href="/favicon.ico?v=3" sizes="any">'
+    '<link rel="icon" href="/favicon-48x48.png?v=3" type="image/png" sizes="48x48">'
+    '<link rel="icon" href="/favicon.svg?v=3" type="image/svg+xml">'
 )
 
 def apply_favicons(html):
