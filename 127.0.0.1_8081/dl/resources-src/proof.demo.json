@@ -1,0 +1,121 @@
+{
+  "_README": [
+    "SINGLE SOURCE OF TRUTH for every result figure and testimonial rendered on /work.",
+    "",
+    "Nothing in this file is verified. It exists so the Work page can be designed",
+    "and reviewed at full fidelity before real client data is available.",
+    "",
+    "Every item carries \"isDemo\": true. The production build refuses to run while",
+    "any item that is rendered publicly still has that flag set. See the guard in",
+    "127.0.0.1_8081/dl/build_resources.py (assert_no_demo_proof).",
+    "",
+    "TO GO LIVE: replace the figures, bars and quotes with verified values, set",
+    "\"isDemo\": false on each item you have verified, and re-run the build. Items",
+    "you have not verified can be removed from the arrays; the page adapts.",
+    "",
+    "Testimonial identities below are invented for design purposes. They are not",
+    "real people and not real companies. Do not publish them."
+  ],
+
+  "results": [
+    {
+      "id": "recommendation-visibility",
+      "isDemo": true,
+      "figure": "+238%",
+      "category": "AI recommendation presence",
+      "headline": "Average increase in AI recommendation visibility",
+      "summary": "Businesses in this sample went from turning up occasionally in AI recommendations to turning up in most of the conversations that matter to them.",
+      "detail": "Recommendation visibility is not a ranking position. When someone asks an assistant for a shortlist, the assistant assembles an answer from whatever it can retrieve and trust at that moment, and the same question asked twice can produce two different lists. So we measure frequency instead of position: across a fixed set of prompts that mirror how real customers ask, how often does this business get named at all? An increase of this size usually means the business moved from being one of many plausible options to being one the model reaches for consistently.",
+      "whatChanged": "The business became legible. Its services, service area and credibility were described the same way across its own site and the places the wider web talks about it, so there was less ambiguity for a model to resolve and more reason to include it.",
+      "howWeMeasure": "A fixed prompt set is run on a schedule across several assistants. We record whether the business is named in each response, then compare the share of prompts that name it before and after.",
+      "bars": [
+        { "key": "Before", "label": "23 of 100 prompts", "count": 23, "decimals": 0, "value": 23 },
+        { "key": "After", "label": "78 of 100 prompts", "count": 78, "decimals": 0, "value": 78, "highlight": true }
+      ]
+    },
+    {
+      "id": "citation-presence",
+      "isDemo": true,
+      "figure": "4.2x",
+      "category": "Citation presence",
+      "headline": "Increase in AI citation presence",
+      "summary": "The sources sitting behind an AI answer changed, and the business's own pages started appearing among them.",
+      "detail": "Several assistants show their working by linking the pages they drew on. Those links are worth watching closely, because they show which corner of the web an assistant treats as reliable on a given question. Citation presence counts how often a company's own site, or a third-party page that describes it accurately, appears in that set. It tends to move before recommendation frequency does, which makes it a useful early signal that the underlying work is landing.",
+      "whatChanged": "Pages that answered a specific question directly, in language a person would actually use, started being retrieved instead of pages that only described the company in general terms. A handful of accurate third-party listings helped as well.",
+      "howWeMeasure": "For prompts where the assistant exposes its sources, we log every cited domain and page, then track how often the business or a page describing it appears.",
+      "bars": [
+        { "key": "Before", "label": "0.9 citations per 10 answers", "count": 0.9, "decimals": 1, "value": 18 },
+        { "key": "After", "label": "3.8 citations per 10 answers", "count": 3.8, "decimals": 1, "value": 76, "highlight": true }
+      ]
+    },
+    {
+      "id": "non-branded-discovery",
+      "isDemo": true,
+      "figure": "+167%",
+      "category": "Search visibility",
+      "headline": "Average growth in non-branded discovery",
+      "summary": "More of the people finding these businesses had not heard of them beforehand.",
+      "detail": "Branded search is a measure of demand you already created. Non-branded search is a measure of whether you can be found by someone who only knows what they need. Someone typing the company name is already sold; someone typing what they need is choosing. Growth here is the part that compounds, and it matters twice over now, because conventional search results are still one of the main places assistants look when they assemble an answer.",
+      "whatChanged": "Coverage improved for the questions customers actually ask, and the pages answering them were structured well enough to be understood without a visitor having to hunt for the answer.",
+      "howWeMeasure": "Impressions and clicks for queries that do not contain the company name, taken from search console data and compared across matched periods.",
+      "bars": [
+        { "key": "Before", "label": "31% of baseline", "count": 31, "decimals": 0, "value": 31 },
+        { "key": "After", "label": "83% of baseline", "count": 83, "decimals": 0, "value": 83, "highlight": true }
+      ]
+    },
+    {
+      "id": "qualified-actions",
+      "isDemo": true,
+      "figure": "+78%",
+      "category": "Commercial impact",
+      "headline": "Increase in qualified website actions from organic and AI discovery",
+      "summary": "The visits that arrived were more likely to turn into an enquiry, a booking or a call.",
+      "detail": "Visibility that produces nothing is a vanity metric, so this is the number we care about most. It counts the actions a business would be glad to receive: a form completed, a call started, an appointment booked. It rose faster than raw traffic did, which is the pattern you want. People arriving from a recommendation or from a question they typed themselves have usually already decided what they need, and they arrive further along than someone who clicked out of curiosity.",
+      "whatChanged": "Traffic composition shifted toward higher intent, and the pages receiving that traffic made the next step obvious rather than making a visitor go looking for it.",
+      "howWeMeasure": "Completions of the actions each business counts as commercially meaningful, segmented to organic and AI-referred sessions, compared across matched periods.",
+      "bars": [
+        { "key": "Before", "label": "39% of baseline", "count": 39, "decimals": 0, "value": 39 },
+        { "key": "After", "label": "69% of baseline", "count": 69, "decimals": 0, "value": 69, "highlight": true }
+      ]
+    }
+  ],
+
+  "testimonials": [
+    {
+      "id": "demo-testimonial-1",
+      "isDemo": true,
+      "identity": "synthetic",
+      "quote": "We had spent years being the practice people recommended to their friends, and none of that showed up when someone asked an assistant the same question. Watching that gap close was strange and quite satisfying.",
+      "name": "Marta Ilves",
+      "role": "Practice Principal",
+      "company": "Rivermount Dental",
+      "industry": "Dental",
+      "resultTag": "Named in 6 of 10 local prompts",
+      "logo": null
+    },
+    {
+      "id": "demo-testimonial-2",
+      "isDemo": true,
+      "identity": "synthetic",
+      "quote": "What convinced me was that they showed me the prompts. I could see the exact questions, I could see who was being recommended instead of us, and I could see it change month over month. Nobody had ever shown me the actual evidence before.",
+      "name": "Dorian Vesk",
+      "role": "Managing Partner",
+      "company": "Halden & Crowe",
+      "industry": "Legal",
+      "resultTag": "Citation presence up 3x",
+      "logo": null
+    },
+    {
+      "id": "demo-testimonial-3",
+      "isDemo": true,
+      "identity": "synthetic",
+      "quote": "They were honest about the parts nobody can promise, which is not what I expected from an agency. The enquiries that come through now tend to already know what treatment they want, and that has changed how our front desk spends its day.",
+      "name": "Priya Raman",
+      "role": "Founder",
+      "company": "Northgate Aesthetics",
+      "industry": "Medical aesthetics",
+      "resultTag": "Qualified enquiries up 58%",
+      "logo": null
+    }
+  ]
+}

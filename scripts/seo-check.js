@@ -63,6 +63,17 @@ const PAGES = [
   },
 ];
 
+const RESOURCES_URLS = [
+  ORIGIN + "/work",
+  ORIGIN + "/research",
+  ORIGIN + "/insights",
+  ORIGIN + "/about",
+  ORIGIN + "/insights/what-is-answer-engine-optimization",
+  ORIGIN + "/insights/how-to-improve-visibility-in-chatgpt",
+  ORIGIN + "/insights/how-ai-recommends-local-businesses",
+  ORIGIN + "/insights/aeo-vs-seo",
+];
+
 const REDIRECTS = [
   ["/contact", "/free-audit"],
   ["/contact.html", "/free-audit"],
@@ -245,10 +256,14 @@ async function checkRobotsSitemap() {
   assert(sm.status === 200, "sitemap.xml 200");
   assert(/<urlset[\s\S]*<\/urlset>/i.test(sm.body), "sitemap valid urlset");
   const locs = [...sm.body.matchAll(/<loc>([^<]+)<\/loc>/gi)].map((m) => m[1]);
-  assert(locs.length === PAGES.length, `sitemap has ${PAGES.length} urls`);
+  const expected = PAGES.length + RESOURCES_URLS.length;
+  assert(locs.length === expected, `sitemap has ${expected} urls`);
   assert(new Set(locs).size === locs.length, "sitemap no duplicate urls");
   for (const page of PAGES) {
     assert(locs.includes(page.canonical), `sitemap includes ${page.canonical}`);
+  }
+  for (const url of RESOURCES_URLS) {
+    assert(locs.includes(url), `sitemap includes ${url}`);
   }
   assert(!locs.some((u) => /localhost|127\.0\.0\.1|\.html|#|\/api\//i.test(u)), "sitemap clean urls");
 

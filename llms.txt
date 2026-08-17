@@ -10,6 +10,10 @@ Answered Labs helps local businesses become understood, cited, surfaced and reco
 - Book an AEO strategy call: https://answeredlabs.com/book
 - Privacy Policy: https://answeredlabs.com/privacy
 - Terms of Use: https://answeredlabs.com/terms
+- Work: https://answeredlabs.com/work
+- Research: https://answeredlabs.com/research
+- Insights: https://answeredlabs.com/insights
+- About: https://answeredlabs.com/about
 
 ## What we do
 - AI visibility tracking across major answer engines

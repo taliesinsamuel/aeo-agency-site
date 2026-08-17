@@ -52,11 +52,23 @@ const REDIRECTS = [
   ["/book/", "/book"],
   ["/privacy/", "/privacy"],
   ["/terms/", "/terms"],
+  ["/work.html", "/work"],
+  ["/research.html", "/research"],
+  ["/insights.html", "/insights"],
+  ["/about.html", "/about"],
+  ["/work/", "/work"],
+  ["/research/", "/research"],
+  ["/insights/", "/insights"],
+  ["/about/", "/about"],
   ["/127.0.0.1_8081/dl/pricing.html", "/pricing"],
   ["/127.0.0.1_8081/dl/contact.html", "/free-audit"],
   ["/127.0.0.1_8081/dl/book.html", "/book"],
   ["/127.0.0.1_8081/dl/privacy.html", "/privacy"],
   ["/127.0.0.1_8081/dl/terms.html", "/terms"],
+  ["/127.0.0.1_8081/dl/work.html", "/work"],
+  ["/127.0.0.1_8081/dl/research.html", "/research"],
+  ["/127.0.0.1_8081/dl/insights.html", "/insights"],
+  ["/127.0.0.1_8081/dl/about.html", "/about"],
   ["/127.0.0.1_8081/dl/404.html", "/404"],
   ["/127.0.0.1_8081/dl/", "/"],
   ["/127.0.0.1_8081/dl", "/"],
@@ -69,6 +81,10 @@ const REWRITES = [
   ["/book", "/127.0.0.1_8081/dl/book.html"],
   ["/privacy", "/127.0.0.1_8081/dl/privacy.html"],
   ["/terms", "/127.0.0.1_8081/dl/terms.html"],
+  ["/work", "/127.0.0.1_8081/dl/work.html"],
+  ["/research", "/127.0.0.1_8081/dl/research.html"],
+  ["/insights", "/127.0.0.1_8081/dl/insights.html"],
+  ["/about", "/127.0.0.1_8081/dl/about.html"],
 ];
 
 const NOT_FOUND = path.join(ROOT, "404.html");
@@ -98,6 +114,14 @@ function resolveRedirect(pathname) {
   for (const [from, to] of REDIRECTS) {
     if (pathname === from) return to;
   }
+  const insightHtml = pathname.match(/^\/insights\/([a-z0-9-]+)\.html$/i);
+  if (insightHtml) return "/insights/" + insightHtml[1];
+  const insightSlash = pathname.match(/^\/insights\/([a-z0-9-]+)\/$/i);
+  if (insightSlash) return "/insights/" + insightSlash[1];
+  const dlArt = pathname.match(
+    /^\/127\.0\.0\.1_8081\/dl\/insights\/([a-z0-9-]+)\.html$/i
+  );
+  if (dlArt) return "/insights/" + dlArt[1];
   return null;
 }
 
@@ -107,6 +131,10 @@ function resolveUrlPath(pathname) {
   }
   if (pathname.startsWith("/assets/")) {
     return "/127.0.0.1_8081/dl" + pathname;
+  }
+  const insight = pathname.match(/^\/insights\/([a-z0-9-]+)$/i);
+  if (insight) {
+    return "/127.0.0.1_8081/dl/insights/" + insight[1] + ".html";
   }
   return pathname;
 }

@@ -691,7 +691,27 @@ CRAWLABLE_NAV = (
     '<div class="aeo-nav-links">'
     '<span class="aeo-nav-hl" aria-hidden="true"></span>'
     '<a href="/">Home</a><a href="/pricing">Pricing</a>'
-    '<a href="/free-audit">Free audit</a></div>'
+    '<a href="/free-audit">Free audit</a>'
+    '<div class="aeo-res">'
+    '<button class="aeo-res-btn" type="button" aria-expanded="false" aria-controls="aeo-res-menu">'
+    "Resources"
+    '<svg class="aeo-res-caret" viewBox="0 0 12 12" fill="none" aria-hidden="true">'
+    '<path d="M3 4.5 6 7.5 9 4.5" stroke="currentColor" stroke-width="1.5" '
+    'stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
+    '<div class="aeo-res-panel" id="aeo-res-menu">'
+    '<a class="aeo-res-item" href="/work">'
+    '<span class="aeo-res-t">Work<i aria-hidden="true">&#8594;</i></span>'
+    '<span class="aeo-res-d">Results, outcomes and what changes when visibility improves.</span></a>'
+    '<a class="aeo-res-item" href="/research">'
+    '<span class="aeo-res-t">Research<i aria-hidden="true">&#8594;</i></span>'
+    '<span class="aeo-res-d">Original investigation into how businesses get discovered by AI.</span></a>'
+    '<a class="aeo-res-item" href="/insights">'
+    '<span class="aeo-res-t">Insights<i aria-hidden="true">&#8594;</i></span>'
+    '<span class="aeo-res-d">Analysis of AEO, SEO, AI search and online discovery.</span></a>'
+    '<a class="aeo-res-item" href="/about">'
+    '<span class="aeo-res-t">About<i aria-hidden="true">&#8594;</i></span>'
+    '<span class="aeo-res-d">Why Answered Labs exists and the people behind it.</span></a>'
+    "</div></div></div>"
     '<div class="aeo-nav-right">'
     '<a class="aeo-btn aeo-btn--primary aeo-nav-book" href="/book">Book a Call</a>'
     '<button type="button" class="aeo-nav-toggle" aria-expanded="false" '
@@ -701,6 +721,8 @@ CRAWLABLE_NAV = (
     '<div class="aeo-nav-drawer" id="aeo-nav-drawer" hidden>'
     '<a href="/">Home</a><a href="/pricing">Pricing</a>'
     '<a href="/free-audit">Free audit</a>'
+    '<a href="/work">Work</a><a href="/research">Research</a>'
+    '<a href="/insights">Insights</a><a href="/about">About</a>'
     '<a class="aeo-btn aeo-btn--primary" href="/book">Book a Call</a>'
     "</div></div></nav>"
 )
@@ -726,6 +748,9 @@ FIRST_PAINT_CSS = """<style id="aeo-first-paint">
 .aeo-nav-brand .aeo-logo{display:block;height:22px;width:auto;max-width:min(204px,42vw)}
 .aeo-nav-links{position:relative;display:flex;align-items:center;gap:2px;justify-self:center}
 .aeo-nav-links a{color:#2e3238;text-decoration:none;padding:9px 12px;border-radius:10px;white-space:nowrap}
+.aeo-res{position:relative;display:flex;align-items:center}
+.aeo-res-btn{display:inline-flex;align-items:center;gap:5px;margin:0;padding:9px 12px;border:0;border-radius:10px;background:none;font:inherit;font-size:15px;font-weight:500;color:#2e3238;cursor:pointer;white-space:nowrap}
+.aeo-res-caret{width:11px;height:11px;opacity:.62}
 .aeo-nav-hl{display:none}
 .aeo-nav-right{justify-self:end;display:flex;align-items:center;gap:8px;min-width:max-content}
 .aeo-btn{display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 22px;border-radius:12px;font-size:14.5px;font-weight:600;text-decoration:none;border:1px solid transparent;box-sizing:border-box}
@@ -1060,10 +1085,21 @@ def apply_body_seo_cleanup(html: str) -> str:
 
 
 def indexable_urls() -> list[str]:
-    return [
+    commercial = [
         abs_url(PAGES[k]["path"])
         for k in ("home", "pricing", "free_audit", "book", "privacy", "terms")
     ]
+    resources = [
+        abs_url("/work"),
+        abs_url("/research"),
+        abs_url("/insights"),
+        abs_url("/about"),
+        abs_url("/insights/what-is-answer-engine-optimization"),
+        abs_url("/insights/how-to-improve-visibility-in-chatgpt"),
+        abs_url("/insights/how-ai-recommends-local-businesses"),
+        abs_url("/insights/aeo-vs-seo"),
+    ]
+    return commercial + resources
 
 
 def write_site_files(repo_root: str) -> None:
@@ -1118,6 +1154,10 @@ Answered Labs helps local businesses become understood, cited, surfaced and reco
 - Book an AEO strategy call: {CANONICAL_ORIGIN}/book
 - Privacy Policy: {CANONICAL_ORIGIN}/privacy
 - Terms of Use: {CANONICAL_ORIGIN}/terms
+- Work: {CANONICAL_ORIGIN}/work
+- Research: {CANONICAL_ORIGIN}/research
+- Insights: {CANONICAL_ORIGIN}/insights
+- About: {CANONICAL_ORIGIN}/about
 
 ## What we do
 - AI visibility tracking across major answer engines
