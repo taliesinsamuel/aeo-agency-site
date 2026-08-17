@@ -1094,12 +1094,101 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
   box-shadow:0 1px 2px rgba(16,17,20,.18),0 14px 30px -10px rgba(16,17,20,.44);
 }
 .aeo-nav-book::after{content:none;display:none}
+
+/* ============================================================
+   RESOURCES DROPDOWN — the only addition to the established nav.
+   Sits between "Free audit" and "Book a Call". The bar itself is
+   untouched. The open menu is a solid opaque white panel.
+   ============================================================ */
+.aeo-res{position:relative;display:flex;align-items:center}
+/* Same 15px/500, #2e3238, 10px-radius target as the sibling nav links so
+   the trigger is indistinguishable from them at rest. */
+.aeo-res-btn{position:relative;z-index:1;display:inline-flex;align-items:center;gap:5px;margin:0;padding:9px 12px;border:0;border-radius:10px;background:none;font-family:inherit;font-size:15px;font-weight:500;letter-spacing:-.006em;color:#2e3238;line-height:normal;white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:color .3s var(--aeo-e)}
+@media (hover:hover) and (pointer:fine){.aeo-res-btn:hover{color:#232529}}
+.aeo-res-btn[aria-expanded="true"]{color:#232529}
+.aeo-res-caret{width:11px;height:11px;flex:none;opacity:.62;transition:transform .2s var(--aeo-e),opacity .2s var(--aeo-e)}
+.aeo-res-btn[aria-expanded="true"] .aeo-res-caret{transform:rotate(180deg);opacity:.9}
+.aeo-res-btn:focus-visible{outline:none;box-shadow:var(--aeo-ring)}
+
+/* The panel is anchored to the trigger and floats clear of the header.
+   ::before is an invisible bridge across the 10px gap so the pointer can
+   travel from trigger to panel without the menu closing underneath it. */
+.aeo-res-panel{position:absolute;top:100%;left:50%;z-index:60;margin-top:10px;width:372px;max-width:calc(100vw - 24px);transform:translateX(-50%) translateY(-6px);padding:8px;border-radius:18px;opacity:1;visibility:hidden;pointer-events:none;transition:transform .18s var(--aeo-e),visibility 0s linear .18s;background-color:#fff;background:#fff;-webkit-backdrop-filter:none;backdrop-filter:none;isolation:isolate;border:1px solid rgba(255,255,255,.72);box-shadow:0 1px 2px rgba(16,17,20,.05),0 12px 28px -14px rgba(16,17,20,.22),0 40px 80px -50px rgba(16,17,20,.34),inset 0 1px 0 rgba(255,255,255,.9)}
+.aeo-res-panel::before{content:"";position:absolute;left:0;right:0;top:-14px;height:14px}
+.aeo-res[data-open="1"] .aeo-res-panel{opacity:1;visibility:visible;pointer-events:auto;transform:translateX(-50%) translateY(0);transition-delay:0s}
+
+/* Prefixed with .aeo-res-panel so these win over `.aeo-nav-links a`, which
+   sets nowrap and its own padding for the top-level nav links. */
+.aeo-res-panel .aeo-res-item{display:block;padding:11px 12px;border-radius:11px;text-decoration:none;white-space:normal;border:1px solid transparent;transition:background-color .18s var(--aeo-e),border-color .18s var(--aeo-e),transform .18s var(--aeo-e)}
+.aeo-res-item + .aeo-res-item{margin-top:2px}
+.aeo-res-t{display:flex;align-items:center;gap:6px;font-size:14.5px;font-weight:600;letter-spacing:-.01em;color:var(--aeo-ink)}
+.aeo-res-t i{font-style:normal;font-size:13px;color:var(--aeo-accent);opacity:0;transform:translateX(-3px);transition:opacity .18s var(--aeo-e),transform .18s var(--aeo-e)}
+.aeo-res-d{display:block;margin-top:3px;font-size:12.5px;line-height:1.45;font-weight:500;color:var(--aeo-ink-3)}
+@media (hover:hover) and (pointer:fine){
+  .aeo-res-item:hover{background:rgba(16,17,20,.038);border-color:rgba(16,17,20,.07);transform:translateY(-1px)}
+  .aeo-res-item:hover .aeo-res-t i{opacity:1;transform:translateX(0)}
+}
+.aeo-res-item:focus-visible{outline:none;background:rgba(16,17,20,.038);border-color:rgba(38,109,240,.45);box-shadow:var(--aeo-ring)}
+.aeo-res-item:focus-visible .aeo-res-t i{opacity:1;transform:translateX(0)}
+
+@media (prefers-reduced-motion:reduce){
+  .aeo-res-panel{transition:transform .01ms linear,visibility 0s}
+  .aeo-res[data-open="1"] .aeo-res-panel{transform:translateX(-50%)}
+  .aeo-res-item,.aeo-res-t i,.aeo-res-caret{transition:none}
+}
+
+/* Shown only at the widths where the bar has to drop the matching link. */
+.aeo-res-panel .aeo-res-item--sm,.aeo-res-panel .aeo-res-item--xs{display:none;margin-top:6px;padding-top:8px;border-top:1px solid rgba(16,17,20,.08);border-radius:0 0 11px 11px}
+.aeo-res-panel .aeo-res-item--sm + .aeo-res-item--xs{margin-top:2px;padding-top:11px;border-top:0}
+
 @media (max-width:760px){
   .aeo-nav{gap:8px;grid-template-columns:auto 1fr auto}
   .aeo-nav-links{gap:0;justify-self:end}
   .aeo-nav-links a{padding:7px 9px;font-size:13px}
-  .aeo-nav-links a:first-child{display:none}
+  /* Scoped to direct children so it cannot reach the links inside the
+     Resources panel, where it would hide the first entry. */
+  .aeo-nav-links > a:first-child{display:none}
+  /* The rule above has never matched: the travelling-highlight <span> is
+     the real first child, so Home stayed visible on phones. Targeting the
+     link itself restores what that rule was written to do, and frees the
+     width the Resources item needs. The wordmark still links home. */
+  .aeo-nav-links a[data-nav="home"]{display:none}
   .aeo-nav-book{height:38px;padding:0 16px;font-size:13px}
+  /* Match the shrunken sibling links exactly. */
+  .aeo-res-btn{padding:7px 9px;font-size:13px;gap:4px}
+  .aeo-res-caret{width:10px;height:10px}
+  /* Centring on the trigger pushes the panel off a narrow screen, and the
+     trigger is the last thing in the bar, so anchoring to its right edge
+     lands in the same place. --aeo-res-shift is measured in script: it is
+     the distance from the trigger to the viewport edge, less a 10px margin,
+     which pulls the panel across to sit flush inside the screen. */
+  .aeo-res-panel{left:auto;right:calc(0px - var(--aeo-res-shift,0px));transform:translateY(-6px);width:min(320px,calc(100vw - 20px));margin-top:8px;max-height:calc(100vh - 72px);overflow-y:auto;overscroll-behavior:contain}
+  /* Landscape on a phone leaves very little height, so the menu scrolls
+     within itself rather than off the screen. dvh where it is supported. */
+  @supports (height:100dvh){.aeo-res-panel{max-height:calc(100dvh - 72px)}}
+  .aeo-res[data-open="1"] .aeo-res-panel{transform:translateY(0)}
+}
+@media (max-width:760px) and (prefers-reduced-motion:reduce){
+  .aeo-res[data-open="1"] .aeo-res-panel{transform:none}
+}
+/* Below 560px the bar cannot hold four labels plus the CTA without
+   pushing the CTA past the viewport edge, which is what it already did
+   at the narrowest widths before Resources existed. Pricing moves into
+   the menu instead of disappearing. */
+@media (max-width:560px){
+  .aeo-nav-links a[data-nav="pricing"]{display:none}
+  .aeo-res-panel .aeo-res-item--sm{display:block}
+}
+@media (max-width:420px){
+  .aeo-nav-links a{padding:7px 7px}
+  .aeo-res-btn{padding:7px 7px}
+}
+/* At 320px the CTA was already off-screen before Resources existed. The
+   bar keeps only the menu at that size, which puts every destination
+   back on screen for the first time. */
+@media (max-width:359px){
+  .aeo-nav-links a[data-nav="audit"]{display:none}
+  .aeo-res-panel .aeo-res-item--xs{display:block}
 }
 .aeo-nav-book-short{display:none}
 @media (max-width:420px){
@@ -1144,6 +1233,20 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
 (function(){
   var reduce=false;try{reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;}catch(e){}
   var fine=true;try{fine=window.matchMedia("(pointer:fine)").matches;}catch(e){}
+
+  /* ---- URL depth ----
+     Every commercial page is served from the root (/, /pricing, /contact,
+     /book), so UP is "" there and every href below is byte-identical to
+     what it has always been. Resources articles are served one level deep
+     (/insights/<slug>), where the chrome's relative links need a "../"
+     prefix to keep resolving to the same files. */
+  var UP="",HOME="./";
+  try{
+    var dir=location.pathname.replace(/[^/]*$/,"");
+    var depth=(dir.match(/\//g)||[]).length-1;
+    if(depth>0){UP=new Array(depth+1).join("../");HOME=UP;}
+  }catch(e){}
+  function U(p){return UP+p;}
 
   /* ============================================================
      LEAD-GEN INTEGRATIONS — public IDs only (no private tokens).
@@ -1217,6 +1320,10 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
       var a=as[i],h=a.getAttribute("href")||"";
       if(!h)continue;
       if(/^(#|mailto:|tel:)/.test(h))continue;
+      /* Anything inside a [data-aeo-keep] subtree already has a correct,
+         depth-aware href: the injected chrome and the Resources pages.
+         The Attio markup this function exists to repair never has it. */
+      try{if(a.closest&&a.closest("[data-aeo-keep]"))continue;}catch(e){}
       if(/^(\.\/|pricing\.html|contact\.html|book\.html|index\.html)/.test(h))continue;
       if(h.indexOf("./#")===0)continue;
       // Never rewrite third-party integration destinations
@@ -1242,14 +1349,154 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
     var nav=header.querySelector("nav");
     if(nav&&nav.getAttribute("data-aeo")!=="1"){
       nav.setAttribute("data-aeo","1");
-      nav.innerHTML='<div class="aeo-nav">'+
-        '<a class="aeo-nav-brand" href="./"><span class="aeo-brand">Answered<i>.</i></span></a>'+
-        '<div class="aeo-nav-links"><span class="aeo-nav-hl" aria-hidden="true"></span><a href="./">Home</a><a href="pricing.html">Pricing</a><a href="contact.html">Free audit</a></div>'+
-        '<div class="aeo-nav-right"><a class="aeo-btn aeo-btn--primary aeo-nav-book" href="book.html">'+
+      nav.innerHTML='<div class="aeo-nav" data-aeo-keep="1">'+
+        '<a class="aeo-nav-brand" href="'+HOME+'"><span class="aeo-brand">Answered<i>.</i></span></a>'+
+        '<div class="aeo-nav-links"><span class="aeo-nav-hl" aria-hidden="true"></span>'+
+          '<a data-nav="home" href="'+HOME+'">Home</a>'+
+          '<a data-nav="pricing" href="'+U("pricing.html")+'">Pricing</a>'+
+          '<a data-nav="audit" href="'+U("contact.html")+'">Free audit</a>'+
+          RESOURCES_HTML()+
+        '</div>'+
+        '<div class="aeo-nav-right"><a class="aeo-btn aeo-btn--primary aeo-nav-book" href="'+U("book.html")+'">'+
           '<span class="aeo-nav-book-full">Book a Call</span><span class="aeo-nav-book-short" aria-hidden="true">Call</span>'+
         '</a></div>'+
       '</div>';
     }
+  }
+
+  /* ---- Resources menu ---- */
+  var RES_ITEMS=[
+    ["work.html","Work","Results, outcomes and what changes when visibility improves."],
+    ["research.html","Research","Original investigation into how businesses get discovered by AI."],
+    ["insights.html","Insights","Analysis of AEO, SEO, AI search and online discovery."],
+    ["about.html","About","Why Answered Labs exists and the people behind it."]
+  ];
+  var CARET='<svg class="aeo-res-caret" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  function RESOURCES_HTML(){
+    var items="";
+    for(var i=0;i<RES_ITEMS.length;i++){
+      items+='<a class="aeo-res-item" href="'+U(RES_ITEMS[i][0])+'">'+
+        '<span class="aeo-res-t">'+RES_ITEMS[i][1]+'<i aria-hidden="true">&#8594;</i></span>'+
+        '<span class="aeo-res-d">'+RES_ITEMS[i][2]+'</span>'+
+      '</a>';
+    }
+    // Pricing leaves the bar below 560px so the new item can fit without
+    // pushing the CTA off-screen. It reappears here so no destination is
+    // ever lost on a phone.
+    var pricing='<a class="aeo-res-item aeo-res-item--sm" href="'+U("pricing.html")+'">'+
+      '<span class="aeo-res-t">Pricing<i aria-hidden="true">&#8594;</i></span>'+
+      '<span class="aeo-res-d">Plans and what each one includes.</span>'+
+    '</a>'+
+    '<a class="aeo-res-item aeo-res-item--xs" href="'+U("contact.html")+'">'+
+      '<span class="aeo-res-t">Free audit<i aria-hidden="true">&#8594;</i></span>'+
+      '<span class="aeo-res-d">See where your business currently appears.</span>'+
+    '</a>';
+    return '<div class="aeo-res">'+
+      '<button class="aeo-res-btn" type="button" aria-expanded="false" aria-controls="aeo-res-menu">Resources'+CARET+'</button>'+
+      '<div class="aeo-res-panel" id="aeo-res-menu">'+items+pricing+'</div>'+
+    '</div>';
+  }
+
+  /* Hover on fine pointers, tap/click on coarse ones, full keyboard
+     support on both. Nothing is appended to <body>, nothing locks
+     scrolling, and no backdrop element is created, so the existing
+     mobile behaviour of the header is unaffected. */
+  function wireResources(){
+    var res=document.querySelector(".aeo-res");
+    if(!res||res.getAttribute("data-aeo-res")==="1")return;
+    res.setAttribute("data-aeo-res","1");
+    var btn=res.querySelector(".aeo-res-btn"),panel=res.querySelector(".aeo-res-panel");
+    if(!btn||!panel)return;
+    var items=panel.querySelectorAll(".aeo-res-item"),closeT=null;
+    // Hover opens the menu; a click pins it open so that moving the mouse
+    // away no longer dismisses it. Without the distinction, clicking a
+    // menu the pointer had already opened would immediately close it.
+    var pinned=false;
+
+    // The panel is positioned against the trigger, which sits at the end of
+    // a bar that is itself inset from the screen. On phones that leaves the
+    // panel hanging past the left edge, so measure the leftover space and
+    // let the stylesheet pull the panel back inside it.
+    function place(){
+      var vw=document.documentElement.clientWidth;
+      var gap=vw-btn.getBoundingClientRect().right-10;
+      panel.style.setProperty("--aeo-res-shift",Math.max(0,Math.round(gap))+"px");
+    }
+
+    function open(){
+      if(closeT){clearTimeout(closeT);closeT=null;}
+      place();
+      res.setAttribute("data-open","1");
+      btn.setAttribute("aria-expanded","true");
+    }
+    function close(focusBtn){
+      if(closeT){clearTimeout(closeT);closeT=null;}
+      pinned=false;
+      res.removeAttribute("data-open");
+      btn.setAttribute("aria-expanded","false");
+      // Returning focus must not scroll: the trigger lives in a sticky
+      // header, and Safari answers a plain focus() there by pulling the
+      // whole document up by the height of the bar.
+      if(focusBtn){try{btn.focus({preventScroll:true});}catch(e){btn.focus();}}
+    }
+    function isOpen(){return res.getAttribute("data-open")==="1";}
+    function closeSoon(){
+      if(closeT)clearTimeout(closeT);
+      // Long enough to cross the gap between trigger and panel without
+      // the menu vanishing mid-movement.
+      closeT=setTimeout(function(){close(false);},180);
+    }
+    res.__aeoResClose=close;
+
+    if(fine){
+      res.addEventListener("pointerenter",function(e){if(e.pointerType!=="touch")open();});
+      res.addEventListener("pointerleave",function(e){if(e.pointerType!=="touch"&&!pinned)closeSoon();});
+    }
+    btn.addEventListener("click",function(e){
+      e.preventDefault();
+      if(pinned){close(false);return;}
+      pinned=true;
+      open();
+    });
+    btn.addEventListener("keydown",function(e){
+      if(e.key==="ArrowDown"||e.key==="Down"){
+        e.preventDefault();pinned=true;open();
+        if(items[0])items[0].focus();
+      }else if(e.key==="Escape"||e.key==="Esc"){
+        if(isOpen()){e.preventDefault();close(true);}
+      }
+    });
+    panel.addEventListener("keydown",function(e){
+      var list=Array.prototype.slice.call(items),idx=list.indexOf(document.activeElement);
+      if(e.key==="Escape"||e.key==="Esc"){e.preventDefault();close(true);}
+      else if(e.key==="ArrowDown"||e.key==="Down"){e.preventDefault();(list[idx+1]||list[0]).focus();}
+      else if(e.key==="ArrowUp"||e.key==="Up"){e.preventDefault();(list[idx-1]||list[list.length-1]).focus();}
+      else if(e.key==="Tab"&&!e.shiftKey&&idx===list.length-1){close(false);}
+    });
+    // Leaving the menu by keyboard should close it, but only once focus
+    // has actually landed somewhere outside the whole component.
+    res.addEventListener("focusout",function(){
+      setTimeout(function(){
+        if(!res.contains(document.activeElement))close(false);
+      },0);
+    });
+    function dismiss(e){
+      if(isOpen()&&!res.contains(e.target))close(false);
+    }
+    document.addEventListener("click",dismiss);
+    // iOS Safari does not bubble clicks from plain, non-interactive elements
+    // to the document, so a tap on the page body would leave the menu open
+    // with click alone.
+    document.addEventListener("pointerdown",dismiss);
+    document.addEventListener("keydown",function(e){
+      if((e.key==="Escape"||e.key==="Esc")&&isOpen())close(true);
+    });
+    window.addEventListener("resize",function(){if(isOpen())place();});
+    window.addEventListener("orientationchange",function(){if(isOpen())place();});
+    // A menu left open across a back/forward restore would otherwise
+    // reappear over the restored page.
+    window.addEventListener("pagehide",function(){close(false);});
+    window.addEventListener("pageshow",function(){close(false);});
   }
   /* ---- nav: one highlight surface that travels between links on hover ---- */
   function wireNavHighlight(){
@@ -1264,11 +1511,20 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
       hl.style.transform="translateX("+(r.left-wr.left)+"px)";
       hl.style.opacity="1";
     }
-    var links=wrap.querySelectorAll("a");
+    // Direct children only. The Resources panel also contains links, and
+    // travelling the highlight down to one of those would drag it out of
+    // the nav bar entirely.
+    var links=wrap.querySelectorAll(":scope > a, :scope > .aeo-res > .aeo-res-btn");
     for(var i=0;i<links.length;i++){
       links[i].addEventListener("pointerenter",function(){moveTo(this);});
     }
-    wrap.addEventListener("pointerleave",function(){hl.style.opacity="0";});
+    wrap.addEventListener("pointerleave",function(){
+      // While the menu is open the trigger stays lit, otherwise the bar
+      // would look inert above an obviously open panel.
+      var openBtn=wrap.querySelector('.aeo-res-btn[aria-expanded="true"]');
+      if(openBtn){moveTo(openBtn);return;}
+      hl.style.opacity="0";
+    });
   }
   function fixFooter(){
     var f=document.querySelector("footer");
@@ -1276,13 +1532,13 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
     f.setAttribute("data-aeo","1");
     f.removeAttribute("class");
     f.className="aeo-foot";
-    f.innerHTML='<div class="aeo-foot-glow"></div><div class="aeo-foot-inner">'+
+    f.innerHTML='<div class="aeo-foot-glow"></div><div class="aeo-foot-inner" data-aeo-keep="1">'+
       '<div class="aeo-foot-top">'+
         '<div class="aeo-foot-brand"><span class="aeo-brand">Answered<i>.</i></span><p>The answer engine optimization agency for local businesses. Be the business AI recommends.</p></div>'+
         '<div class="aeo-foot-cols">'+
-          '<div class="aeo-foot-col"><h4>What we do</h4><a href="./#aeo-platform">AI visibility tracking</a><a href="./#aeo-platform">Site structure &amp; schema</a><a href="./#aeo-platform">Content AI quotes</a><a href="./#aeo-platform">Reviews &amp; citations</a></div>'+
-          '<div class="aeo-foot-col"><h4>Company</h4><a href="pricing.html">Pricing</a><a href="contact.html">Free audit</a><a href="book.html">Book a call</a></div>'+
-          '<div class="aeo-foot-col"><h4>Contact</h4><a href="mailto:hello@answered.agency">hello@answered.agency</a><a href="contact.html">Get in touch</a></div>'+
+          '<div class="aeo-foot-col"><h4>What we do</h4><a href="'+HOME+'#aeo-platform">AI visibility tracking</a><a href="'+HOME+'#aeo-platform">Site structure &amp; schema</a><a href="'+HOME+'#aeo-platform">Content AI quotes</a><a href="'+HOME+'#aeo-platform">Reviews &amp; citations</a></div>'+
+          '<div class="aeo-foot-col"><h4>Company</h4><a href="'+U("pricing.html")+'">Pricing</a><a href="'+U("contact.html")+'">Free audit</a><a href="'+U("book.html")+'">Book a call</a></div>'+
+          '<div class="aeo-foot-col"><h4>Contact</h4><a href="mailto:hello@answered.agency">hello@answered.agency</a><a href="'+U("contact.html")+'">Get in touch</a></div>'+
         '</div>'+
       '</div>'+
       '<div class="aeo-foot-bottom"><span>\u00a9 2026 Answered. All rights reserved.</span><span>Tracking ChatGPT \u00b7 Perplexity \u00b7 Gemini \u00b7 Claude</span></div>'+
@@ -1425,7 +1681,7 @@ header[data-aeo-scrolled="1"]{background-color:rgba(255,255,255,.82)!important;-
     },{passive:true});
   };
 
-  function tick(){fixNav();wireNavHighlight();fixFooter();fixLinks();fixCtas();wireHeader();wireParallax();scanReveal();}
+  function tick(){fixNav();wireNavHighlight();wireResources();fixFooter();fixLinks();fixCtas();wireHeader();wireParallax();scanReveal();}
   var n=0,iv=setInterval(function(){tick();if(++n>80)clearInterval(iv);},160);
   document.addEventListener("DOMContentLoaded",tick);
   window.addEventListener("load",tick);

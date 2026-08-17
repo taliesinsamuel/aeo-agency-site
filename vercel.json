@@ -7,7 +7,18 @@
     { "source": "/book.html", "destination": "/127.0.0.1_8081/dl/book.html" },
     { "source": "/contact", "destination": "/127.0.0.1_8081/dl/contact.html" },
     { "source": "/pricing", "destination": "/127.0.0.1_8081/dl/pricing.html" },
-    { "source": "/book", "destination": "/127.0.0.1_8081/dl/book.html" }
+    { "source": "/book", "destination": "/127.0.0.1_8081/dl/book.html" },
+
+    { "source": "/work", "destination": "/127.0.0.1_8081/dl/work.html" },
+    { "source": "/work.html", "destination": "/127.0.0.1_8081/dl/work.html" },
+    { "source": "/research", "destination": "/127.0.0.1_8081/dl/research.html" },
+    { "source": "/research.html", "destination": "/127.0.0.1_8081/dl/research.html" },
+    { "source": "/insights", "destination": "/127.0.0.1_8081/dl/insights.html" },
+    { "source": "/insights.html", "destination": "/127.0.0.1_8081/dl/insights.html" },
+    { "source": "/about", "destination": "/127.0.0.1_8081/dl/about.html" },
+    { "source": "/about.html", "destination": "/127.0.0.1_8081/dl/about.html" },
+    { "source": "/insights/:slug", "destination": "/127.0.0.1_8081/dl/insights/:slug.html" },
+    { "source": "/insights/:slug.html", "destination": "/127.0.0.1_8081/dl/insights/:slug.html" }
   ],
   "headers": [
     {

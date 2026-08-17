@@ -45,7 +45,19 @@ const REWRITES = [
   ["/contact", "/127.0.0.1_8081/dl/contact.html"],
   ["/pricing", "/127.0.0.1_8081/dl/pricing.html"],
   ["/book", "/127.0.0.1_8081/dl/book.html"],
+  // Resources section. Mirrors the rewrites in vercel.json.
+  ["/work", "/127.0.0.1_8081/dl/work.html"],
+  ["/work.html", "/127.0.0.1_8081/dl/work.html"],
+  ["/research", "/127.0.0.1_8081/dl/research.html"],
+  ["/research.html", "/127.0.0.1_8081/dl/research.html"],
+  ["/insights", "/127.0.0.1_8081/dl/insights.html"],
+  ["/insights.html", "/127.0.0.1_8081/dl/insights.html"],
+  ["/about", "/127.0.0.1_8081/dl/about.html"],
+  ["/about.html", "/127.0.0.1_8081/dl/about.html"],
 ];
+
+// /insights/<slug> and /insights/<slug>.html both map to the built article.
+const ARTICLE_RE = /^\/insights\/([a-z0-9-]+)(?:\.html)?$/;
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -69,6 +81,8 @@ function resolveUrlPath(pathname) {
   for (const [from, to] of REWRITES) {
     if (pathname === from) return to;
   }
+  const m = ARTICLE_RE.exec(pathname);
+  if (m) return "/127.0.0.1_8081/dl/insights/" + m[1] + ".html";
   return pathname;
 }
 
