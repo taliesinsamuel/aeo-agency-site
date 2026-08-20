@@ -42,10 +42,11 @@ SELF = "/127.0.0.1_8081/dl/resources-src"
 
 FONT_CSS = ASSETS + "/_next/static/chunks/0te5~pn50-xak_dpl=dpl_4gXyZGiaqnpkANs5NvnuaSaJy4YF.css"
 FAVICON_LINKS = (
-    '<link rel="icon" href="/favicon.ico?v=3" sizes="any">'
-    '<link rel="icon" href="/favicon-48x48.png?v=3" type="image/png" sizes="48x48">'
-    '<link rel="icon" href="/favicon.svg?v=3" type="image/svg+xml">'
-    '<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">'
+    '<link rel="icon" href="/favicon.svg?v=4" type="image/svg+xml">'
+    '<link rel="icon" href="/favicon-32x32.png?v=4" type="image/png" sizes="32x32">'
+    '<link rel="icon" href="/favicon-48x48.png?v=4" type="image/png" sizes="48x48">'
+    '<link rel="icon" href="/favicon.ico?v=4" sizes="48x48">'
+    '<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=4">'
     '<link rel="manifest" href="/site.webmanifest">'
 )
 

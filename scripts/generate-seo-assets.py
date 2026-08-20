@@ -81,15 +81,15 @@ def make_og() -> None:
 
 
 def make_apple() -> None:
-    """Derive apple-touch-icon from the official favicon artwork (no redraw)."""
-    src_path = os.path.join(ROOT, "favicon-48x48.png")
-    if not os.path.exists(src_path):
-        src_path = os.path.join(ROOT, "apple-touch-icon.png")
-    src = Image.open(src_path).convert("RGBA")
-    img = src.resize((180, 180), Image.Resampling.LANCZOS)
+    """apple-touch-icon.png is rendered from the official logo mark.
+
+    Do not upscale the 48x48 favicon here — run scripts/render-favicons.js.
+    """
     out = os.path.join(ROOT, "apple-touch-icon.png")
-    img.save(out, "PNG", optimize=True)
-    print("wrote", out)
+    if os.path.exists(out):
+        print("kept", out)
+        return
+    raise SystemExit("apple-touch-icon.png missing; run scripts/render-favicons.js")
 
 
 if __name__ == "__main__":

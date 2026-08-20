@@ -526,7 +526,7 @@ def head_block(page_key: str) -> str:
         f'<meta name="twitter:title" content="{esc(title)}">',
         f'<meta name="twitter:description" content="{esc(desc)}">',
         f'<meta name="twitter:image" content="{esc(OG_IMAGE)}">',
-        '<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">',
+        '<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=4">',
         '<link rel="manifest" href="/site.webmanifest">',
     ]
     if robots:
@@ -1192,6 +1192,12 @@ Answered Labs helps local businesses become understood, cited, surfaced and reco
                 "src": "/favicon.svg",
                 "sizes": "any",
                 "type": "image/svg+xml",
+                "purpose": "any",
+            },
+            {
+                "src": "/favicon-32x32.png",
+                "sizes": "32x32",
+                "type": "image/png",
                 "purpose": "any",
             },
             {
