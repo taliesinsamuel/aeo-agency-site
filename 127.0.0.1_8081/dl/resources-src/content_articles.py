@@ -22,6 +22,9 @@ invented data to work, it was built as a conceptual figure instead.
 See resources-src/figures.py.
 """
 
+import re
+from urllib.parse import urlparse
+
 from components import (
     ABOUT, AUDIT, BOOK, INSIGHTS, RESEARCH, WORK, L, arrow, crumbs, esc,
 )
@@ -379,8 +382,8 @@ A1 = {
         )),
     ],
     "sources": [
-        'OpenAI, <a href="https://platform.openai.com/docs/bots" rel="nofollow">Overview of OpenAI crawlers</a>, which documents the user agents OpenAI uses and how site owners can control them.',
-        'Google Search Central, <a href="https://developers.google.com/search/docs/crawling-indexing/overview-google-crawlers" rel="nofollow">Overview of Google crawlers and fetchers</a>.',
+        'OpenAI, <a href="https://developers.openai.com/api/docs/bots" rel="nofollow">Overview of OpenAI crawlers</a>, which documents the user agents OpenAI uses and how site owners can control them.',
+        'Google Search Central, <a href="https://developers.google.com/crawling/docs/crawlers-fetchers/overview-google-crawlers" rel="nofollow">Overview of Google crawlers and fetchers</a>.',
         'Schema.org, <a href="https://schema.org/LocalBusiness" rel="nofollow">LocalBusiness</a>, the vocabulary most commonly used to describe a business in structured data.',
         'Discovered Labs (2026), <a href="https://discoveredlabs.com/research/what-drives-ai-citations" rel="nofollow">What actually drives AI citations: a statistical analysis of 2M AI citations across 10K pages</a>, the citation research referred to above and covered in detail in <a href="/insights/what-makes-ai-cite-a-page">What Makes AI Cite a Page?</a>',
         'Ahrefs (2025), <a href="https://ahrefs.com/blog/ai-search-overlap/" rel="nofollow">Only 12% of AI cited URLs rank in Google&rsquo;s top 10 for the original prompt</a>, the source of the ranking overlap referred to above.',
@@ -748,8 +751,8 @@ A2 = {
         )),
     ],
     "sources": [
-        'OpenAI, <a href="https://platform.openai.com/docs/bots" rel="nofollow">Overview of OpenAI crawlers</a>.',
-        'Google Search Central, <a href="https://developers.google.com/search/docs/crawling-indexing/overview-google-crawlers" rel="nofollow">Overview of Google crawlers and fetchers</a>.',
+        'OpenAI, <a href="https://developers.openai.com/api/docs/bots" rel="nofollow">Overview of OpenAI crawlers</a>.',
+        'Google Search Central, <a href="https://developers.google.com/crawling/docs/crawlers-fetchers/overview-google-crawlers" rel="nofollow">Overview of Google crawlers and fetchers</a>.',
         'Semrush (2026), <a href="https://www.semrush.com/blog/chatgpt-reasoning-ai-visibility/" rel="nofollow">Only 25% of cited sources overlap between ChatGPT&rsquo;s different reasoning modes</a>, the source of the reasoning-mode figures above.',
         'Discovered Labs (2026), <a href="https://discoveredlabs.com/research/what-drives-ai-citations" rel="nofollow">What actually drives AI citations: a statistical analysis of 2M AI citations across 10K pages</a>, the source of the brand-controlled citation shares above.',
         'Ahrefs (2025), <a href="https://ahrefs.com/blog/ai-search-overlap/" rel="nofollow">Only 12% of AI cited URLs rank in Google&rsquo;s top 10 for the original prompt</a>, on the gap between ranking for a prompt and being cited for it.',
@@ -1369,7 +1372,7 @@ A4 = {
     ],
     "sources": [
         'Google Search Central, <a href="https://developers.google.com/search/docs/fundamentals/seo-starter-guide" rel="nofollow">SEO Starter Guide</a>.',
-        'OpenAI, <a href="https://platform.openai.com/docs/bots" rel="nofollow">Overview of OpenAI crawlers</a>.',
+        'OpenAI, <a href="https://developers.openai.com/api/docs/bots" rel="nofollow">Overview of OpenAI crawlers</a>.',
         'Ahrefs (2025), <a href="https://ahrefs.com/blog/ai-search-overlap/" rel="nofollow">Only 12% of AI cited URLs rank in Google&rsquo;s top 10 for the original prompt</a>, the source of the retrieval overlap and per-engine figures above.',
         'Semrush (2026), <a href="https://www.semrush.com/blog/the-ghost-citations-study/" rel="nofollow">Why 62% of AI citations don&rsquo;t lead to brand mentions</a>, the source of the citation and mention rates above.',
         'Discovered Labs (2026), <a href="https://discoveredlabs.com/research/what-drives-ai-citations" rel="nofollow">What actually drives AI citations: a statistical analysis of 2M AI citations across 10K pages</a>, the citation research referred to above and covered in detail in <a href="/insights/what-makes-ai-cite-a-page">What Makes AI Cite a Page?</a>',
@@ -1729,6 +1732,52 @@ def cover(article, cls="alr-cover"):
     return '<div class="%s%s" data-alr-field aria-hidden="true"></div>' % (cls, suffix)
 
 
+_INTERNAL_HOSTS = ("answeredlabs.com", "www.answeredlabs.com")
+
+
+def _is_external_href(href):
+    href = (href or "").strip()
+    if not href or href.startswith(("#", "mailto:", "tel:", "/", "./", "../")):
+        return False
+    if not re.match(r"^https?://", href, re.I):
+        return False
+    host = (urlparse(href).hostname or "").lower()
+    return host not in _INTERNAL_HOSTS
+
+
+def _merge_rel(existing):
+    parts = [p for p in (existing or "").split() if p]
+    for extra in ("noopener", "noreferrer"):
+        if extra not in parts:
+            parts.append(extra)
+    return " ".join(parts)
+
+
+def mark_external_article_links(html):
+    """Open off-site Insights citations in a new tab. Internal links stay put."""
+
+    def repl(match):
+        tag = match.group(0)
+        href = match.group(1)
+        if not _is_external_href(href):
+            return tag
+        attrs = tag[2:-1]
+        if not re.search(r"\btarget=", attrs):
+            attrs += ' target="_blank"'
+        if re.search(r"\brel=", attrs):
+            attrs = re.sub(
+                r'\brel="([^"]*)"',
+                lambda m: 'rel="%s"' % _merge_rel(m.group(1)),
+                attrs,
+                count=1,
+            )
+        else:
+            attrs += ' rel="noopener noreferrer"'
+        return "<a" + attrs + ">"
+
+    return re.sub(r'<a\s+href="([^"]+)"[^>]*>', repl, html)
+
+
 def toc(article):
     items = "".join(
         '<li><a href="#%s">%s</a></li>' % (sid, esc(heading))
@@ -1743,14 +1792,16 @@ def toc(article):
 def build(article):
     a = article
     author = AUTHOR_META[a["author"]]
-    body_sections = "".join(
-        '<h2 id="%s">%s</h2>%s' % (sid, esc(heading), html)
-        for sid, heading, html in a["sections"]
+    body_sections = mark_external_article_links(
+        "".join(
+            '<h2 id="%s">%s</h2>%s' % (sid, esc(heading), html)
+            for sid, heading, html in a["sections"]
+        )
     )
 
     sources = ""
     if a.get("sources"):
-        sources = (
+        sources = mark_external_article_links(
             '<section class="alr-sources"><h2>Sources</h2><ol>%s</ol>'
             '<p class="alr-small" style="margin-top:14px">Where we describe how a system behaves without a citation, we are '
             'describing what we have observed rather than documented behaviour, and it may change.</p></section>'
