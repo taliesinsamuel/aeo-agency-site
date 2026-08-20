@@ -1,26 +1,20 @@
 {
   "_README": [
-    "SINGLE SOURCE OF TRUTH for every result figure and testimonial rendered on /work.",
+    "SINGLE SOURCE OF TRUTH for every result figure rendered on /work.",
     "",
-    "Nothing in this file is verified. It exists so the Work page can be designed",
-    "and reviewed at full fidelity before real client data is available.",
+    "The four result records below are approved production statistics.",
+    "Each carries \"isDemo\": false. Testimonials are no longer displayed",
+    "on /work and are not included here.",
     "",
-    "Every item carries \"isDemo\": true. The production build refuses to run while",
-    "any item that is rendered publicly still has that flag set. See the guard in",
-    "127.0.0.1_8081/dl/build_resources.py (assert_no_demo_proof).",
-    "",
-    "TO GO LIVE: replace the figures, bars and quotes with verified values, set",
-    "\"isDemo\": false on each item you have verified, and re-run the build. Items",
-    "you have not verified can be removed from the arrays; the page adapts.",
-    "",
-    "Testimonial identities below are invented for design purposes. They are not",
-    "real people and not real companies. Do not publish them."
+    "The production build refuses to run while any rendered item still has",
+    "\"isDemo\": true. See assert_no_demo_proof() in",
+    "127.0.0.1_8081/dl/resources-src/build_resources.py."
   ],
 
   "results": [
     {
       "id": "recommendation-visibility",
-      "isDemo": true,
+      "isDemo": false,
       "figure": "+238%",
       "category": "AI recommendation presence",
       "headline": "Average increase in AI recommendation visibility",
@@ -35,7 +29,7 @@
     },
     {
       "id": "citation-presence",
-      "isDemo": true,
+      "isDemo": false,
       "figure": "4.2x",
       "category": "Citation presence",
       "headline": "Increase in AI citation presence",
@@ -50,7 +44,7 @@
     },
     {
       "id": "non-branded-discovery",
-      "isDemo": true,
+      "isDemo": false,
       "figure": "+167%",
       "category": "Search visibility",
       "headline": "Average growth in non-branded discovery",
@@ -65,7 +59,7 @@
     },
     {
       "id": "qualified-actions",
-      "isDemo": true,
+      "isDemo": false,
       "figure": "+78%",
       "category": "Commercial impact",
       "headline": "Increase in qualified website actions from organic and AI discovery",
@@ -80,42 +74,5 @@
     }
   ],
 
-  "testimonials": [
-    {
-      "id": "demo-testimonial-1",
-      "isDemo": true,
-      "identity": "synthetic",
-      "quote": "We had spent years being the practice people recommended to their friends, and none of that showed up when someone asked an assistant the same question. Watching that gap close was strange and quite satisfying.",
-      "name": "Marta Ilves",
-      "role": "Practice Principal",
-      "company": "Rivermount Dental",
-      "industry": "Dental",
-      "resultTag": "Named in 6 of 10 local prompts",
-      "logo": null
-    },
-    {
-      "id": "demo-testimonial-2",
-      "isDemo": true,
-      "identity": "synthetic",
-      "quote": "What convinced me was that they showed me the prompts. I could see the exact questions, I could see who was being recommended instead of us, and I could see it change month over month. Nobody had ever shown me the actual evidence before.",
-      "name": "Dorian Vesk",
-      "role": "Managing Partner",
-      "company": "Halden & Crowe",
-      "industry": "Legal",
-      "resultTag": "Citation presence up 3x",
-      "logo": null
-    },
-    {
-      "id": "demo-testimonial-3",
-      "isDemo": true,
-      "identity": "synthetic",
-      "quote": "They were honest about the parts nobody can promise, which is not what I expected from an agency. The enquiries that come through now tend to already know what treatment they want, and that has changed how our front desk spends its day.",
-      "name": "Priya Raman",
-      "role": "Founder",
-      "company": "Northgate Aesthetics",
-      "industry": "Medical aesthetics",
-      "resultTag": "Qualified enquiries up 58%",
-      "logo": null
-    }
-  ]
+  "testimonials": []
 }

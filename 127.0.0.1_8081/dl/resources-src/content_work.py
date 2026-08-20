@@ -317,7 +317,6 @@ def testimonials(items):
 
 def build(proof):
     results = proof["results"]
-    tests = proof["testimonials"]
 
     body = (
         hero(
@@ -336,7 +335,6 @@ def build(proof):
         + BEHIND
         + framework()
         + process()
-        + testimonials(tests)
         + """<section class="alr-section alr-section--white">
   <div class="alr-wrap">
     <div style="max-width:50ch;margin-bottom:26px">
