@@ -1,4 +1,4 @@
-"""/research — the investigation programme and the method behind it."""
+"""/research — the questions we keep testing, and how we test them."""
 
 from components import (
     INSIGHTS, WORK, L, cta, esc, hero, xlinks,
@@ -7,139 +7,79 @@ from components import (
 UP = ""
 ORIGIN = "https://answeredlabs.com"
 
-# Status values are deliberately conservative. Nothing is described as
-# finished, because nothing is finished.
-PROGRAMME = [
+# Areas of active study, not projects with operational stages. Each one is a
+# question we keep returning to, followed by what our own testing currently
+# suggests. Nothing here is presented as a finished study.
+STUDIES = [
     (
-        "AL-01",
         "Local AI recommendations",
-        "How systems choose businesses when someone asks for a local recommendation.",
-        "We are building a prompt corpus across service categories and cities, and recording which businesses get named, how often the same question returns a different answer, and how much the phrasing of a question changes the shortlist.",
-        "Active",
-        "active",
+        "What makes one business appear when someone asks an AI assistant for a recommendation, while another doesn't?",
+        "AI recommendations appear to depend on much more than traditional ranking position. Systems need to understand what a business does, where it operates, whether it is relevant to the exact request, and whether enough trustworthy information exists across the web to support recommending it. Businesses with clear service information, strong third-party signals and consistent entity data tend to give an AI system more confidence than businesses whose online presence is fragmented or ambiguous.",
     ),
     (
-        "AL-02",
         "Citation sources",
-        "Which types of websites repeatedly influence AI-generated business answers.",
-        "Where assistants expose their sources, we log every cited domain and classify it: the business itself, a directory, a review platform, local press, a professional body, or something else. The aim is a picture of which categories actually carry weight.",
-        "Active",
-        "active",
+        "Which websites and sources do AI systems rely on when deciding what businesses to mention?",
+        "A company's own website matters, but it is rarely the whole picture. AI systems can draw on directories, review platforms, publications, industry sites and other pages that independently describe the business. This means citation visibility is partly an authority problem: the more consistently credible sources confirm who a business is and what it is known for, the easier it becomes for an assistant to substantiate a recommendation.",
     ),
     (
-        "AL-03",
         "Cross-platform visibility",
-        "How recommendations differ between ChatGPT, Gemini, Perplexity and search-driven AI experiences.",
-        "The same question, asked of several systems on the same day, does not produce the same answer. We are measuring how far apart they are and whether a business that is visible in one is reliably visible in the others.",
-        "In progress",
-        "progress",
+        "Why can a business be highly visible in ChatGPT but almost absent from Gemini or Perplexity?",
+        "There is no single AI ranking. Different systems retrieve information differently, use different sources and may weigh those sources differently. A business can therefore have strong visibility on one platform and weak visibility on another. We think the useful goal is not to optimise for one model in isolation, but to build an online presence that is sufficiently clear and authoritative to travel across multiple discovery systems.",
     ),
     (
-        "AL-04",
         "Review signals",
-        "The relationship between public reputation and recommendation presence.",
-        "Whether review volume, rating, recency and the content of reviews correlate with being recommended, and whether any of that survives once you control for how well known a business already is.",
-        "In progress",
-        "progress",
+        "How much do review volume, rating, recency and reputation influence AI recommendations?",
+        "Reviews appear to matter both directly and indirectly. They provide evidence of reputation, reveal what customers repeatedly associate with a business and create signals across platforms that AI systems can retrieve. Raw review volume alone is unlikely to explain visibility, though. Recency, consistency, subject matter and the authority of the platform carrying those reviews can all change what the wider web appears to know about a company.",
     ),
     (
-        "AL-05",
         "Entity consistency",
-        "How clearly defined business information affects discovery.",
-        "Testing whether businesses whose name, address, category and service description agree across the web are recommended more often than comparable businesses where those details conflict.",
-        "Upcoming",
-        "",
+        "Does consistent information about a business across the web make it easier for AI systems to understand and recommend it?",
+        "Probably, and this is one of the clearest principles behind our work. When a company's name, services, locations, positioning and other core facts are described consistently across its own site and third-party sources, there is less ambiguity for a system to resolve. Conflicting or thin information makes it harder to establish what the business actually is and when it should be considered relevant.",
     ),
     (
-        "AL-06",
         "Search and AI overlap",
-        "How conventional ranking and AI recommendation presence interact.",
-        "Comparing search position for a query against presence in AI answers for the equivalent question, to see how much of one predicts the other and where the two come apart.",
-        "Upcoming",
-        "",
+        "How closely does traditional Google visibility correlate with visibility in AI-generated answers?",
+        "The two are connected, but they are not the same thing. Strong search visibility can make useful information easier to discover and can strengthen the web signals AI systems rely on, but appearing prominently in search does not guarantee recommendation inside an AI answer. AI discovery adds another layer: the system must understand the business well enough, and trust the available evidence enough, to actually include it in the answer.",
     ),
 ]
 
 
-def programme():
+def studies():
     cards = []
-    for ident, title, summary, detail, status, mod in PROGRAMME:
+    for title, question, finding in STUDIES:
         cards.append(
-            """<article class="alr-card alr-card--hover alr-rv">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px">
-        <span class="alr-tag">{ident}</span>
-        <span class="alr-status{mod}">{status}</span>
-      </div>
+            """<article class="alr-card alr-card--hover alr-study alr-rv">
       <h3 class="alr-h3">{title}</h3>
-      <p class="alr-body" style="margin-top:12px;color:var(--al-ink);font-weight:450">{summary}</p>
-      <p class="alr-body" style="margin-top:12px;font-size:15px">{detail}</p>
+      <p class="alr-study-q">{question}</p>
+      <div class="alr-study-note">
+        <p class="alr-note-label">What we're seeing</p>
+        <p class="alr-body" style="font-size:15.5px">{finding}</p>
+      </div>
     </article>""".format(
-                ident=ident,
-                mod=(" alr-status--" + mod) if mod else "",
-                status=esc(status),
                 title=esc(title),
-                summary=esc(summary),
-                detail=esc(detail),
+                question=esc(question),
+                finding=esc(finding),
             )
         )
-    return """<section class="alr-section alr-section--white">
+    return """<section class="alr-section alr-section--white" style="padding-top:0">
   <div class="alr-wrap">
     <div style="max-width:52ch;margin-bottom:clamp(28px,4vw,44px)">
       <p class="alr-eyebrow">The programme</p>
-      <h2 class="alr-h2">What we're investigating</h2>
-      <p class="alr-dek">Six open questions. None of them are settled, and we will say so on each report when they are not.</p>
+      <h2 class="alr-h2">What we're studying</h2>
+      <p class="alr-dek">Six questions we keep returning to as we test how businesses appear across search and AI systems.</p>
     </div>
-    <div class="alr-grid alr-grid--3">{cards}</div>
+    <div class="alr-grid alr-grid--3 alr-studies">{cards}</div>
   </div>
 </section>""".format(cards="".join(cards))
 
 
-METHOD_FIELDS = [
-    ("Research question", "Stated before collection begins, not fitted to the result afterwards."),
-    ("Prompt corpus", "The exact questions asked, published in full or as a representative sample."),
-    ("Platform", "Which assistant or interface, since answers differ between them."),
-    ("Model", "Named where it is observable, and marked unknown where it is not."),
-    ("Geography", "Where the query was run from, because location changes local answers."),
-    ("Sampling logic", "How prompts and businesses were selected, and what that excludes."),
-    ("Collection date", "When observations were taken. These systems change underneath you."),
-    ("Number of observations", "The actual n, not a description like 'extensive testing'."),
-    ("Comparison set", "What the result is being compared against."),
-    ("Exclusions", "What was discarded and on what grounds."),
-    ("Limitations", "What the study cannot show, stated by us rather than left to the reader."),
-    ("Interpretation", "What we think it means, kept clearly separate from what we observed."),
-]
-
-
-def methodology():
-    cells = []
-    for name, desc in METHOD_FIELDS:
-        cells.append(
-            '<div class="alr-datacell"><dt>%s</dt><dd style="font-size:13.5px;font-weight:400;color:var(--al-ink-2);line-height:1.5">%s</dd></div>'
-            % (esc(name), esc(desc))
-        )
-    return """<section class="alr-section alr-section--paper">
+METHOD = """<section class="alr-section alr-section--paper">
   <div class="alr-wrap">
     <div class="alr-measure" style="margin-inline:0">
       <p class="alr-eyebrow">Method</p>
-      <h2 class="alr-h2">What every report has to declare</h2>
-      <p class="alr-lead" style="margin-top:20px">Most claims in this category arrive without a method, which makes them impossible to check and impossible to build on. We would like our own work to be checkable, including by people who disagree with it. So anything published under Research carries the following, whether or not the result is flattering.</p>
-    </div>
-    <dl class="alr-datagrid" style="margin-top:clamp(28px,3.5vw,40px)">{cells}</dl>
-    <div class="alr-callout alr-callout--accent" style="max-width:44rem">
-      <p class="alr-callout-title">On uncertainty</p>
-      <p>AI systems are probabilistic and they change without notice. A finding that held in one quarter may not hold in the next, and a sample large enough to be interesting is rarely large enough to be conclusive. Where we report a pattern, we will say how confident we are and what would change our mind.</p>
-    </div>
-  </div>
-</section>"""
-
-
-PUBLISHED = """<section class="alr-section alr-section--white">
-  <div class="alr-wrap">
-    <div style="max-width:52ch">
-      <p class="alr-eyebrow">Published reports</p>
-      <h2 class="alr-h2">Nothing here yet</h2>
-      <p class="alr-lead" style="margin-top:20px">The studies above are still collecting. When the first report is ready it will appear here in full, with its prompt corpus, its sample size, its limitations and a citation format so it can be referenced properly.</p>
-      <p class="alr-lead" style="margin-top:18px">We would rather leave this section empty than fill it with something we have not actually done. In the meantime, our thinking on how these systems behave is in <a class="alr-link" href="/insights">Insights</a>.</p>
+      <h2 class="alr-h2">How we investigate AI discovery</h2>
+      <p class="alr-lead" style="margin-top:20px">We test real customer questions across major AI platforms, record which businesses are recommended and which sources are cited, then compare those results with signals across websites, search visibility, reviews and the wider web. We repeat tests over time and across different prompts to separate one-off answers from patterns that appear consistently.</p>
+      <p class="alr-lead" style="margin-top:18px">As the evidence grows, we use those observations to refine our own work and publish the findings that are useful enough to share. Where we make a stronger claim, we want to be able to show what we tested and how we reached it.</p>
     </div>
   </div>
 </section>"""
@@ -151,21 +91,15 @@ def build():
             "Research",
             "Researching how businesses get discovered by&nbsp;AI.",
             "We test how AI systems find, understand, cite and recommend businesses, then publish what we learn.",
-            extra="""<div class="alr-strip" style="margin-top:36px;max-width:46rem">
-      <span class="alr-strip-item">Studies open <b>6</b></span>
-      <span class="alr-strip-item">Currently collecting <b>4</b></span>
-      <span class="alr-strip-item">Reports published <b>0</b></span>
-      <span class="alr-strip-item">Programme started <b>2026</b></span>
-    </div>""",
         )
-        + programme()
-        + methodology()
-        + PUBLISHED
-        + """<section class="alr-section alr-section--paper">
+        + studies()
+        + METHOD
+        + """<section class="alr-section alr-section--white">
   <div class="alr-wrap">
     <div style="max-width:50ch;margin-bottom:26px">
       <p class="alr-eyebrow">Related</p>
-      <h2 class="alr-h2">While you wait</h2>
+      <h2 class="alr-h2">Explore our thinking</h2>
+      <p class="alr-dek">Analysis, explanations and practical guidance on how search and AI discovery are changing.</p>
     </div>
     %s
   </div>
@@ -198,7 +132,7 @@ def build():
             "@id": ORIGIN + "/research#webpage",
             "url": ORIGIN + "/research",
             "name": "Research: how businesses get discovered by AI",
-            "description": "Answered Labs' research programme into how AI systems find, cite and recommend businesses, and the method every report must declare.",
+            "description": "The six questions Answered Labs is actively studying about how AI systems find, cite and recommend businesses, and how we test them.",
             "isPartOf": {"@id": ORIGIN + "/#website"},
             "publisher": {"@id": ORIGIN + "/#organization"},
         },
@@ -218,7 +152,7 @@ def build():
             "slug": "research",
             "depth": 0,
             "title": "Research: how businesses get discovered by AI | Answered Labs",
-            "description": "Our open research programme into AI recommendation, citation sources, cross-platform visibility and entity consistency, and the method every report declares.",
+            "description": "What we are studying about AI recommendation, citation sources, cross-platform visibility, review signals and entity consistency, and how we test it.",
             "body": body,
             "schema_nodes": schema,
         },

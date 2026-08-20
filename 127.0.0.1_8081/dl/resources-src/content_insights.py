@@ -8,9 +8,31 @@ from content_articles import AUTHOR_META, cover, human_date
 UP = ""
 ORIGIN = "https://answeredlabs.com"
 
+# Mirrors build_resources.SELF. /insights is the only page with cover
+# artwork, so the cover field script is requested here and nowhere else.
+COVER_FIELD_JS = (
+    '<script src="/127.0.0.1_8081/dl/resources-src/cover-field.js" defer></script>\n'
+)
+
 # Kept deliberately small. A topic only exists once something has been
 # written under it.
-TOPICS = ["AEO", "AI Search", "ChatGPT", "Local Search", "SEO", "Research"]
+TOPICS = ["AEO", "AI Citations", "AI Search", "ChatGPT", "Local Search", "SEO",
+          "Research"]
+
+# /insights listing dates only. Shared article `published` values still
+# drive individual article pages, JSON-LD, and Open Graph, and are left
+# untouched.
+INDEX_DISPLAY_DATES = {
+    "what-makes-ai-cite-a-page": "2026-07-05",
+    "what-is-answer-engine-optimization": "2026-08-16",
+    "how-to-improve-visibility-in-chatgpt": "2026-05-12",
+    "how-ai-recommends-local-businesses": "2026-01-21",
+    "aeo-vs-seo": "2025-06-18",
+}
+
+
+def index_published(a):
+    return INDEX_DISPLAY_DATES.get(a["slug"], a["published"])
 
 
 def featured(a):
@@ -36,8 +58,8 @@ def featured(a):
         title=esc(a["title"]),
         dek=esc(a["dek"]),
         author=esc(author["name"]),
-        published=a["published"],
-        published_h=human_date(a["published"]),
+        published=index_published(a),
+        published_h=human_date(index_published(a)),
         reading=esc(a["reading"]),
         cover=cover(a),
     )
@@ -67,8 +89,8 @@ def item(a):
         title=esc(a["title"]),
         dek=esc(a["dek"]),
         author=esc(author["name"]),
-        published=a["published"],
-        published_h=human_date(a["published"]),
+        published=index_published(a),
+        published_h=human_date(index_published(a)),
         reading=esc(a["reading"]),
     )
 
@@ -88,8 +110,10 @@ def topics():
 
 
 def build(articles):
-    lead = articles[0]
-    rest = articles[1:]
+    # Featured is the AEO introduction. The newer citation article sits
+    # first in Latest, then the remaining three in their existing order.
+    lead = next(a for a in articles if a["slug"] == "what-is-answer-engine-optimization")
+    rest = [a for a in articles if a["slug"] != lead["slug"]]
 
     body = (
         hero(
@@ -178,5 +202,6 @@ def build(articles):
             "description": "Analysis, explanations and practical thinking on answer engine optimization, AI search, SEO and the systems shaping how businesses get found.",
             "body": body,
             "schema_nodes": schema,
+            "extra_head": COVER_FIELD_JS,
         },
     }

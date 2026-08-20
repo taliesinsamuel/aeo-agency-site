@@ -270,6 +270,38 @@ header.alr-hdr {
   max-width: 58ch;
   text-wrap: pretty;
 }
+
+/* About opening hero only. Other Resources heroes are untouched. */
+.alr-about-hero {
+  text-align: center;
+  padding-block: clamp(72px, 9vw, 128px) clamp(40px, 4.6vw, 64px);
+}
+/* Page-specific: close the empty band between the About hero and
+   WHY WE STARTED without touching shared .alr-section spacing. */
+.alr-about-hero + .alr-section {
+  padding-top: clamp(36px, 4.8vw, 68px);
+}
+.alr-about-hero .alr-eyebrow {
+  margin-bottom: 16px;
+}
+.alr-about-hero .alr-display {
+  max-width: 16.8em;
+  margin-inline: auto;
+}
+.alr-about-hero .alr-dek {
+  max-width: min(72ch, 820px);
+  margin-inline: auto;
+  margin-top: 28px;
+  line-height: 1.62;
+  text-wrap: pretty;
+}
+@media (max-width: 479px) {
+  .alr-about-hero .alr-dek {
+    text-align: left;
+    max-width: none;
+    margin-top: 22px;
+  }
+}
 .alr-lead {
   margin: 0;
   font-size: 18px;
@@ -1178,9 +1210,1876 @@ a.alr-card:hover .alr-arrow i {
 }
 
 /* ============================================================
-   ARTICLE / RESEARCH CARDS — typographic covers, no stock imagery.
-   The "cover" is a geometric field generated from the topic, so every
-   card is visually distinct without a single photograph.
+   ARTICLE FIGURES — the editorial figure system used inside Insights
+   articles. Built by resources-src/figures.py.
+
+   Three things are deliberate here.
+
+   Static. Nothing in this block animates or transitions. Figures are
+   editorial illustrations, so they render at their final state on first
+   paint and stay there. None of them carry the [data-alr-anim] hooks
+   resources.js drives the /work bars with.
+
+   Container-relative. Figures sit in a reading column whose width does
+   not track the viewport (there is a 232px contents rail above 1120px),
+   so the internal layouts respond to the figure's own width through
+   container queries rather than to the screen. The narrow layout is the
+   base, so a browser without container query support gets the stacked
+   version rather than a broken wide one.
+
+   Restrained palette. Blue for the primary series or finding, dark grey
+   for comparison, warm pale grey for context, and pale blue only for
+   highlighting. No third hue, no gradients beyond a barely visible
+   vertical wash on highlighted panels.
+   ============================================================ */
+.alr-article > .alr-fig {
+  /* Slightly wider than the reading measure, still inside the grid track
+     at every width the article layout produces. */
+  max-width: min(100%, 48rem);
+  margin: clamp(36px, 4.4vw, 58px) auto;
+}
+.alr-fig {
+  border: 1px solid var(--al-rule);
+  border-radius: var(--al-r-lg);
+  background: var(--al-surface);
+}
+/* The article body styles every p, ul, ol and li it contains. These resets
+   are written at the same specificity and later in the file so they win,
+   and every figure rule that then re-applies a margin is qualified with a
+   parent class so it outranks the reset in turn. */
+.alr-fig p,
+.alr-fig ul,
+.alr-fig ol,
+.alr-fig li,
+.alr-fig dl,
+.alr-fig dt,
+.alr-fig dd,
+.alr-keyfind p,
+.alr-keyfind ul,
+.alr-keyfind li {
+  margin: 0;
+  padding: 0;
+}
+.alr-fig ul,
+.alr-fig ol {
+  list-style: none;
+}
+.alr-fig li::marker {
+  content: none;
+}
+.alr-fig-head {
+  padding: clamp(16px, 2vw, 22px) clamp(16px, 2.2vw, 24px) 0;
+}
+.alr-fig-kind {
+  font-family: var(--al-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--al-ink-4);
+}
+.alr-fig .alr-fig-title {
+  margin-top: 8px;
+  font-family: var(--al-display);
+  font-weight: 600;
+  font-size: clamp(16px, 1.8vw, 19px);
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  color: var(--al-ink);
+  text-wrap: balance;
+}
+/* The plot is the container the internal layouts query, so the
+   breakpoints below measure the space the figure content actually has
+   rather than the frame around it. */
+.alr-fig-plot {
+  container-type: inline-size;
+  container-name: fig;
+  padding: clamp(14px, 1.8vw, 20px) clamp(16px, 2.2vw, 24px) clamp(16px, 2vw, 22px);
+}
+.alr-fig-cap {
+  margin: 0 clamp(16px, 2.2vw, 24px) clamp(16px, 2vw, 22px);
+  padding-top: clamp(13px, 1.6vw, 17px);
+  border-top: 1px solid var(--al-rule);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--al-ink-3);
+}
+.alr-fig-src {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--al-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  color: var(--al-ink-4);
+}
+/* Source links keep the article's link styling but drop its easing, so a
+   figure contains nothing at all that moves. The hover state is unchanged,
+   it just arrives immediately. Specificity has to clear the article link
+   rule above, hence the repeated :not()s. */
+.alr-article .alr-fig-src a:not(.alr-btn):not(.alr-arrow) {
+  transition: none;
+}
+.alr-fig--sm .alr-fig-title {
+  font-size: clamp(15px, 1.5vw, 16.5px);
+}
+
+/* ---- key findings ----------------------------------------- */
+.alr-keyfind {
+  margin: clamp(30px, 3.6vw, 44px) auto;
+  padding: clamp(18px, 2.2vw, 24px);
+  border: 1px solid rgba(38, 109, 240, 0.22);
+  border-left: 3px solid var(--al-accent);
+  border-radius: var(--al-r-lg);
+  background: linear-gradient(180deg, #f7faff, #fdfeff);
+}
+.alr-keyfind .alr-keyfind-t {
+  margin: 0 0 14px;
+  font-family: var(--al-display);
+  font-weight: 600;
+  font-size: clamp(15.5px, 1.6vw, 17.5px);
+  letter-spacing: -0.018em;
+  color: var(--al-ink);
+}
+.alr-keyfind ul {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.alr-keyfind li {
+  position: relative;
+  margin: 0;
+  padding-left: 18px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--al-ink-2);
+}
+.alr-keyfind li::marker {
+  content: none;
+}
+.alr-keyfind li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 9px;
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--al-accent);
+}
+
+/* ---- shared small parts ----------------------------------- */
+.alr-fig .alr-fg-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.alr-fig .alr-fg-chips li {
+  padding: 6px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--al-rule);
+  background: var(--al-paper);
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--al-ink-2);
+}
+.alr-fig .alr-fg-chips--blue li {
+  border-color: rgba(38, 109, 240, 0.24);
+  background: var(--al-accent-soft);
+  color: var(--al-accent-ink);
+}
+.alr-fig .alr-fg-chips--grey li {
+  background: var(--al-paper-2);
+}
+.alr-fig .alr-fg-chips--c {
+  justify-content: center;
+}
+.alr-fig .alr-fg-lines {
+  display: grid;
+}
+.alr-fig .alr-fg-lines li {
+  position: relative;
+  padding: 7px 0 7px 15px;
+  border-top: 1px solid var(--al-rule);
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--al-ink-2);
+}
+.alr-fig .alr-fg-lines li:first-child {
+  border-top: 0;
+}
+.alr-fig .alr-fg-lines li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 14px;
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  background: var(--al-ink-5);
+}
+.alr-fig .alr-fg-lines--blue li::before {
+  background: var(--al-accent);
+}
+.alr-fig .alr-fg-note {
+  margin-top: 20px;
+  padding-left: 12px;
+  border-left: 2px solid var(--al-accent);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--al-ink-3);
+}
+.alr-fig .alr-fg-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--al-ink-3);
+}
+.alr-fig .alr-fg-legend li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.alr-fig .alr-fg-sw {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  flex: none;
+}
+.alr-fig .alr-fg-sw--named {
+  background: var(--al-accent);
+}
+/* The dot is the non-colour cue: a marked cell is distinguishable from an
+   unmarked one in greyscale and to anyone who cannot separate the hues. */
+.alr-fig .alr-fg-sw--named::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fff;
+}
+.alr-fig .alr-fg-sw--plain {
+  background: var(--al-paper-2);
+  border: 1px solid var(--al-rule-2);
+}
+.alr-fig .alr-fg-sw--blue {
+  background: var(--al-accent);
+}
+.alr-fig .alr-fg-sw--grey {
+  background: var(--al-ink-4);
+}
+.alr-fig .alr-fg-pairs {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+}
+.alr-fig .alr-fg-pairs dt {
+  padding: 9px 14px 9px 0;
+  border-top: 1px solid var(--al-rule);
+  font-family: var(--al-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--al-ink-4);
+}
+.alr-fig .alr-fg-pairs dd {
+  padding: 9px 0;
+  border-top: 1px solid var(--al-rule);
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--al-ink);
+}
+.alr-fig .alr-fg-pairs dt:first-of-type,
+.alr-fig .alr-fg-pairs dd:first-of-type {
+  border-top: 0;
+}
+/* For values that are a literal string somebody typed, rather than prose. */
+.alr-fig .alr-fg-pairs--mono dd {
+  font-family: var(--al-mono);
+  font-size: 12.5px;
+  color: var(--al-ink-2);
+}
+
+/* ---- columns ---------------------------------------------- */
+.alr-fig .alr-fg-cols {
+  display: grid;
+  gap: 12px;
+}
+@container fig (min-width: 30rem) {
+  .alr-fig .alr-fg-cols {
+    grid-template-columns: repeat(var(--fg-n, 2), minmax(0, 1fr));
+    align-items: stretch;
+  }
+}
+.alr-fig .alr-fg-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid var(--al-rule-cool);
+  border-radius: var(--al-r-md);
+  background: var(--al-surface);
+}
+.alr-fig .alr-fg-col--blue {
+  border-color: rgba(38, 109, 240, 0.26);
+  background: linear-gradient(180deg, #f7faff, #fff);
+}
+.alr-fig .alr-fg-col--grey {
+  background: var(--al-paper-2);
+}
+.alr-fig .alr-fg-col-t {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--al-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--al-ink-4);
+}
+.alr-fig .alr-fg-col--blue .alr-fg-col-t {
+  color: var(--al-accent-ink);
+}
+.alr-fig .alr-fg-col-s {
+  font-family: var(--al-display);
+  font-weight: 600;
+  font-size: clamp(15px, 1.5vw, 17px);
+  line-height: 1.25;
+  letter-spacing: -0.018em;
+  color: var(--al-ink);
+}
+.alr-fig .alr-fg-col--blue .alr-fg-col-s {
+  color: var(--al-accent-ink);
+}
+.alr-fig .alr-fg-mark {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  flex: none;
+}
+.alr-fig .alr-fg-mark--solid {
+  background: var(--al-accent);
+}
+.alr-fig .alr-fg-mark--hollow {
+  border: 1.5px solid var(--al-ink-4);
+}
+
+/* ---- result structures (illustrative wireframes) ---------- */
+.alr-fig .alr-fg-ranks {
+  display: grid;
+  gap: 5px;
+}
+.alr-fig .alr-fg-rank {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 7px 9px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: var(--al-paper-2);
+}
+.alr-fig .alr-fg-rank-n {
+  font-family: var(--al-mono);
+  font-size: 10.5px;
+  text-align: right;
+  color: var(--al-ink-5);
+  font-variant-numeric: tabular-nums;
+}
+.alr-fig .alr-fg-rank-lines {
+  display: grid;
+  gap: 4px;
+}
+.alr-fig .alr-fg-rank-lines i {
+  display: block;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--al-ink-5);
+  opacity: 0.4;
+}
+.alr-fig .alr-fg-rank-lines i:first-child {
+  width: 84%;
+}
+.alr-fig .alr-fg-rank-lines i:last-child {
+  width: 56%;
+}
+.alr-fig .alr-fg-rank.is-marked {
+  background: var(--al-accent-soft);
+  border-color: rgba(38, 109, 240, 0.24);
+}
+.alr-fig .alr-fg-rank.is-marked .alr-fg-rank-n {
+  color: var(--al-accent-ink);
+}
+.alr-fig .alr-fg-rank.is-marked .alr-fg-rank-lines i {
+  background: var(--al-accent);
+  opacity: 0.55;
+}
+.alr-fig .alr-fg-slots {
+  display: grid;
+  gap: 8px;
+}
+.alr-fig .alr-fg-slot {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px;
+  border: 1px solid rgba(38, 109, 240, 0.26);
+  border-radius: var(--al-r-sm);
+  background: linear-gradient(180deg, #f7faff, #fff);
+  font-family: var(--al-display);
+  font-weight: 600;
+  font-size: 13.5px;
+  color: var(--al-accent-ink);
+}
+.alr-fig .alr-fg-slot::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: var(--al-accent);
+  flex: none;
+}
+.alr-fig .alr-fg-slot--out {
+  border-style: dashed;
+  border-color: var(--al-rule-2);
+  background: var(--al-paper-2);
+  color: var(--al-ink-4);
+  font-weight: 500;
+}
+.alr-fig .alr-fg-slot--out::before {
+  background: transparent;
+  border: 1.5px solid var(--al-ink-5);
+}
+.alr-fig .alr-fg-cells {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  /* Capped so the squares stay the size of a data mark rather than growing
+     into tiles that dominate the figure on a wide column. */
+  max-width: 27rem;
+}
+@container fig (min-width: 24rem) {
+  .alr-fig .alr-fg-cells {
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+  }
+}
+.alr-fig .alr-fg-cell {
+  position: relative;
+  aspect-ratio: 1;
+  border: 1px solid var(--al-rule-2);
+  border-radius: 5px;
+  background: var(--al-paper-2);
+}
+.alr-fig .alr-fg-cell.is-named {
+  border-color: var(--al-accent-hi);
+  background: var(--al-accent);
+}
+.alr-fig .alr-fg-cell.is-named::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+}
+.alr-fig .alr-fg-runs {
+  display: grid;
+  gap: 9px;
+}
+.alr-fig .alr-fg-run {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px 12px;
+}
+.alr-fig .alr-fg-run-t {
+  font-family: var(--al-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--al-ink-4);
+}
+.alr-fig .alr-fg-run-c {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 5px;
+  /* Capped so the marks stay square, matching the caption's description of
+     each one as a single question. */
+  max-width: 15rem;
+}
+.alr-fig .alr-fg-run-c .alr-fg-cell {
+  border-radius: 4px;
+}
+.alr-fig .alr-fg-run-c .alr-fg-cell.is-named::after {
+  width: 5px;
+  height: 5px;
+}
+.alr-fig .alr-fg-run-a {
+  grid-column: 2;
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: var(--al-ink-3);
+}
+@container fig (min-width: 30rem) {
+  .alr-fig .alr-fg-run {
+    grid-template-columns: 52px minmax(0, 1fr) auto;
+  }
+  .alr-fig .alr-fg-run-a {
+    grid-column: auto;
+    text-align: right;
+    white-space: nowrap;
+  }
+}
+
+/* ---- process ---------------------------------------------- */
+.alr-fig .alr-fg-flow {
+  --fg-gap: 22px;
+  display: grid;
+  gap: var(--fg-gap);
+}
+.alr-fig .alr-fg-node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 13px 14px;
+  border: 1px solid var(--al-rule-cool);
+  border-radius: var(--al-r-md);
+  background: var(--al-surface);
+}
+.alr-fig .alr-fg-node-t {
+  font-family: var(--al-display);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.28;
+  letter-spacing: -0.012em;
+  color: var(--al-ink);
+  overflow-wrap: break-word;
+}
+.alr-fig .alr-fg-flow > .alr-fg-node:last-child {
+  border-color: rgba(38, 109, 240, 0.3);
+  background: linear-gradient(180deg, #f7faff, #fff);
+}
+.alr-fig .alr-fg-flow > .alr-fg-node:last-child .alr-fg-node-t {
+  color: var(--al-accent-ink);
+}
+.alr-fig .alr-fg-sub {
+  display: grid;
+  gap: 5px;
+}
+.alr-fig .alr-fg-sub li {
+  padding: 5px 9px;
+  border: 1px solid var(--al-rule);
+  border-radius: 7px;
+  background: var(--al-paper-2);
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: var(--al-ink-3);
+}
+/* An input that is also another lane's output: the step the two share. */
+.alr-fig .alr-fg-sub li.is-shared {
+  border-color: rgba(38, 109, 240, 0.26);
+  background: var(--al-accent-soft);
+  color: var(--al-accent-ink);
+}
+/* A single CSS chevron sits in the gap after each node. Vertical is the
+   base case; the horizontal rule below only applies once the figure is
+   wide enough to run the chain across. */
+.alr-fig .alr-fg-node:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(-1 * var(--fg-gap) / 2);
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid var(--al-ink-5);
+  border-bottom: 1.5px solid var(--al-ink-5);
+  transform: translate(-50%, 50%) rotate(45deg);
+}
+/* 44rem is the width at which a five-stage chain still holds its longest
+   single-word label ("Interpretation") on one line. Below it the chain runs
+   vertically instead of shrinking into something unreadable. */
+@container fig (min-width: 44rem) {
+  .alr-fig .alr-fg-flow:not(.alr-fg-flow--v) {
+    --fg-gap: 18px;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    align-items: stretch;
+  }
+  /* Equal-height boxes with the label floating at the top read as empty.
+     Centring the contents makes the row look composed. */
+  .alr-fig .alr-fg-flow:not(.alr-fg-flow--v) > .alr-fg-node {
+    justify-content: center;
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .alr-fig .alr-fg-flow:not(.alr-fg-flow--v) .alr-fg-node-t {
+    font-size: 13px;
+  }
+  .alr-fig .alr-fg-flow:not(.alr-fg-flow--v) > .alr-fg-node:not(:last-child)::after {
+    left: auto;
+    bottom: auto;
+    right: calc(-1 * var(--fg-gap) / 2);
+    top: 50%;
+    border-bottom: 0;
+    border-top: 1.5px solid var(--al-ink-5);
+    transform: translate(50%, -50%) rotate(45deg);
+  }
+}
+/* A vertical chain reads as a pipeline rather than a stack of full-width
+   bars, so it is held to a column and centred, and a stage's inputs run
+   across in a row instead of down. */
+.alr-fig .alr-fg-flow--v {
+  --fg-gap: 16px;
+  max-width: 26rem;
+  margin-inline: auto;
+}
+.alr-fig .alr-fg-flow--v > .alr-fg-node {
+  padding: 11px 14px;
+  text-align: center;
+}
+@container fig (min-width: 26rem) {
+  .alr-fig .alr-fg-flow--v .alr-fg-sub {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  /* Growing rather than sitting in fixed tracks means a stage with one
+     input fills the node and a stage with six wraps into even rows. */
+  .alr-fig .alr-fg-flow--v .alr-fg-sub li {
+    flex: 1 1 6.5rem;
+  }
+}
+.alr-fig .alr-fg-lanes {
+  display: grid;
+  gap: 14px;
+}
+.alr-fig .alr-fg-lane {
+  padding: 14px;
+  border: 1px solid var(--al-rule-cool);
+  border-radius: var(--al-r-md);
+  background: var(--al-paper);
+}
+.alr-fig .alr-fg-lane-t {
+  margin-bottom: 12px;
+  font-family: var(--al-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--al-ink-4);
+}
+.alr-fig .alr-fg-stack {
+  display: grid;
+  gap: 6px;
+}
+.alr-fig .alr-fg-step {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--al-rule-cool);
+  border-radius: var(--al-r-md);
+  background: var(--al-surface);
+}
+.alr-fig .alr-fg-step-n {
+  padding-top: 2px;
+  font-family: var(--al-mono);
+  font-size: 11px;
+  color: var(--al-ink-5);
+  font-variant-numeric: tabular-nums;
+}
+.alr-fig .alr-fg-step-b {
+  display: grid;
+  gap: 3px;
+}
+.alr-fig .alr-fg-step-t {
+  font-family: var(--al-display);
+  font-weight: 600;
+  font-size: 14.5px;
+  line-height: 1.3;
+  letter-spacing: -0.014em;
+  color: var(--al-ink);
+}
+.alr-fig .alr-fg-step-s {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--al-ink-3);
+}
+.alr-fig .alr-fg-step.is-emph {
+  border-color: rgba(38, 109, 240, 0.3);
+  background: linear-gradient(180deg, #f7faff, #fff);
+}
+.alr-fig .alr-fg-step.is-emph .alr-fg-step-n,
+.alr-fig .alr-fg-step.is-emph .alr-fg-step-t {
+  color: var(--al-accent-ink);
+}
+/* A dependency stack reads as physical layers: no gaps, shared hairlines,
+   and the base visibly sitting under everything above it. */
+.alr-fig .alr-fg-stack--up {
+  gap: 0;
+  border: 1px solid var(--al-rule-cool);
+  border-radius: var(--al-r-md);
+  overflow: hidden;
+}
+.alr-fig .alr-fg-stack--up .alr-fg-step {
+  border: 0;
+  border-top: 1px solid var(--al-rule-cool);
+  border-radius: 0;
+}
+.alr-fig .alr-fg-stack--up .alr-fg-step:first-child {
+  border-top: 0;
+}
+.alr-fig .alr-fg-stack--up .alr-fg-step:last-child {
+  background: var(--al-paper-2);
+}
+.alr-fig .alr-fg-drive {
+  display: grid;
+  gap: 22px;
+}
+.alr-fig .alr-fg-drive-in,
+.alr-fig .alr-fg-drive-out {
+  position: relative;
+  padding: 14px;
+  border-radius: var(--al-r-md);
+  text-align: center;
+  font-family: var(--al-display);
+  font-weight: 600;
+  font-size: 13.5px;
+  line-height: 1.3;
+  letter-spacing: -0.012em;
+}
+.alr-fig .alr-fg-drive-in {
+  border: 1px solid var(--al-rule-cool);
+  background: var(--al-paper-2);
+  color: var(--al-ink);
+}
+.alr-fig .alr-fg-drive-out {
+  border: 1px solid rgba(38, 109, 240, 0.3);
+  background: linear-gradient(180deg, #f7faff, #fff);
+  color: var(--al-accent-ink);
+}
+.alr-fig .alr-fg-drive-f {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+.alr-fig .alr-fg-drive-f li {
+  padding: 8px 10px;
+  border: 1px solid var(--al-rule);
+  border-radius: 8px;
+  background: var(--al-surface);
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--al-ink-2);
+}
+.alr-fig .alr-fg-drive-in::after,
+.alr-fig .alr-fg-drive-f::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -16px;
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid var(--al-ink-5);
+  border-bottom: 1.5px solid var(--al-ink-5);
+  transform: translate(-50%, 50%) rotate(45deg);
+}
+@container fig (min-width: 34rem) {
+  .alr-fig .alr-fg-drive {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.45fr) minmax(0, 0.85fr);
+    align-items: center;
+    gap: 28px;
+  }
+  .alr-fig .alr-fg-drive-in::after,
+  .alr-fig .alr-fg-drive-f::after {
+    left: auto;
+    bottom: auto;
+    right: -18px;
+    top: 50%;
+    border-bottom: 0;
+    border-top: 1.5px solid var(--al-ink-5);
+    transform: translate(50%, -50%) rotate(45deg);
+  }
+}
+.alr-fig .alr-fg-conv {
+  display: grid;
+  gap: 22px;
+}
+.alr-fig .alr-fg-conv > .alr-fg-chips {
+  position: relative;
+}
+/* The grid gap already separates the label from the chips. */
+.alr-fig .alr-fg-conv > .alr-fg-band-t {
+  margin-bottom: 0;
+}
+.alr-fig .alr-fg-conv-out {
+  display: grid;
+  gap: 22px;
+}
+.alr-fig .alr-fg-conv-n {
+  position: relative;
+  padding: 13px 16px;
+  border: 1px solid var(--al-rule-cool);
+  border-radius: var(--al-r-md);
+  background: var(--al-surface);
+  text-align: center;
+  font-family: var(--al-display);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.3;
+  letter-spacing: -0.014em;
+  color: var(--al-ink);
+}
+.alr-fig .alr-fg-conv-n.is-emph {
+  border-color: rgba(38, 109, 240, 0.3);
+  background: linear-gradient(180deg, #f7faff, #fff);
+  color: var(--al-accent-ink);
+}
+.alr-fig .alr-fg-conv > .alr-fg-chips::after,
+.alr-fig .alr-fg-conv-n:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -15px;
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid var(--al-ink-5);
+  border-bottom: 1.5px solid var(--al-ink-5);
+  transform: translate(-50%, 50%) rotate(45deg);
+}
+
+/* A shared foundation, two sets of outputs, one outcome. Reuses the
+   converge chevron so the whole figure system draws its arrows one way. */
+.alr-fig .alr-fg-sys {
+  display: grid;
+  gap: 22px;
+}
+.alr-fig .alr-fg-sys > *:not(:last-child) {
+  position: relative;
+}
+.alr-fig .alr-fg-sys > *:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -15px;
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid var(--al-ink-5);
+  border-bottom: 1.5px solid var(--al-ink-5);
+  transform: translate(-50%, 50%) rotate(45deg);
+}
+
+/* ---- fields, layers and matrices -------------------------- */
+.alr-fig .alr-fg-hub {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.alr-fig .alr-fg-hub-r {
+  display: contents;
+}
+.alr-fig .alr-fg-hub-s {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 54px;
+  padding: 11px;
+  border: 1px solid var(--al-rule-cool);
+  border-radius: var(--al-r-sm);
+  background: var(--al-surface);
+  text-align: center;
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--al-ink-2);
+}
+.alr-fig .alr-fg-hub-c {
+  grid-row: 1;
+  grid-column: 1 / -1;
+  padding: 16px;
+  border: 1px solid rgba(38, 109, 240, 0.3);
+  border-radius: var(--al-r-md);
+  background: linear-gradient(180deg, #f7faff, #fff);
+  text-align: center;
+  font-family: var(--al-display);
+  font-weight: 600;
+  font-size: clamp(15px, 1.6vw, 17px);
+  letter-spacing: -0.018em;
+  color: var(--al-accent-ink);
+}
+@container fig (min-width: 30rem) {
+  .alr-fig .alr-fg-hub {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .alr-fig .alr-fg-hub-c {
+    grid-row: 2;
+  }
+  .alr-fig .alr-fg-hub-s:nth-child(-n + 3) {
+    grid-row: 1;
+  }
+  .alr-fig .alr-fg-hub-s:nth-child(n + 4) {
+    grid-row: 3;
+  }
+  /* Hairlines toward the centre. Equal for every source, because nothing
+     here establishes that any one of them weighs more. */
+  .alr-fig .alr-fg-hub-s::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    width: 1px;
+    height: 10px;
+    background: var(--al-rule-2);
+    transform: translateX(-50%);
+  }
+  .alr-fig .alr-fg-hub-s:nth-child(-n + 3)::after {
+    bottom: -10px;
+  }
+  .alr-fig .alr-fg-hub-s:nth-child(n + 4)::after {
+    top: -10px;
+  }
+}
+.alr-fig .alr-fg-lap {
+  display: grid;
+  gap: 10px;
+}
+.alr-fig .alr-fg-lap-z {
+  padding: 15px;
+  border: 1px solid var(--al-rule-cool);
+  border-radius: var(--al-r-md);
+  background: var(--al-paper);
+}
+.alr-fig .alr-fg-lap-t {
+  margin-bottom: 11px;
+  font-family: var(--al-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--al-ink-4);
+}
+.alr-fig .alr-fg-lap-z--m .alr-fg-lap-t {
+  color: var(--al-accent-ink);
+}
+@container fig (min-width: 34rem) {
+  .alr-fig .alr-fg-lap {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 0;
+    align-items: stretch;
+  }
+  .alr-fig .alr-fg-lap-z--l {
+    border-radius: var(--al-r-md) 0 0 var(--al-r-md);
+    padding-right: 26px;
+  }
+  .alr-fig .alr-fg-lap-z--r {
+    border-radius: 0 var(--al-r-md) var(--al-r-md) 0;
+    padding-left: 26px;
+  }
+  /* The shared middle overlaps both emphases rather than sitting between
+     them, which is the point of the figure. */
+  .alr-fig .alr-fg-lap-z--m {
+    position: relative;
+    z-index: 1;
+    margin-inline: -14px;
+    margin-block: -8px;
+    border-color: rgba(38, 109, 240, 0.3);
+    background: linear-gradient(180deg, #f7faff, #fff);
+    box-shadow: var(--al-sh-2);
+  }
+}
+.alr-fig .alr-fg-bands {
+  display: grid;
+  border: 1px solid var(--al-rule-cool);
+  border-radius: var(--al-r-md);
+  overflow: hidden;
+}
+.alr-fig .alr-fg-band {
+  padding: 15px;
+  border-top: 1px solid var(--al-rule-cool);
+  background: var(--al-surface);
+}
+.alr-fig .alr-fg-band:first-child {
+  border-top: 0;
+}
+.alr-fig .alr-fg-band--blue {
+  background: linear-gradient(180deg, #f4f8ff, #fbfdff);
+}
+.alr-fig .alr-fg-band--grey {
+  background: var(--al-paper-2);
+}
+.alr-fig .alr-fg-band-t {
+  margin-bottom: 11px;
+  font-family: var(--al-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--al-ink-4);
+}
+.alr-fig .alr-fg-band--blue .alr-fg-band-t {
+  color: var(--al-accent-ink);
+}
+.alr-fig .alr-fg-table {
+  overflow-x: auto;
+  border: 1px solid var(--al-rule-cool);
+  border-radius: var(--al-r-md);
+  background: var(--al-surface);
+  -webkit-overflow-scrolling: touch;
+}
+/* Unlike the article tables, figure matrices are short enough to fit the
+   narrowest column without an internal scroll. */
+.alr-table--fig {
+  min-width: 0;
+  font-size: 14px;
+}
+.alr-table--fig th,
+.alr-table--fig td {
+  padding: 11px 13px;
+  border-bottom-color: var(--al-rule-cool);
+}
+.alr-table--fig thead th {
+  background: var(--al-paper-2);
+  white-space: normal;
+}
+.alr-table--fig tbody th {
+  width: 26%;
+}
+.alr-fig .alr-fg-table--ab .alr-table--fig tbody td:last-child {
+  color: var(--al-accent-ink);
+}
+@container fig (max-width: 24rem) {
+  .alr-table--fig {
+    font-size: 12.5px;
+  }
+  .alr-table--fig th,
+  .alr-table--fig td {
+    padding: 9px 9px;
+  }
+}
+.alr-fig .alr-fg-quad {
+  display: grid;
+  gap: 10px;
+}
+.alr-fig .alr-fg-axis {
+  font-family: var(--al-mono);
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--al-ink-4);
+}
+.alr-fig .alr-fg-quad-g {
+  display: grid;
+  gap: 1px;
+  background: var(--al-rule-cool);
+  border: 1px solid var(--al-rule-cool);
+  border-radius: var(--al-r-md);
+  overflow: hidden;
+}
+.alr-fig .alr-fg-quad-c {
+  display: grid;
+  gap: 5px;
+  align-content: start;
+  padding: 14px;
+  background: var(--al-surface);
+}
+.alr-fig .alr-fg-quad-c:nth-child(2) {
+  background: linear-gradient(180deg, #f5f9ff, #fff);
+}
+.alr-fig .alr-fg-quad-t {
+  font-family: var(--al-display);
+  font-weight: 600;
+  font-size: 13.5px;
+  line-height: 1.25;
+  letter-spacing: -0.012em;
+  color: var(--al-ink);
+}
+.alr-fig .alr-fg-quad-c:nth-child(2) .alr-fg-quad-t {
+  color: var(--al-accent-ink);
+}
+.alr-fig .alr-fg-quad-n {
+  font-size: 11.5px;
+  line-height: 1.42;
+  color: var(--al-ink-3);
+}
+/* Stacked, each quadrant still names its own position, so the axes carry
+   nothing and would only imply an ordering the column does not have. */
+.alr-fig .alr-fg-axis {
+  display: none;
+}
+@container fig (min-width: 30rem) {
+  .alr-fig .alr-fg-axis {
+    display: block;
+  }
+  .alr-fig .alr-fg-quad {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: "y g" ". x";
+    gap: 8px;
+  }
+  .alr-fig .alr-fg-axis--y {
+    grid-area: y;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    text-align: center;
+  }
+  .alr-fig .alr-fg-axis--x {
+    grid-area: x;
+    text-align: center;
+  }
+  .alr-fig .alr-fg-quad-g {
+    grid-area: g;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+/* Held to a column so the nested bands read as concentric areas rather than
+   as full-width containers stacked inside each other. */
+.alr-fig .alr-fg-rings {
+  max-width: 24rem;
+  margin-inline: auto;
+}
+.alr-fig .alr-fg-ring {
+  padding: 13px;
+  border: 1px solid var(--al-rule-cool);
+  border-radius: var(--al-r-lg);
+  background: var(--al-paper);
+}
+.alr-fig .alr-fg-ring .alr-fg-ring {
+  background: var(--al-surface);
+}
+.alr-fig .alr-fg-ring .alr-fg-ring .alr-fg-ring {
+  border-color: rgba(38, 109, 240, 0.22);
+  background: var(--al-accent-soft);
+}
+.alr-fig .alr-fg-ring-t {
+  margin-bottom: 12px;
+  text-align: center;
+  font-family: var(--al-mono);
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--al-ink-4);
+}
+.alr-fig .alr-fg-ring .alr-fg-ring .alr-fg-ring > .alr-fg-ring-t {
+  color: var(--al-accent-ink);
+}
+.alr-fig .alr-fg-ring-c {
+  padding: 15px 12px;
+  border: 1px solid rgba(38, 109, 240, 0.3);
+  border-radius: var(--al-r-md);
+  background: var(--al-surface);
+  text-align: center;
+  font-family: var(--al-display);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.018em;
+  color: var(--al-accent-ink);
+}
+
+/* --- quantitative charts -------------------------------------------
+   Bars are sized from a --v custom property carrying the value as a
+   percentage of the axis maximum. Nothing here transitions or animates:
+   the fills are plain background colours on statically sized boxes, so a
+   chart is complete on first paint. Three fills only, all existing brand
+   tokens: accent blue for the primary series, charcoal ink for the
+   comparison, and a pale blue or cool grey for context. */
+.alr-fig .alr-fg-bars {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+.alr-fig .alr-fg-bar {
+  display: grid;
+  gap: 4px 14px;
+  align-items: center;
+}
+.alr-fig .alr-fg-bar > dt {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.35;
+  color: var(--al-ink-2);
+}
+/* The value sits in a fixed column rather than being sized by its own text,
+   which is what lets the axis below line up with the end of the track
+   instead of the end of the row. */
+.alr-fig .alr-fg-bar > dd {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 3.2rem;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+.alr-fig .alr-fg-bar-t {
+  min-width: 0;
+  height: 22px;
+  border-radius: 3px;
+  background: var(--al-paper-2);
+}
+.alr-fig .alr-fg-bar-f {
+  display: block;
+  width: calc(var(--v) * 1%);
+  height: 100%;
+  border-radius: 3px;
+  background: var(--al-accent);
+}
+.alr-fig .alr-fg-bar--mute .alr-fg-bar-f {
+  background: #a8c4f5;
+}
+.alr-fig .alr-fg-bar--grey .alr-fg-bar-f {
+  background: var(--al-ink-2);
+}
+.alr-fig .alr-fg-bar-v {
+  font-family: var(--al-mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--al-ink);
+}
+.alr-fig .alr-fg-bar--grey .alr-fg-bar-v {
+  color: var(--al-ink-2);
+}
+/* The axis sits under the track column only, so its ticks line up with the
+   bars rather than with the labels or the values. */
+.alr-fig .alr-fg-ax {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  margin-right: calc(3.2rem + 10px);
+  padding-top: 6px;
+  border-top: 1px solid var(--al-rule-cool);
+  font-family: var(--al-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--al-ink-4);
+}
+.alr-fig .alr-fg-ax-u {
+  margin: 5px 0 0;
+  font-size: 11.5px;
+  color: var(--al-ink-4);
+}
+@container fig (min-width: 30rem) {
+  .alr-fig .alr-fg-bar {
+    grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+  }
+  .alr-fig .alr-fg-bars + .alr-fg-ax,
+  .alr-fig .alr-fg-ax + .alr-fg-ax-u {
+    margin-left: calc(15rem + 14px);
+  }
+}
+
+/* --- 100% stacked bars --- */
+.alr-fig .alr-fg-stk {
+  display: grid;
+  gap: 14px;
+}
+.alr-fig .alr-fg-stk-r {
+  display: grid;
+  gap: 6px;
+}
+.alr-fig .alr-fg-stk-l {
+  margin: 0;
+  font-family: var(--al-display);
+  font-weight: 600;
+  font-size: 13.5px;
+  letter-spacing: -0.01em;
+  color: var(--al-ink);
+}
+.alr-fig .alr-fg-stk-b {
+  display: flex;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--al-paper-2);
+}
+.alr-fig .alr-fg-seg {
+  display: grid;
+  place-content: center;
+  gap: 1px;
+  width: calc(var(--v) * 1%);
+  min-width: 0;
+  padding: 9px 4px;
+  background: var(--al-accent);
+  text-align: center;
+}
+.alr-fig .alr-fg-seg + .alr-fg-seg {
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.7);
+}
+.alr-fig .alr-fg-seg--mute {
+  background: #c3d6f8;
+}
+.alr-fig .alr-fg-seg--grey {
+  background: var(--al-paper-3);
+}
+.alr-fig .alr-fg-seg-v {
+  font-family: var(--al-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+.alr-fig .alr-fg-seg--mute .alr-fg-seg-v,
+.alr-fig .alr-fg-seg--grey .alr-fg-seg-v {
+  color: var(--al-ink);
+}
+/* Inside a chart the swatch has to be the segment's own fill, or the legend
+   stops being a key. The shared swatch tones are tuned for the diagrams and
+   are a shade or two off these fills. */
+.alr-fig .alr-fg-stk .alr-fg-sw {
+  border-radius: 3px;
+}
+.alr-fig .alr-fg-stk .alr-fg-sw--named {
+  background: var(--al-accent);
+}
+.alr-fig .alr-fg-stk .alr-fg-sw--mute {
+  background: #c3d6f8;
+}
+.alr-fig .alr-fg-stk .alr-fg-sw--grey {
+  background: var(--al-paper-3);
+  border: 1px solid var(--al-rule-2);
+}
+/* A single-row chart repeats every value in its legend, so a thin segment
+   can drop its inline number on a narrow screen without losing it. */
+.alr-fig .alr-fg-stk--one .alr-fg-seg-v {
+  display: none;
+}
+@container fig (min-width: 30rem) {
+  .alr-fig .alr-fg-stk--one .alr-fg-seg-v {
+    display: block;
+  }
+}
+@container fig (min-width: 34rem) {
+  .alr-fig .alr-fg-stk-r {
+    grid-template-columns: minmax(0, 7rem) minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+  }
+  .alr-fig .alr-fg-seg {
+    padding: 11px 6px;
+  }
+}
+
+/* --- grouped bars: columns when there is room, rows when there is not --- */
+.alr-fig .alr-fg-grouped {
+  display: grid;
+  gap: 18px;
+}
+.alr-fig .alr-fg-grp-l {
+  margin: 0 0 8px;
+  font-family: var(--al-display);
+  font-weight: 600;
+  font-size: 13.5px;
+  letter-spacing: -0.01em;
+  color: var(--al-ink);
+}
+.alr-fig .alr-fg-grp-s {
+  display: grid;
+  gap: 8px;
+}
+/* fit-content keeps the series label column as narrow as its own text on a
+   phone, where every pixel taken from it is a pixel of bar. */
+.alr-fig .alr-fg-gb {
+  display: grid;
+  grid-template-columns: fit-content(7rem) minmax(0, 1fr) 3.2rem;
+  align-items: center;
+  gap: 10px;
+}
+/* Row mode reorders the three parts of a bar into label, track, value.
+   Column mode below restores document order: value, track, label. */
+.alr-fig .alr-fg-gb-k {
+  order: -1;
+  font-size: 12.5px;
+  color: var(--al-ink-3);
+}
+.alr-fig .alr-fg-gb-v {
+  order: 1;
+}
+.alr-fig .alr-fg-gb-t {
+  height: 20px;
+  border-radius: 3px;
+  background: var(--al-paper-2);
+}
+.alr-fig .alr-fg-gb-f {
+  display: block;
+  width: calc(var(--v) * 1%);
+  height: 100%;
+  border-radius: 3px;
+  background: var(--al-accent);
+}
+.alr-fig .alr-fg-gb--grey .alr-fg-gb-f {
+  background: var(--al-ink-2);
+}
+.alr-fig .alr-fg-gb-v {
+  font-family: var(--al-mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--al-ink);
+}
+@container fig (min-width: 32rem) {
+  .alr-fig .alr-fg-grouped {
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    gap: 24px;
+  }
+  .alr-fig .alr-fg-grp-l {
+    margin: 0;
+    order: 2;
+    padding-top: 10px;
+    border-top: 1px solid var(--al-rule-cool);
+    text-align: center;
+  }
+  .alr-fig .alr-fg-grp {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .alr-fig .alr-fg-grp-s {
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    align-items: end;
+    justify-content: center;
+    gap: 18px;
+    /* Tall enough for a bar at the top of the scale (150px) plus its value
+       and series labels, so the tallest group cannot push its labels down
+       into the baseline. */
+    height: 200px;
+  }
+  /* Column mode: the same --v now drives height instead of width, at
+     1.5px per percentage point of the shared axis. The horizontal tick row
+     is dropped, because under columns it would read as a value scale
+     running along the wrong axis, and every column prints its own value. */
+  .alr-fig .alr-fg-grouped + .alr-fg-ax {
+    display: none;
+  }
+  .alr-fig .alr-fg-gb {
+    grid-template-columns: none;
+    align-content: end;
+    justify-items: center;
+    gap: 6px;
+    height: 100%;
+  }
+  .alr-fig .alr-fg-gb-k,
+  .alr-fig .alr-fg-gb-v {
+    order: 0;
+    text-align: center;
+  }
+  .alr-fig .alr-fg-gb-t {
+    width: 46px;
+    height: calc(var(--v) * 1.5px);
+    border-radius: 3px 3px 0 0;
+  }
+  .alr-fig .alr-fg-gb-f {
+    width: 100%;
+    border-radius: 3px 3px 0 0;
+  }
+}
+
+/* --- two-point slope --- */
+.alr-fig .alr-fg-slope {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 10px;
+  max-width: 30rem;
+  margin-inline: auto;
+}
+.alr-fig .alr-fg-slope-y {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 190px;
+  font-family: var(--al-mono);
+  font-size: 10.5px;
+  color: var(--al-ink-4);
+  text-align: right;
+}
+.alr-fig .alr-fg-slope-a {
+  position: relative;
+  height: 190px;
+  border-left: 1px solid var(--al-rule-cool);
+  border-bottom: 1px solid var(--al-rule-cool);
+  background: linear-gradient(var(--al-rule-cool), var(--al-rule-cool)) no-repeat
+    0 50% / 100% 1px;
+}
+.alr-fig .alr-fg-slope-l {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.alr-fig .alr-fg-slope-l line {
+  stroke: var(--al-accent);
+  stroke-width: 2;
+}
+.alr-fig .alr-fg-slope-p {
+  position: absolute;
+  left: var(--x);
+  bottom: var(--y);
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--al-accent);
+  transform: translate(-50%, 50%);
+}
+.alr-fig .alr-fg-slope-v {
+  position: absolute;
+  bottom: 13px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--al-mono);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: var(--al-accent-ink);
+}
+/* The two points sit on the axis ends, so their labels are nudged inward
+   to stay inside the plot. */
+.alr-fig .alr-fg-slope-p:first-of-type .alr-fg-slope-v {
+  left: 0;
+  transform: none;
+}
+.alr-fig .alr-fg-slope-p:last-of-type .alr-fg-slope-v {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+.alr-fig .alr-fg-slope-x {
+  grid-column: 2;
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  font-family: var(--al-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--al-ink-3);
+}
+
+/* --- two charts in one figure --- */
+.alr-fig .alr-fg-sub2 {
+  display: grid;
+  gap: 22px;
+}
+/* Each column is its own query container, so a chart inside one measures
+   the column it actually occupies rather than the whole figure. Without
+   this a sub-plot on a wide screen would reserve a label gutter sized for
+   a full-width chart and squeeze its own bars to nothing. */
+.alr-fig .alr-fg-sub2-c {
+  container-type: inline-size;
+  container-name: fig;
+  min-width: 0;
+}
+.alr-fig .alr-fg-sub2-t {
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--al-rule-cool);
+  font-family: var(--al-display);
+  font-weight: 600;
+  font-size: 13.5px;
+  letter-spacing: -0.012em;
+  color: var(--al-ink);
+}
+@container fig (min-width: 36rem) {
+  .alr-fig .alr-fg-sub2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px;
+  }
+}
+
+/* --- diverging bars: one signed series about a zero line --- */
+.alr-fig .alr-fg-divs {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+.alr-fig .alr-fg-dv {
+  display: grid;
+  gap: 4px 14px;
+  align-items: center;
+}
+.alr-fig .alr-fg-dv > dt {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.35;
+  color: var(--al-ink-2);
+}
+.alr-fig .alr-fg-dv > dd {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 3.2rem;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+.alr-fig .alr-fg-dv-t {
+  position: relative;
+  min-width: 0;
+  height: 22px;
+  border-radius: 3px;
+  background: var(--al-paper-2);
+}
+/* The zero line overshoots the track so it reads as an axis running down
+   the chart rather than as an edge belonging to one bar. */
+.alr-fig .alr-fg-dv-t::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: 50%;
+  width: 1px;
+  background: var(--al-ink-3);
+}
+.alr-fig .alr-fg-dv-f {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: calc(var(--v) * 1%);
+  background: var(--al-accent);
+}
+.alr-fig .alr-fg-dv-f--pos {
+  left: 50%;
+  border-radius: 0 3px 3px 0;
+}
+.alr-fig .alr-fg-dv-f--neg {
+  right: 50%;
+  border-radius: 3px 0 0 3px;
+}
+.alr-fig .alr-fg-dv--grey .alr-fg-dv-f {
+  background: var(--al-ink-2);
+}
+.alr-fig .alr-fg-dv--mute .alr-fg-dv-f {
+  background: #a8c4f5;
+}
+.alr-fig .alr-fg-dv-v {
+  font-family: var(--al-mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--al-ink);
+}
+.alr-fig .alr-fg-dv--grey .alr-fg-dv-v {
+  color: var(--al-ink-2);
+}
+@container fig (min-width: 30rem) {
+  .alr-fig .alr-fg-dv {
+    grid-template-columns: minmax(0, 13rem) minmax(0, 1fr);
+  }
+  .alr-fig .alr-fg-divs + .alr-fg-ax {
+    margin-left: calc(13rem + 14px);
+  }
+}
+
+/* --- page depth: a wireframe page with depths read off beside it --- */
+.alr-fig .alr-fg-dep {
+  --dep-h: 260px;
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 16px;
+  max-width: 30rem;
+}
+.alr-fig .alr-fg-dep-p {
+  position: relative;
+  height: var(--dep-h);
+  padding: 9px 7px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid var(--al-rule-cool);
+  border-radius: 4px;
+  background: #fff;
+}
+.alr-fig .alr-fg-dep-p i {
+  display: block;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--al-paper-2);
+}
+/* Ragged line lengths so the block reads as a page of prose rather than a
+   bar chart lying on its side. */
+.alr-fig .alr-fg-dep-p i:nth-child(3n) {
+  width: 72%;
+}
+.alr-fig .alr-fg-dep-p i:nth-child(4n) {
+  width: 88%;
+}
+.alr-fig .alr-fg-dep-p i:nth-child(5n) {
+  width: 60%;
+}
+.alr-fig .alr-fg-dep-r {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--y);
+  height: 2px;
+  background: var(--al-accent);
+}
+.alr-fig .alr-fg-dep-s {
+  position: relative;
+  height: var(--dep-h);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.alr-fig .alr-fg-dep-m {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--y);
+  display: grid;
+  gap: 1px;
+  transform: translateY(-50%);
+}
+/* The end marks are pinned inside the scale instead of centred on it, so
+   neither one hangs off the top or bottom of the page it describes. */
+.alr-fig .alr-fg-dep-m:first-child {
+  transform: none;
+}
+.alr-fig .alr-fg-dep-m:last-child {
+  transform: translateY(-100%);
+}
+.alr-fig .alr-fg-dep-k {
+  font-family: var(--al-mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--al-ink-3);
+}
+.alr-fig .alr-fg-dep-m.is-emph .alr-fg-dep-k {
+  font-size: 15px;
+  color: var(--al-accent-ink);
+}
+.alr-fig .alr-fg-dep-l {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--al-ink-3);
+}
+.alr-fig .alr-fg-dep-m.is-emph .alr-fg-dep-l {
+  color: var(--al-ink);
+}
+@container fig (min-width: 26rem) {
+  .alr-fig .alr-fg-dep {
+    --dep-h: 300px;
+    grid-template-columns: 116px minmax(0, 1fr);
+    gap: 22px;
+  }
+}
+
+/* --- page anatomy: a wireframe whose zones carry their own names --- */
+.alr-fig .alr-fg-anat {
+  max-width: 34rem;
+  margin-inline: auto;
+  padding: 16px 15px 18px;
+  border: 1px solid var(--al-rule-cool);
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 12px 26px -22px rgba(20, 26, 38, 0.55);
+}
+.alr-fig .alr-fg-anat-h {
+  margin: 0 0 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--al-rule-cool);
+  font-family: var(--al-display);
+  font-weight: 650;
+  font-size: 15px;
+  letter-spacing: -0.014em;
+  color: var(--al-ink);
+}
+.alr-fig .alr-fg-anat-l {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+.alr-fig .alr-fg-anat-b {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2px 9px;
+  padding-left: 11px;
+  border-left: 2px solid var(--al-paper-3);
+}
+.alr-fig .alr-fg-anat-b.is-emph {
+  border-left-color: var(--al-accent);
+}
+.alr-fig .alr-fg-anat-b .alr-fg-mark {
+  margin-top: 5px;
+}
+.alr-fig .alr-fg-anat-t {
+  font-family: var(--al-display);
+  font-weight: 600;
+  font-size: 13.5px;
+  letter-spacing: -0.01em;
+  color: var(--al-ink);
+}
+.alr-fig .alr-fg-anat-s {
+  grid-column: 2;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--al-ink-3);
+}
+.alr-fig .alr-fg-anat-w {
+  grid-column: 2;
+  display: grid;
+  gap: 4px;
+  margin-top: 6px;
+}
+.alr-fig .alr-fg-anat-w i {
+  display: block;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--al-paper-2);
+}
+.alr-fig .alr-fg-anat-w i:last-child {
+  width: 64%;
+}
+
+/* --- data callout: numbers that need a sentence, not a chart --- */
+.alr-article .alr-datastat {
+  margin: 22px 0;
+  padding: 16px 18px;
+  border: 1px solid var(--al-rule-cool);
+  border-left: 2px solid var(--al-accent);
+  border-radius: 4px;
+  background: var(--al-paper);
+}
+.alr-article .alr-fg-stats {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+.alr-article .alr-fg-stat > dt {
+  margin: 0;
+  font-family: var(--al-mono);
+  font-size: 19px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--al-accent-ink);
+}
+.alr-article .alr-fg-stat > dd {
+  margin: 2px 0 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--al-ink-2);
+}
+.alr-article .alr-fg-stats-f {
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--al-rule-cool);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--al-ink-3);
+}
+@media (min-width: 700px) {
+  .alr-article .alr-fg-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }
+}
+
+/* ============================================================
+   ARTICLE CARDS — no stock imagery. The "cover" is a background colour
+   with the homepage square field animated into it by cover-field.js.
+   Nothing else: no label, no artwork, no grid lines.
+
+   --alf-rgb is the colour of the squares for that cover, read by the
+   script. Pale covers take a darker branded field, the dark cover a
+   light one. --alf-gain scales the field's alpha ladder where the
+   contrast against the background needs it.
    ============================================================ */
 .alr-cover {
   position: relative;
@@ -1193,46 +3092,49 @@ a.alr-card:hover .alr-arrow i {
   align-items: flex-end;
   padding: 16px;
   flex: none;
+  --alf-rgb: 36, 91, 194; /* --al-accent-ink */
+  --alf-gain: 1.5;
 }
-.alr-cover::before {
-  content: "";
+.alr-field {
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(rgba(38, 109, 240, 0.13) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(38, 109, 240, 0.13) 1px, transparent 1px);
-  background-size: 22px 22px;
-  mask-image: radial-gradient(120% 100% at 12% 100%, #000, transparent 72%);
-  -webkit-mask-image: radial-gradient(120% 100% at 12% 100%, #000, transparent 72%);
-}
-.alr-cover span {
-  position: relative;
-  font-family: var(--al-mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--al-accent-ink);
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 .alr-cover--warm {
   background: linear-gradient(160deg, #fbf7f1, #f4ede3);
   border-color: var(--al-rule);
-}
-.alr-cover--warm::before {
-  background-image: linear-gradient(rgba(28, 29, 31, 0.09) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(28, 29, 31, 0.09) 1px, transparent 1px);
-}
-.alr-cover--warm span {
-  color: var(--al-ink-2);
+  --alf-rgb: 58, 65, 80; /* --al-ink-2 */
+  --alf-gain: 1.15;
 }
 .alr-cover--ink {
   background: linear-gradient(160deg, #14161a, #0d0f12);
   border-color: #23262c;
+  --alf-rgb: 255, 255, 255;
+  --alf-gain: 1.35;
 }
-.alr-cover--ink::before {
-  background-image: linear-gradient(rgba(120, 160, 250, 0.16) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(120, 160, 250, 0.16) 1px, transparent 1px);
+/* Silver: a light metal grey ground with a darker grey field, so it reads
+   as neither the near-black cover nor the pale blue one. Both values are
+   held on a neutral axis rather than taken from the accent or slate
+   tokens, which carry too much blue. The gain lands the field on the same
+   few levels of separation the other covers read at. */
+.alr-cover--silver {
+  background: linear-gradient(160deg, #d0d3d8, #c1c5cb);
+  border-color: #b4b9c0;
+  --alf-rgb: 80, 84, 90;
+  --alf-gain: 1.8;
 }
-.alr-cover--ink span {
-  color: #8fb2fa;
+/* Sage: pale green ground with a darker green field, matching the
+   contrast pattern of the default pale-blue cover (darker squares on a
+   lighter base). Held on a low-saturation green so it reads as sage
+   rather than mint. Gain sits with the other pale covers. */
+.alr-cover--sage {
+  background: linear-gradient(160deg, #e6eee4, #d9e5d7);
+  border-color: #c8d6c6;
+  --alf-rgb: 32, 78, 42;
+  --alf-gain: 3.6;
 }
 
 .alr-featured {
@@ -1300,9 +3202,6 @@ a.alr-card:hover .alr-arrow i {
   aspect-ratio: 3 / 2;
   padding: 10px;
 }
-.alr-item .alr-cover span {
-  font-size: 9.5px;
-}
 @media (max-width: 720px) {
   .alr-item {
     grid-template-columns: minmax(0, 1fr);
@@ -1338,6 +3237,57 @@ a.alr-card:hover .alr-arrow i {
   font-weight: 500;
   color: var(--al-ink);
   font-variant-numeric: tabular-nums;
+}
+/* Study cards carry a question and an observation, so they hold more copy
+   than the generic card and need wider columns than the shared grid gives. */
+.alr-studies {
+  gap: clamp(18px, 2vw, 24px);
+}
+@media (max-width: 699px) {
+  .alr-studies.alr-grid--3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (min-width: 700px) and (max-width: 1120px) {
+  .alr-studies.alr-grid--3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.alr-study-q {
+  margin: 14px 0 0;
+  font-size: 16.5px;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: -0.012em;
+  color: var(--al-ink);
+  text-wrap: pretty;
+}
+.alr-study-note {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--al-rule-2);
+}
+/* One brand accent per card: a short rule sitting on the top border, inset
+   to the card's text edge, plus the observation label in the same blue the
+   Work eyebrows use. Everything else stays white, warm grey and ink. */
+.alr-study::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  /* Tracks .alr-card padding, so the rule starts on the text edge and clears
+     the corner radius at every width. */
+  left: clamp(22px, 2.4vw, 30px);
+  width: 36px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--al-accent);
+  transition: width 0.2s var(--al-e);
+}
+.alr-study .alr-note-label {
+  color: var(--al-accent-ink);
+}
+.alr-study.alr-card--hover:hover::before {
+  width: 48px;
 }
 .alr-datagrid {
   display: grid;
@@ -1381,11 +3331,69 @@ a.alr-card:hover .alr-arrow i {
     gap: 40px;
   }
 }
-/* Asymmetry: the second founder block drops slightly so the pair reads
-   as a composition rather than two matching employee cards. */
+/* Who we are, on /about. Equal columns on a shared baseline: neither
+   founder should read as the more senior of the two. */
+.alr-who {
+  padding-block: clamp(64px, 8vw, 116px);
+}
+.alr-who-head {
+  max-width: 720px;
+  margin: 0 auto clamp(40px, 5.5vw, 72px);
+  text-align: center;
+}
+/* Slightly stronger brand accent than the default muted eyebrow, still
+   an eyebrow — not a headline. Heading stays ink; the short rule below
+   it carries the signature blue. */
+.alr-who .alr-eyebrow {
+  color: var(--al-accent-ink);
+}
+.alr-who-head .alr-h2::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 1.5px;
+  margin: 16px auto 0;
+  background: var(--al-accent);
+}
+.alr-who .alr-founders {
+  max-width: 1020px;
+  margin-inline: auto;
+  align-items: start;
+  column-gap: clamp(32px, 6vw, 88px);
+}
 @media (min-width: 761px) {
-  .alr-founder:nth-child(2) {
-    margin-top: 56px;
+  .alr-who .alr-founders {
+    position: relative;
+  }
+  /* Low-contrast warm rule between the columns, sized to the taller one. */
+  .alr-who .alr-founders::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 50%;
+    width: 1px;
+    background: var(--al-rule);
+    opacity: 0.7;
+  }
+}
+.alr-who-synthesis {
+  max-width: 74ch;
+  margin: clamp(52px, 6.5vw, 88px) auto 0;
+  text-align: center;
+  font-size: 17.5px;
+  line-height: 1.66;
+  color: var(--al-ink-2);
+  text-wrap: pretty;
+}
+@media (max-width: 479px) {
+  .alr-who-head {
+    max-width: none;
+  }
+  .alr-who-synthesis {
+    text-align: left;
+    max-width: none;
+    font-size: 16.5px;
   }
 }
 .alr-founder-name {

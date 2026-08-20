@@ -46,6 +46,7 @@ FAVICON_LINKS = (
     '<link rel="icon" href="/favicon-48x48.png?v=3" type="image/png" sizes="48x48">'
     '<link rel="icon" href="/favicon.svg?v=3" type="image/svg+xml">'
     '<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">'
+    '<link rel="manifest" href="/site.webmanifest">'
 )
 
 ORG_ID = ORIGIN + "/#organization"

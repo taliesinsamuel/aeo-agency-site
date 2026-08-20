@@ -1,7 +1,7 @@
 """/about — why Answered Labs exists and who is behind it."""
 
 from components import (
-    AUDIT, INSIGHTS, RESEARCH, WORK, L, cta, esc, hero, xlinks,
+    AUDIT, INSIGHTS, RESEARCH, WORK, L, cta, esc, xlinks,
 )
 
 UP = ""
@@ -13,9 +13,11 @@ GAP = """<section class="alr-section alr-section--white">
     <div class="alr-measure">
       <p class="alr-eyebrow">Why we started</p>
       <h2 class="alr-h2">The gap we kept seeing</h2>
-      <p class="alr-lead" style="margin-top:22px">A business can be genuinely excellent and still be close to invisible inside AI-driven discovery. We kept running into the same situation: a company with real customers, real expertise, a good service, a reputation people would vouch for and a website that works perfectly well, which simply does not come up when someone asks an assistant who they should use.</p>
-      <p class="alr-lead" style="margin-top:18px">Nothing was broken in the way anyone had been trained to look for. Nobody had made a mistake. The business was just difficult for a machine to understand, or difficult to verify, or absent from the handful of sources the machine happened to trust for that question. Meanwhile a competitor that was not obviously better at the actual job was being named every time.</p>
-      <p class="alr-lead" style="margin-top:18px">That gap is what Answered Labs was built around. Not the promise of gaming a model, which is not a thing, but the much less exciting work of making a business easy to find, easy to understand and easy to have confidence in.</p>
+      <p class="alr-lead" style="margin-top:22px">A business can be genuinely excellent and still be almost invisible in AI-driven discovery. We kept seeing the same pattern: a company with real customers, real expertise, a strong service, a good reputation and a perfectly capable website simply would not appear when someone asked an AI assistant who they should use.</p>
+      <p class="alr-lead" style="margin-top:18px">Usually, the problem was not that the business was weak. The problem was that the evidence available to the system did not reflect the quality of the business clearly enough.</p>
+      <p class="alr-lead" style="margin-top:18px">Its services might be described vaguely. Important information might conflict across the website, business profiles and third-party listings. The company might be absent from sources that repeatedly appear around the relevant questions. Its reputation might be obvious to existing customers but poorly represented in the places an AI system can retrieve and verify.</p>
+      <p class="alr-lead" style="margin-top:18px">Meanwhile, a competitor that was not obviously better at the actual work could appear again and again because the web made that business easier to understand and easier to substantiate.</p>
+      <p class="alr-lead" style="margin-top:18px">That gap is what Answered Labs was built around. Not trying to game a model, but doing the more durable work of making a business legible across the web: clear about what it does, consistent wherever it appears, supported by credible evidence and measurable across the questions customers actually ask.</p>
       <div class="alr-pull">
         <p>Being good at the work and being findable are two different problems. Plenty of businesses have solved the first one and assumed it would take care of the second.</p>
       </div>
@@ -25,41 +27,81 @@ GAP = """<section class="alr-section alr-section--white">
 
 
 FOUNDERS = [
-    ("taliesin-kauffmann", "Taliesin Kauffmann", "Co-founder"),
-    ("emerson-kauffmann", "Emerson Kauffmann", "Co-founder"),
+    (
+        "taliesin-kauffmann",
+        "Taliesin Kauffmann",
+        "Co-founder",
+        "Taliesin works across AI discovery, positioning and go-to-market strategy, "
+        "with a focus on how businesses become the answer in both conventional search "
+        "and AI systems. Before Answered Labs he worked in strategy consulting and "
+        "product marketing at technology companies including Seal and Vertice, shaping "
+        "positioning, launching AI and software products, and turning complex technical "
+        "capabilities into clear commercial narratives. At Answered Labs his work sits "
+        "at the intersection of AEO, SEO and product strategy: defining how a company "
+        "should be understood by search and AI systems, then turning that into the "
+        "structured content and positioning customers actually evaluate.",
+    ),
+    (
+        "emerson-kauffmann",
+        "Emerson Kauffmann",
+        "Co-founder",
+        "Emerson works on the technical foundation of search and AI visibility: how "
+        "websites are built, structured and interpreted by search engines and AI "
+        "systems. His work spans AEO, SEO, web development and software "
+        "implementation, with an emphasis on the underlying mechanics that decide "
+        "whether content is discoverable at all. At Answered Labs he is responsible "
+        "for translating strategy into execution, making sure site architecture, "
+        "structured content, performance and technical SEO all support how information "
+        "is surfaced and understood. His focus is on making visibility something that "
+        "is engineered rather than assumed.",
+    ),
 ]
+
+SYNTHESIS = (
+    "Together, that gives Answered Labs a view of the problem from both sides: what a "
+    "business needs to say and prove to become a credible answer, and how the "
+    "underlying website and technical systems make that information discoverable in "
+    "the first place."
+)
 
 
 def founders():
     cards = []
-    for anchor, name, role in FOUNDERS:
+    for anchor, name, role, bio in FOUNDERS:
         cards.append(
             """<div class="alr-founder alr-rv">
       <h3 class="alr-founder-name" id="{anchor}">{name}</h3>
       <p class="alr-founder-role">{role}</p>
-    </div>""".format(anchor=anchor, name=esc(name), role=esc(role))
+      <p>{bio}</p>
+    </div>""".format(
+                anchor=anchor, name=esc(name), role=esc(role), bio=esc(bio)
+            )
         )
-    return """<section class="alr-section alr-section--paper">
+    return """<section class="alr-section alr-section--paper alr-who">
   <div class="alr-wrap">
-    <div style="max-width:48ch;margin-bottom:clamp(32px,4.5vw,56px)">
+    <div class="alr-who-head">
       <p class="alr-eyebrow">Who we are</p>
-      <h2 class="alr-h2">Two people, so far</h2>
+      <h2 class="alr-h2">Built across strategy, content and technology.</h2>
     </div>
     <div class="alr-founders">{cards}</div>
-    <p class="alr-small" style="max-width:52ch;margin-top:clamp(36px,5vw,64px)">We have kept this short on purpose. A list of previous job titles would not tell you much about whether we can help, and we would rather be judged on the research and the writing further down this page.</p>
+    <p class="alr-who-synthesis">{synthesis}</p>
   </div>
-</section>""".format(cards="".join(cards))
+</section>""".format(cards="".join(cards), synthesis=esc(SYNTHESIS))
 
 
 NOTE = """<section class="alr-section alr-section--white">
   <div class="alr-wrap">
     <div class="alr-measure">
-      <p class="alr-eyebrow">A note from us</p>
+      <p class="alr-eyebrow">Our position</p>
       <div class="alr-note alr-rv" style="margin-top:20px">
-        <p>Answer engine optimization is a very young category, and it currently has more confident language in it than evidence. You can find a great deal of advice about getting recommended by AI, some of it sensible, much of it asserted with a certainty nobody has earned yet. Very little of it comes with a method attached.</p>
-        <p>We would like to work differently, and we are writing this down partly to hold ourselves to it. Test things. Measure them properly, against a fixed set of questions rather than a flattering one. Publish what we find, including the parts that are inconvenient or dull. Apply what holds up to client work, and let that work generate the next set of questions.</p>
-        <p>Some of what we currently believe will turn out to be wrong. These systems change without announcement, and a finding from this quarter may not survive the next one. When that happens we would rather say so than quietly update a page. Where we are unsure, we will tell you we are unsure.</p>
-        <p>What we are confident about is narrower and more boring than the category's usual pitch: businesses that are easy to find, clearly described and independently vouched for tend to do better in these systems than businesses that are not. Most of our work is the unglamorous business of closing that distance.</p>
+        <p>Answer engine optimization is a young category, and confidence has moved faster than evidence.</p>
+        <p>A lot of what is sold as AEO today is familiar SEO work with a new label: the same audits, the same content programmes and the same authority tactics, with ChatGPT added to the presentation. Much of that work can still be useful. Strong search visibility, good technical foundations and genuinely useful content all matter. But calling conventional SEO “AEO” does not address what has actually changed.</p>
+        <p>Generated answers introduce a different set of questions. Is the business being retrieved at all? Does the system understand what it does and where it operates? Which sources are being used to verify it? Is the business cited but never named? Does it appear in ChatGPT but disappear in Gemini? Does the answer change when the wording, location or retrieval path changes? Those are not questions a conventional rank report can answer.</p>
+        <p>Answered Labs was built around measuring those things directly.</p>
+        <p>We test real customer questions across the systems people actually use. We record who appears, who does not, which sources are cited and how those patterns change over time. We compare that with search visibility, website structure, entity consistency, reputation and the wider evidence available across the web. Then we use the findings to decide what should change.</p>
+        <p>That matters because AEO should not be a checklist of tactics borrowed from SEO and assumed to work everywhere. It should be an evidence-led discipline. Test the question. Measure the baseline. Understand why competitors are appearing. Make the changes that address the actual problem. Run the same test again.</p>
+        <p>The systems themselves will keep changing. Models update, retrieval behaviour shifts and sources that matter today may matter differently next year. Our approach is built for that reality. We do not need the underlying systems to remain static, because the work is measured against what they are actually doing now.</p>
+        <p>What does remain remarkably consistent is the foundation: businesses perform better when they are easy to discover, clearly described, technically accessible, supported by credible information and consistently represented across the web. Our job is to identify where that chain breaks, fix it, and measure whether the business becomes more visible as a result.</p>
         <div class="alr-sig">
           <b>Taliesin Kauffmann</b> and <b>Emerson Kauffmann</b><br>Co-founders, Answered Labs
         </div>
@@ -131,11 +173,13 @@ BUILDING = """<section class="alr-section alr-section--white">
 
 def build():
     body = (
-        hero(
-            "About Answered Labs",
-            "We built Answered Labs for the way people find businesses&nbsp;now.",
-            "For years, online discovery meant searching, scanning a page of links and choosing where to click. Increasingly, customers ask AI systems what to buy, where to go, who to hire and which companies they should trust. Answered Labs exists to help businesses become easier to find, understand and recommend in that environment.",
-        )
+        """<section class="alr-section alr-section--white alr-about-hero">
+  <div class="alr-wrap">
+    <p class="alr-eyebrow">About Answered Labs</p>
+    <h1 class="alr-display">We built Answered Labs for the way people find businesses&nbsp;now.</h1>
+    <p class="alr-dek">For years, online discovery meant searching, scanning a page of links and deciding where to click. Increasingly, customers ask AI systems what to buy, where to go, who to hire and which companies they should trust. That changes what it means to be findable. It is no longer enough for a business to have a good website or rank well for a handful of searches. AI systems have to understand what the business does, connect it to the right questions, find evidence that supports it and have enough confidence to include it in an answer. Answered Labs exists to help businesses become easier to find, understand, verify and recommend in that environment.</p>
+  </div>
+</section>"""
         + GAP
         + founders()
         + NOTE

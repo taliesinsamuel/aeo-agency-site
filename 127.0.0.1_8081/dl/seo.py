@@ -1094,6 +1094,7 @@ def indexable_urls() -> list[str]:
         abs_url("/research"),
         abs_url("/insights"),
         abs_url("/about"),
+        abs_url("/insights/what-makes-ai-cite-a-page"),
         abs_url("/insights/what-is-answer-engine-optimization"),
         abs_url("/insights/how-to-improve-visibility-in-chatgpt"),
         abs_url("/insights/how-ai-recommends-local-businesses"),

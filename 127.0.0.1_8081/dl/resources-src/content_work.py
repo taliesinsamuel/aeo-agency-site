@@ -87,7 +87,7 @@ def bars(result):
 
 def lead_result(r):
     """The opening figure gets the most space on the page."""
-    return """<section class="alr-section alr-section--white">
+    return """<section class="alr-section alr-section--white" style="padding-top:0">
   <div class="alr-wrap">
     <div class="alr-stat-hero alr-rv">
       <div>
@@ -180,7 +180,7 @@ BEHIND = """<section class="alr-section alr-section--paper">
       </ul>
       <div class="alr-callout alr-callout--note">
         <p class="alr-callout-title">Worth saying plainly</p>
-        <p>We cannot guarantee a position in an AI answer, and neither can anyone else. These systems are probabilistic, they change without notice, and the same question can return different companies on different days. What can be done is to make a business a much more likely answer, and then to watch whether that is happening.</p>
+        <p>No one can guarantee a fixed position in an AI answer because these systems are probabilistic and constantly changing. What we can do is materially improve the likelihood that a business is found, understood and recommended, then measure that progress across a consistent set of real customer questions.</p>
       </div>
     </div>
   </div>
@@ -238,7 +238,7 @@ def framework():
   <div class="alr-wrap">
     <div style="max-width:56ch;margin-bottom:clamp(28px,4vw,48px)">
       <p class="alr-eyebrow">How we measure</p>
-      <h2 class="alr-h2">Six things we track, in this order</h2>
+      <h2 class="alr-h2">Six metrics we track, in this order</h2>
       <p class="alr-dek">Each one answers a different question, and the last one is the only one that pays for the others.</p>
     </div>
     <div class="alr-deflist">{rows}</div>
@@ -324,11 +324,6 @@ def build(proof):
             "Work",
             "Visibility you can&nbsp;measure.",
             "Answered Labs improves how businesses are understood, surfaced and recommended across search and AI-driven discovery. We track progress across recommendation presence, citation visibility, organic search, website discovery and the commercial actions that follow.",
-            extra="""<div class="alr-strip" style="margin-top:36px;max-width:44rem">
-      <span class="alr-strip-item">Measured across <b>5</b> assistants</span>
-      <span class="alr-strip-item">Prompt sets of <b>100+</b> questions</span>
-      <span class="alr-strip-item">Re-run <b>monthly</b></span>
-    </div>""",
         )
         + lead_result(results[0])
         + """<section class="alr-section alr-section--white" style="padding-top:0">
