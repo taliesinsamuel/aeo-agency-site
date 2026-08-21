@@ -1,4 +1,6 @@
 <style id="aeo-book-style">
+/* Pale-blue field: Book a call eyebrow only. Do not touch .aeo-pill globally. */
+.aeo-book-head>.aeo-pill{background:#fff;color:#1c1d1f}
 .aeo-book-wrap{max-width:820px;margin:0 auto}
 .aeo-book-head{text-align:center;margin-bottom:clamp(28px,3.6vw,40px)}
 .aeo-book-head h1{font-family:"Inter Display",Inter,sans-serif;font-weight:600;font-size:clamp(30px,4vw,44px);line-height:1.08;letter-spacing:-.028em;margin:0 0 10px;color:var(--aeo-ink);text-wrap:balance}

@@ -409,22 +409,35 @@
     ambientRetarget:0.55,    // gentle field-wide tonal drift
     ambientLerp:1.35,        // slower ease → smoother gradation
     cursorRadius:125,        // tighter local influence (~34% smaller)
-    maxDisplace:18,          // restrained bend — lattice stays legible
+    maxDisplace:16.5,        // restrained bend — lattice stays legible
     springK:0.045,           // a touch tighter than the chaotic pass
-    damping:0.940,           // ~12% softer recovery / less jitter
+    damping:0.928,           // settles a little faster after fast cursor moves
     coupleK:0.055,           // light mesh coupling — no liquid waves
-    repulse:1.7,             // gentler part-around-cursor
-    impulseK:0.00019,        // slightly softer wake impulses
+    repulse:1.55,            // gentler part-around-cursor
+    impulseK:0.00016,        // slightly softer wake impulses
+    impulseSpeedCap:2400,    // px/s beyond which momentum stops scaling up
     trailLen:4,              // short, restrained trail
     trailDecay:0.42,         // older samples die quickly
     wakeMaxSpeed:1600,       // needs faster motion before wake boosts
     wakeRadiusBoost:0.18,    // modest radius bloom when moving fast
-    wakeDisplaceBoost:0.22,  // modest displace bloom
+    wakeDisplaceBoost:0.18,  // modest displace bloom
     settleEps:0.025,
     pointerSmooth:1.35,      // light position lag (~10–15% smoother, not mushy)
     velSmooth:1.05,          // soften abrupt velocity / direction flips
     alphaBins:40             // finer grayscale steps for tonal smoothness
   };
+
+  /* Color variant is opted in by secondary pages only
+     (parts/sqfield_pale.frag). Homepage never sets this, so CFG,
+     clip, and performance stay exactly as they are on /. */
+  var pale=false;
+  try{
+    var _v=window.__aeoSqFieldVariant;
+    if(_v&&_v.id==="pale-blue"){
+      pale=true;
+      if(_v.color)CFG.color=_v.color;
+    }
+  }catch(e){}
 
   function clamp(v,a,b){return v<a?a:(v>b?b:v);}
   function rand(a,b){return a+Math.random()*(b-a);}
@@ -756,6 +769,9 @@
           sampleForce(cx,cy,mouse.x,mouse.y,effR*1.2,_sf);
           if(_sf.g>0){
             impulseScale=CFG.impulseK*_sf.g*(0.3+0.7*wake)*tick;
+            // Past the cap, momentum stops growing with speed so a fast flick
+            // can't shove neighbours through each other.
+            if(spd>CFG.impulseSpeedCap)impulseScale*=CFG.impulseSpeedCap/spd;
             fx+=mouse.vx*impulseScale;
             fy+=mouse.vy*impulseScale;
             far=false;
@@ -845,25 +861,31 @@
   var resizeT=null;
   function onResize(){
     if(resizeT)clearTimeout(resizeT);
-    resizeT=setTimeout(function(){buildField();measureBounds();draw();},150);
+    resizeT=setTimeout(function(){buildField();if(!pale)measureBounds();draw();},150);
   }
   window.addEventListener("resize",onResize);
 
   buildField();
-  var boot=0,bootIv=setInterval(function(){
-    measureBounds();
-    if(++boot>60)clearInterval(bootIv); // ~15s of settling: async section mounts + pin resizing
-  },250);
+  if(pale){
+    boundsReady=true;
+  }else{
+    var boot=0,bootIv=setInterval(function(){
+      measureBounds();
+      if(++boot>60)clearInterval(bootIv); // ~15s of settling: async section mounts + pin resizing
+    },250);
+  }
 
   var lastT=performance.now();
   function frame(now){
     requestAnimationFrame(frame);
-    if(!boundsReady)return;
-    var sy=window.pageYOffset||document.documentElement.scrollTop||0;
-    var vh=window.innerHeight;
-    var heroVY=bounds.heroTop-sy, endVY=bounds.endTop-sy;
-    if(endVY<=0||heroVY>=vh){lastT=now;return;} // fully out of view
-    applyClip(heroVY,endVY,vh);
+    if(!pale){
+      if(!boundsReady)return;
+      var sy=window.pageYOffset||document.documentElement.scrollTop||0;
+      var vh=window.innerHeight;
+      var heroVY=bounds.heroTop-sy, endVY=bounds.endTop-sy;
+      if(endVY<=0||heroVY>=vh){lastT=now;return;} // fully out of view
+      applyClip(heroVY,endVY,vh);
+    }
 
     var dt=Math.min(0.033,(now-lastT)/1000);
     lastT=now;
@@ -1884,6 +1906,9 @@ html.aeo-nav-open .alr-hdr-sticky{z-index:110}
       var a=as[i],h=a.getAttribute("href")||"";
       if(!h)continue;
       if(/^(#|mailto:|tel:)/.test(h))continue;
+      // Insights citations already point at the supporting study. Do not
+      // rewrite them onto an Answered Labs URL.
+      if(a.closest&&a.closest(".alr-article,.alr-sources,.alr-fig,.alr-keyfind"))continue;
       if(/^(?:\.\/|#|\/(?:pricing|free-audit|contact|book|privacy|terms|assets|work|research|insights|about)(?:\/|$|\?|#)|pricing\.html|contact\.html|book\.html|privacy\.html|terms\.html|index\.html|work\.html|research\.html|insights\.html|about\.html)/.test(h))continue;
       if(h.indexOf("./#")===0||h.indexOf("/#")===0)continue;
       // Never rewrite third-party integration destinations

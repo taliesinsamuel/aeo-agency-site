@@ -1,5 +1,13 @@
 <style id="aeo-pricing-style">
-.aeo-subpage .aeo-plat-inner{padding-top:clamp(120px,14vw,170px)}
+/* Pale-blue field: Pricing + FAQ as text-only labels. Most popular stays a pill. */
+.aeo-plat-intro>.aeo-pill,
+.aeo-faq-h>.aeo-pill{
+  background:transparent;
+  color:var(--aeo-accent-ink);
+  border:none;
+  box-shadow:none;
+}
+.aeo-subpage .aeo-plat-inner{padding-top:clamp(70px,8vw,100px)}
 .aeo-price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch}
 /* Surface matches homepage .aeo-card inset stroke + panel elevation (--aeo-sh-4). */
 .aeo-price{

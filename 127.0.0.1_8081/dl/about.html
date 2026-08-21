@@ -830,6 +830,9 @@ html.aeo-nav-open .alr-hdr-sticky{z-index:110}
       var a=as[i],h=a.getAttribute("href")||"";
       if(!h)continue;
       if(/^(#|mailto:|tel:)/.test(h))continue;
+      // Insights citations already point at the supporting study. Do not
+      // rewrite them onto an Answered Labs URL.
+      if(a.closest&&a.closest(".alr-article,.alr-sources,.alr-fig,.alr-keyfind"))continue;
       if(/^(?:\.\/|#|\/(?:pricing|free-audit|contact|book|privacy|terms|assets|work|research|insights|about)(?:\/|$|\?|#)|pricing\.html|contact\.html|book\.html|privacy\.html|terms\.html|index\.html|work\.html|research\.html|insights\.html|about\.html)/.test(h))continue;
       if(h.indexOf("./#")===0||h.indexOf("/#")===0)continue;
       // Never rewrite third-party integration destinations

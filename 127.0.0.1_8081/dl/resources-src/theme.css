@@ -143,17 +143,18 @@
    PAGE SHELL — replicates the commercial header/footer chrome so a
    Resources page is visually continuous with the rest of the site.
    Values are lifted from the live header: 1px #e4e7ec bottom rule,
-   95% white, sticky at z-index 92, 1200px container.
+   solid white, sticky at z-index 92, 1200px container.
    ============================================================ */
 .alr-hdr-sticky {
   position: sticky;
   top: 0;
   z-index: 92;
+  background: #fff;
 }
 header.alr-hdr {
   position: relative;
   border-bottom: 1px solid #e4e7ec;
-  background: rgba(255, 255, 255, 0.95);
+  background: #fff;
 }
 .alr-hdr-inner {
   width: 100%;

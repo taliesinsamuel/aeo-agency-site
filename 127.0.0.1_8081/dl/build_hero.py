@@ -432,6 +432,8 @@ STORY = open("parts/story.frag", encoding="utf-8").read()
 HEROGRID = open("parts/hero_grid.frag", encoding="utf-8").read()
 # Secondary-page-only floating square field (never injected on home).
 FLOATFIELD = open("parts/float_field.frag", encoding="utf-8").read()
+# Pale-blue color variant of the homepage lattice — pricing / free-audit / book only.
+SQFIELD_PALE = open("parts/sqfield_pale.frag", encoding="utf-8").read()
 
 import seo as aeo_seo
 
@@ -456,9 +458,10 @@ def build_page(fname, page_key, frag_path):
     page = page.replace("Start for free", "Get your free audit")
     page = page.replace("Talk to sales", "Book a call")
     frag = open(frag_path, encoding="utf-8").read()
-    # ANALYTICS + CHROME + FLOATFIELD + page content. Homepage build above never
-    # receives FLOATFIELD - keeps home square field untouched.
-    page = page.replace("</body>", ANALYTICS + CHROME + FLOATFIELD + frag + "</body>", 1)
+    # Homepage lattice + pale-blue color variant. FLOATFIELD is not injected
+    # here — 404 / privacy / terms still use it via build_meta_page().
+    # Homepage build above never receives SQFIELD_PALE.
+    page = page.replace("</body>", ANALYTICS + CHROME + SQFIELD_PALE + HEROGRID + frag + "</body>", 1)
     page = apply_favicons(page)
     page = fix_next_asset_paths(page)
     page = aeo_seo.apply_page_seo(page, page_key)

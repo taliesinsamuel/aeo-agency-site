@@ -1055,6 +1055,9 @@ html.aeo-nav-open .alr-hdr-sticky{z-index:110}
       var a=as[i],h=a.getAttribute("href")||"";
       if(!h)continue;
       if(/^(#|mailto:|tel:)/.test(h))continue;
+      // Insights citations already point at the supporting study. Do not
+      // rewrite them onto an Answered Labs URL.
+      if(a.closest&&a.closest(".alr-article,.alr-sources,.alr-fig,.alr-keyfind"))continue;
       if(/^(?:\.\/|#|\/(?:pricing|free-audit|contact|book|privacy|terms|assets|work|research|insights|about)(?:\/|$|\?|#)|pricing\.html|contact\.html|book\.html|privacy\.html|terms\.html|index\.html|work\.html|research\.html|insights\.html|about\.html)/.test(h))continue;
       if(h.indexOf("./#")===0||h.indexOf("/#")===0)continue;
       // Never rewrite third-party integration destinations
@@ -1691,688 +1694,632 @@ html.aeo-nav-open .alr-hdr-sticky{z-index:110}
 })();
 </script>
 <!-- End of HubSpot Embed Code -->
-<style id="aeo-floatfield-style">
+<style id="aeo-sqfield-pale-style">
 /* ============================================================
-   FLOATING SQUARE FIELD — secondary pages only
+   SQUARE FIELD — pale-blue color variant
    ------------------------------------------------------------
-   Dispersed, independently drifting monochrome squares on a white
-   canvas. Visual language matches the homepage square field
-   (size, flat fill, grayscale alphas) but physics are autonomous
-   agents — not a rigid matrix. Injected only via build_page();
-   never mounts on the homepage.
+   Injected only on /pricing, /free-audit, and /book. The lattice
+   itself is the homepage field (hero_grid.frag). This fragment
+   only recolors the ground, lifts the page shell so the canvas
+   can sit at z-index 0 (same layering the old float field used),
+   and opts the shared script into the pale-blue variant.
+   Homepage never loads this file.
    ============================================================ */
 
-/* Fixed viewport canvas under page content. On secondary pages the
-   Attio shell paints an opaque body background that hides z-index:-1
-   layers, so the canvas sits at z-index:0 and the page shell is lifted
-   above it. Dark bands keep their own opaque fills and cover the field. */
-html{background:#fff}
-body{background-color:transparent!important}
-
-#aeo-floatfield{
-  position:fixed;left:0;top:0;width:100%;height:100%;
-  z-index:0;display:block;pointer-events:none;
+/* Featured Insights cover ground: theme.css .alr-cover */
+html.aeo-sqfield-pale{
+  background:#f2f5fb;
+  background-image:linear-gradient(160deg,#f2f5fb,#e8eef8);
 }
+html.aeo-sqfield-pale body{background-color:transparent!important}
 
-/* Lift the Attio page shell (and footer) above the canvas without
-   changing content styling — position/z-index only. */
-body > div.flex,
-.aeo-foot{
+/* Attio's opaque body would hide z-index:-1; match the prior
+   secondary-page stack (canvas at 0, shell above it). */
+html.aeo-sqfield-pale #aeo-sqfield{z-index:0}
+html.aeo-sqfield-pale body > div.flex,
+html.aeo-sqfield-pale .aeo-foot{
   position:relative;
   z-index:1;
 }
 
 /* Open the light subpage shell so the fixed canvas shows through.
    Cards, forms, FAQ rows, and dark bands keep their own surfaces. */
-.aeo-subpage.aeo-plat{background:transparent!important}
+html.aeo-sqfield-pale .aeo-subpage.aeo-plat{background:transparent!important}
 
 /* Ensure intentionally dark regions remain opaque above the field. */
-.aeo-cta-band,.aeo-foot{isolation:isolate}
+html.aeo-sqfield-pale .aeo-cta-band,
+html.aeo-sqfield-pale .aeo-foot{isolation:isolate}
 </style>
-<script id="aeo-floatfield-script">
+<script>
+document.documentElement.classList.add("aeo-sqfield-pale");
+/* Color is --al-accent-ink / Featured cover --alf-rgb. */
+window.__aeoSqFieldVariant={id:"pale-blue",color:"36, 91, 194"};
+</script>
+<style id="aeo-sqfield-style">
+/* ============================================================
+   SQUARE FIELD — one continuous interactive background
+   ------------------------------------------------------------
+   Replaces the old hero-only grey mesh with a single dense field
+   of tiny monochrome square cells that spans the hero through the
+   stacked cards and the "From invisible to recommended in 90 days"
+   process section — then stops immediately before the metrics
+   band (#aeo-stats). All of the field math lives in the script
+   below; this stylesheet only removes Attio's old hero background
+   layers, opens up the section backgrounds this field needs to
+   show through, and positions the single canvas.
+   ============================================================ */
+
+/* Attio's three hero-background layers, matched by distinctive
+   fragments of their own inline style/class strings so the exact
+   same repeating-linear-gradient pattern reused elsewhere on the
+   page (e.g. the footer CTA band) is left completely alone — this
+   only fires inside .aeo-hero, and only for these three layers. */
+.aeo-hero [style*="90% 80% at 50% 100%"],
+.aeo-hero [class*="repeating-linear-gradient(90deg"],
+.aeo-hero [style*="106.6667% at 50% 0%"]{display:none!important}
+
+/* Mobile Attio scene (md:hidden) ships an opaque primary-background
+   wash at absolute inset-0. That layer sits above the shared square
+   field and made the mobile hero look plain white. Open it so the
+   existing #aeo-sqfield canvas shows through (desktop path unchanged). */
+.aeo-hero .absolute.inset-0.bg-primary-background{background:transparent!important}
+
+/* Opaque section backgrounds would sit in front of the single
+   fixed, page-level canvas no matter how negative its z-index.
+   Opening these boxes (flat white/surface at rest) lets one shared
+   canvas read as continuous behind the whole pre-metrics region.
+   #aeo-story is already transparent; #aeo-stats keeps its dark band. */
+.aeo-hero,#aeo-platform,#aeo-process,.aeo-proc{background:transparent!important}
+
+#aeo-sqfield{position:fixed;left:0;top:0;width:100%;height:100%;z-index:-1;display:block;pointer-events:none}
+</style>
+<script id="aeo-sqfield-script">
 (function(){
-  if(window.__aeoFloatFieldBooted)return;
-  // Hard guard: never run if the homepage square field is present.
-  if(window.__aeoSqFieldBooted||document.getElementById("aeo-sqfield"))return;
-  // Privacy / Terms use a continuous dark legal canvas — no starfield.
-  try{
-    var path=(location.pathname||"").toLowerCase();
-    if(/\/(privacy|terms)(\.html)?\/?$/.test(path)||document.documentElement.classList.contains("aeo-legal-page"))return;
-  }catch(e){}
-  window.__aeoFloatFieldBooted=true;
+  if(window.__aeoSqFieldBooted)return;
+  window.__aeoSqFieldBooted=true;
 
   var reduce=false; try{reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;}catch(e){}
+  // "fine" = a real mouse/trackpad. Touch devices only ever get the
+  // ambient flicker — no repulsion physics, and no listeners that could
+  // fight a scroll gesture.
   var fine=true; try{fine=window.matchMedia("(pointer:fine)").matches;}catch(e){}
 
-  /* Visual constants — density/size/physics stay independent.
-     Non-home: homepage tonal ladder (hero_grid.frag); sparkle timing stays non-home. */
+  /* Every tunable the field depends on, in one place.
+     Physics gains below are framed as per-tick@60fps values and scaled
+     by dt*60 inside the integrator so behaviour stays stable across rates. */
   var CFG={
-    size:4.0,
+    spacingDesktop:8.5,      // px between cell centers, viewport >=1024
+    spacingTablet:9.2,       // 768-1023
+    spacingMobile:10.0,      // <768
+    size:4.0,                // px, square side
     color:"0,0,0",
-    // Non-home only: slightly denser + a touch darker than before.
-    // Size/physics/sparkle timing unchanged. Homepage uses hero_grid.frag.
-    aMin:0.034,aMax:0.082,   // majority — a bit darker still
-    aMidMin:0.072,aMidMax:0.135, // light-medium band
-    aRareMin:0.17,aRareMax:0.26, // soft charcoal accents only
-    aBlackMin:0.17,aBlackMax:0.26, // charcoal tier (kept ≤ aCeil)
-    midChance:0.22,
-    rareChance:0.11,
-    blackChance:0.06,
-    aCeil:0.26,
-    // Sparkle — timing/rate unchanged; peak shades use palette above
-    sparkleSpawn:1.35,
-    sparkleDurMin:0.42,
-    sparkleDurMax:0.95,
-    ambientLerp:1.45,
-    // Density — slightly fewer than last pass; still above original
-    areaPerParticle:600,
-    countMin:1100,
-    countMax:2300,
-    // Ambient drift (px/s) — unchanged idle look/feel
-    driftMin:22,
-    driftMax:42,
-
-    /* ---- CURSOR FLOW FIELD (interaction only) ----
-       Strong LOCAL pull + fast response. Moving >> stationary.
-       Visual/idle CFG above stays locked. */
-    // Dynamic influence radius (viewport px)
-    radiusStill:190,
-    radiusMove:320,
-    energyForMaxRadius:170, // moderate speed → near-full moving field
-    // Personal orbit offsets — loose irregular cloud, center open
-    spaceMin:52,
-    spaceMax:150,
-    // Per-particle variety
-    massMin:0.7,
-    massMax:2.1,
-    // Base inertial steering toward desired velocity (1/s)
-    steerMin:4.0,
-    steerMax:7.5,
-    // Extra steering boost while under local cursor influence (1/s)
-    cursorSteerBoost:12.0,
-    // Desired flow toward personal offset (px/s) — still vs moving
-    flowStill:55,
-    flowMove:310,
-    // Modest capped radial accel toward personal offset (px/s²)
-    radialAccelStill:90,
-    radialAccelMove:320,
-    // How much autonomous velocity is retained under influence
-    autoRetainMin:0.08,
-    autoRetainMax:0.28,
-    // Inherit smoothed cursor velocity as local current
-    velInheritMin:0.38,
-    velInheritMax:0.78,
-    // Subtle tangential — secondary to inward attraction
-    tangStill:0.16,
-    tangMove:0.28,
-    // Soft outward push near exact pointer center
-    centerClear:38,
-    centerPush:58,
-    // Presence fade when pointer enters/leaves page (1/s)
-    influenceFadeIn:14.0,
-    influenceFadeOut:8.0,
-    // Pointer smoothing (1/s) — responsive, not laggy
-    ptrSmooth:28,
-    ptrVelSmooth:16,
-    energySmoothUp:18,
-    energySmoothDown:4.0,
-    // Strength: controlled when still, powerful when moving
-    strengthStill:0.42,
-    strengthMove:1.15,
-    speedCap:420,
-
-    // Soft spatial density balancing (unchanged autonomous layer)
-    densCols:6,
-    densRows:4,
-    densBiasMin:4,
-    densBiasMax:11,
-    densRetargetMin:1.0,
-    densRetargetMax:3.0,
-    densUnderRatio:0.78,
-    densOverRatio:1.28,
-    alphaBins:40 // homepage tonal bin resolution
+    // Nuanced grayscale ladder — many intermediate steps, no harsh jumps.
+    // Clear step lighter: resting field sits in very light grey so copy
+    // leads; charcoal accents remain, but rarer and softer.
+    aMin:0.020,aMax:0.052,   // majority of squares — very light grey
+    aRareMin:0.14,aRareMax:0.21, // soft charcoal accents only
+    rareChance:0.08,         // fewer simultaneous dark accents
+    sparkleSpawn:0.95,       // keep current quantity of active sparkles
+    sparkleDurMin:0.38,      // linger longer through grey ladder
+    sparkleDurMax:0.85,
+    ambientRetarget:0.55,    // gentle field-wide tonal drift
+    ambientLerp:1.35,        // slower ease → smoother gradation
+    cursorRadius:125,        // tighter local influence (~34% smaller)
+    maxDisplace:16.5,        // restrained bend — lattice stays legible
+    springK:0.045,           // a touch tighter than the chaotic pass
+    damping:0.928,           // settles a little faster after fast cursor moves
+    coupleK:0.055,           // light mesh coupling — no liquid waves
+    repulse:1.55,            // gentler part-around-cursor
+    impulseK:0.00016,        // slightly softer wake impulses
+    impulseSpeedCap:2400,    // px/s beyond which momentum stops scaling up
+    trailLen:4,              // short, restrained trail
+    trailDecay:0.42,         // older samples die quickly
+    wakeMaxSpeed:1600,       // needs faster motion before wake boosts
+    wakeRadiusBoost:0.18,    // modest radius bloom when moving fast
+    wakeDisplaceBoost:0.18,  // modest displace bloom
+    settleEps:0.025,
+    pointerSmooth:1.35,      // light position lag (~10–15% smoother, not mushy)
+    velSmooth:1.05,          // soften abrupt velocity / direction flips
+    alphaBins:40             // finer grayscale steps for tonal smoothness
   };
 
-  // Pricing / Free Audit / Book only:
-  // - ~28% fewer squares (density)
-  // - proportional position remap on viewport resize (even distribution)
-  // Size, opacity, physics, sparkle, and cursor behavior stay identical.
-  // 404 and other float-field hosts keep the default CFG / resize behavior.
-  var evenResizeRemap=false;
+  /* Color variant is opted in by secondary pages only
+     (parts/sqfield_pale.frag). Homepage never sets this, so CFG,
+     clip, and performance stay exactly as they are on /. */
+  var pale=false;
   try{
-    var densPath=(location.pathname||"").toLowerCase();
-    if(/\/(pricing|contact|free-audit|book)(\.html)?\/?$/.test(densPath)){
-      var densKeep=0.72;
-      CFG.areaPerParticle=Math.round(CFG.areaPerParticle/densKeep);
-      CFG.countMin=Math.round(CFG.countMin*densKeep);
-      CFG.countMax=Math.round(CFG.countMax*densKeep);
-      evenResizeRemap=true;
+    var _v=window.__aeoSqFieldVariant;
+    if(_v&&_v.id==="pale-blue"){
+      pale=true;
+      if(_v.color)CFG.color=_v.color;
     }
   }catch(e){}
 
   function clamp(v,a,b){return v<a?a:(v>b?b:v);}
   function rand(a,b){return a+Math.random()*(b-a);}
-  function hypot(x,y){return Math.sqrt(x*x+y*y);}
-  function smoothstep(u){u=clamp(u,0,1);return u*u*(3-2*u);}
-  // Poisson-ish count from a small expected value (homepage sparkle helper)
+  // Poisson-ish count from a small expected value (avoids round-to-zero).
   function countFromRate(expected){
     var n=0;
     while(expected>=1){n++;expected-=1;}
     if(Math.random()<expected)n++;
     return n;
   }
+  function spacingFor(vw){
+    if(vw<768)return CFG.spacingMobile;
+    if(vw<1024)return CFG.spacingTablet;
+    return CFG.spacingDesktop;
+  }
 
   var canvas=document.createElement("canvas");
-  canvas.id="aeo-floatfield";
+  canvas.id="aeo-sqfield";
   canvas.setAttribute("aria-hidden","true");
   document.body.appendChild(canvas);
-  var ctx=canvas.getContext("2d",{alpha:true});
+  var ctx=canvas.getContext("2d");
 
-  var w=0,h=0,dpr=1,count=0;
-  var parts=null;
-  var half=CFG.size*0.5;
+  var w=0,h=0,dpr=1,spacing=CFG.spacingDesktop,cols=0,rows=0,offX=0,offY=0;
+  var homeX=null,homeY=null,curA=null,tgtA=null;
+  var dx=null,dy=null,vx=null,vy=null,activeFlag=null;
+  var spkT=null,spkDur=null,spkPeak=null; // sparkle envelope per cell
+  var activeList=[];
+  var binsPool=new Array(CFG.alphaBins);
+  for(var _b=0;_b<CFG.alphaBins;_b++)binsPool[_b]=null;
+  // Scratch buffers for neighbour coupling (read previous displacements).
+  var prevDx=null,prevDy=null;
 
-  var densCols=CFG.densCols, densRows=CFG.densRows;
-  var densN=densCols*densRows;
-  var densCount=new Int16Array(densN);
-  var densAvg=0;
-  var cellW=1, cellH=1;
-
-  // Pointer — viewport coords (clientX/Y) for fixed canvas
-  var ptr={x:-9999,y:-9999,active:false};
-  var ptrSmooth={x:-9999,y:-9999};
-  var ptrPrev={x:-9999,y:-9999};
-  var ptrVel={x:0,y:0};
-  var ptrEnergy=0;
-  var ptrInfluence=0;
-
-  function pickAlpha(){
-    // Homepage resting field: continuous very-light band only.
-    // Darker accents arrive via sparkle peaks (same as hero_grid).
-    return rand(CFG.aMin,CFG.aMax);
-  }
-
-  function countFor(vw,vh){
-    var n=Math.round((vw*vh)/CFG.areaPerParticle);
-    return clamp(n,CFG.countMin,CFG.countMax);
-  }
-
-  function cellIndex(x,y){
-    var cx=clamp((x/cellW)|0,0,densCols-1);
-    var cy=clamp((y/cellH)|0,0,densRows-1);
-    return cy*densCols+cx;
-  }
-
-  function cellCenter(idx,out){
-    var cx=idx%densCols, cy=(idx/densCols)|0;
-    out.x=(cx+rand(0.15,0.85))*cellW;
-    out.y=(cy+rand(0.15,0.85))*cellH;
-  }
-
-  function pickUnderCell(preferNearX,preferNearY){
-    var i,best=-1,bestScore=1e9,score,cx,cy,dx,dy;
-    var threshold=densAvg*CFG.densUnderRatio;
-    for(i=0;i<densN;i++){
-      if(densCount[i]>threshold)continue;
-      cx=i%densCols; cy=(i/densCols)|0;
-      dx=(cx+0.5)*cellW-preferNearX;
-      dy=(cy+0.5)*cellH-preferNearY;
-      score=densCount[i]*18+hypot(dx,dy)*0.04+Math.random()*12;
-      if(score<bestScore){bestScore=score;best=i;}
+  /* Shared lattice for other effects (How-it-works pixel resolve).
+     Viewport-fixed: cell centres are in CSS viewport coordinates. */
+  window.__aeoSqField={
+    size:CFG.size,
+    spacingDesktop:CFG.spacingDesktop,
+    spacingTablet:CFG.spacingTablet,
+    spacingMobile:CFG.spacingMobile,
+    spacingFor:spacingFor,
+    get:function(){
+      return {
+        size:CFG.size,
+        spacing:spacing,
+        gap:spacing-CFG.size,
+        offX:offX,
+        offY:offY,
+        cols:cols,
+        rows:rows,
+        ready:!!(homeX&&cols&&rows)
+      };
+    },
+    /* Viewport CSS centre of lattice cell (gi, gj). */
+    cellCenter:function(gi,gj){
+      return {x:offX+gi*spacing,y:offY+gj*spacing};
     }
-    if(best<0){
-      best=0;
-      for(i=1;i<densN;i++)if(densCount[i]<densCount[best])best=i;
-    }
-    return best;
-  }
+  };
 
-  function assignPersonalSpace(p){
-    // Irregular polar offset — surrounds cursor; never a perfect ring
-    var ang=rand(0,Math.PI*2);
-    var rad=rand(CFG.spaceMin,CFG.spaceMax);
-    if(Math.random()<0.4)rad*=rand(0.7,1.3);
-    p.spaceX=Math.cos(ang)*rad+rand(-16,16);
-    p.spaceY=Math.sin(ang)*rad+rand(-16,16);
-    var r0=hypot(p.spaceX,p.spaceY);
-    if(r0<CFG.spaceMin*0.88&&r0>0.001){
-      var s=(CFG.spaceMin*0.88)/r0;
-      p.spaceX*=s; p.spaceY*=s;
-    }
-  }
-
-  function makeParticle(existing){
-    var p=existing||{};
-    p.x=rand(0,w); p.y=rand(0,h);
-    p.mass=rand(CFG.massMin,CFG.massMax);
-    p.steer=rand(CFG.steerMin,CFG.steerMax);
-    p.autoRetain=rand(CFG.autoRetainMin,CFG.autoRetainMax);
-    p.velInherit=rand(CFG.velInheritMin,CFG.velInheritMax);
-    p.densBias=rand(CFG.densBiasMin,CFG.densBiasMax);
-    p.tangSign=Math.random()<0.5?-1:1;
-    p.tangAmt=rand(0.65,1.35);
-    p.response=rand(0.75,1.15); // per-particle cursor responsiveness
-    var ang=rand(0,Math.PI*2);
-    var spd=rand(CFG.driftMin,CFG.driftMax);
-    p.driftX=Math.cos(ang)*spd;
-    p.driftY=Math.sin(ang)*spd;
-    p.vx=p.driftX*(0.85+Math.random()*0.3);
-    p.vy=p.driftY*(0.85+Math.random()*0.3);
-    assignPersonalSpace(p);
-    p.densTx=p.x; p.densTy=p.y;
-    p.densTimer=rand(0.2,CFG.densRetargetMax);
-    // Homepage-style tonal state (opacity only — no motion coupling)
-    p.curA=pickAlpha();
-    p.tgtA=p.curA;
-    p.a=p.curA;
-    p.spkT=0; p.spkDur=0; p.spkPeak=0;
-    return p;
-  }
-
-  var _densPt={x:0,y:0};
-
-  // Map existing particle positions into the new viewport so density stays
-  // approximately uniform across the current width/height after resize.
-  // Avoids left/right clustering when expanding half-screen → full-screen.
-  function remapField(prevW,prevH){
-    if(!evenResizeRemap||!parts||!prevW||!prevH)return;
-    if(prevW===w&&prevH===h)return;
-    var sx=w/prevW, sy=h/prevH;
-    if(Math.abs(sx-1)<0.0005&&Math.abs(sy-1)<0.0005)return;
-    var i,p;
-    for(i=0;i<parts.length;i++){
-      p=parts[i];
-      if(!p)continue;
-      p.x*=sx; p.y*=sy;
-      p.densTx*=sx; p.densTy*=sy;
-      wrapPos(p);
-    }
-  }
-
-  function resize(){
-    var prevW=w, prevH=h;
+  function buildField(){
     dpr=Math.min(window.devicePixelRatio||1,2);
     w=window.innerWidth; h=window.innerHeight;
-    canvas.width=Math.round(w*dpr);
-    canvas.height=Math.round(h*dpr);
-    canvas.style.width=w+"px";
-    canvas.style.height=h+"px";
+    canvas.width=Math.round(w*dpr); canvas.height=Math.round(h*dpr);
+    canvas.style.width=w+"px"; canvas.style.height=h+"px";
     ctx.setTransform(dpr,0,0,dpr,0,0);
-
-    cellW=w/densCols; cellH=h/densRows;
-
-    // Remap first so kept particles span the new viewport, not the old one.
-    if(parts&&prevW>0&&prevH>0)remapField(prevW,prevH);
-
-    var next=countFor(w,h);
-    if(!parts||parts.length!==next){
-      var old=parts;
-      parts=new Array(next);
-      var i;
-      for(i=0;i<next;i++){
-        if(old&&old[i]){
-          parts[i]=old[i];
-          wrapPos(parts[i]);
-        }else{
-          parts[i]=makeParticle();
-        }
+    spacing=spacingFor(w);
+    cols=Math.ceil(w/spacing)+2; rows=Math.ceil(h/spacing)+2;
+    offX=(w-(cols-1)*spacing)/2; offY=(h-(rows-1)*spacing)/2;
+    if(window.__aeoSqField){
+      window.__aeoSqField.size=CFG.size;
+      window.__aeoSqField.spacing=spacing;
+    }
+    var n=cols*rows;
+    homeX=new Float32Array(n); homeY=new Float32Array(n);
+    curA=new Float32Array(n); tgtA=new Float32Array(n);
+    dx=new Float32Array(n); dy=new Float32Array(n);
+    vx=new Float32Array(n); vy=new Float32Array(n);
+    prevDx=new Float32Array(n); prevDy=new Float32Array(n);
+    spkT=new Float32Array(n); spkDur=new Float32Array(n); spkPeak=new Float32Array(n);
+    activeFlag=new Uint8Array(n);
+    activeList.length=0;
+    var i,j,idx,base;
+    for(j=0;j<rows;j++){
+      for(i=0;i<cols;i++){
+        idx=j*cols+i;
+        homeX[idx]=offX+i*spacing; homeY[idx]=offY+j*spacing;
+        base=rand(CFG.aMin,CFG.aMax);
+        curA[idx]=base; tgtA[idx]=base;
+        spkT[idx]=0; spkDur[idx]=0; spkPeak[idx]=0;
       }
-      count=next;
     }
   }
 
-  function wrapPos(p){
-    var m=CFG.size*3;
-    var spanX=w+2*m, spanY=h+2*m;
-    var wrapped=false;
-    if(p.x<-m){p.x+=spanX; wrapped=true;}
-    else if(p.x>w+m){p.x-=spanX; wrapped=true;}
-    if(p.y<-m){p.y+=spanY; wrapped=true;}
-    else if(p.y>h+m){p.y-=spanY; wrapped=true;}
-    if(wrapped){
-      p.densTimer=rand(0.05,0.55);
-    }
-  }
-
-  function recountDensity(){
-    var i,p,idx;
-    for(i=0;i<densN;i++)densCount[i]=0;
-    for(i=0;i<count;i++){
-      p=parts[i];
-      idx=cellIndex(p.x,p.y);
-      densCount[idx]++;
-      p.cell=idx;
-    }
-    densAvg=count/densN;
-  }
-
-  function step(dt){
-    if(!parts)return;
-    var i,p,dx,dy,dist,fall,u,mx,my,desVx,desVy,blend,steer,sp,inv;
-    var densW,ddx,ddy,dd,localFall,overfull,underNeed;
-    var toCx,toCy,cDist,tx,ty,flowAmt,tangK,energyN,radius,mix;
-    var flowVx,flowVy,tangVx,tangVy,carryVx,carryVy,arrive,radAccel;
-    var hasPtr=ptr.active&&fine&&!reduce;
-
-    // Soft cursor presence
-    var fadeT=hasPtr?CFG.influenceFadeIn:CFG.influenceFadeOut;
-    var fadeBlend=1-Math.exp(-fadeT*dt);
-    ptrInfluence+=( (hasPtr?1:0) - ptrInfluence )*fadeBlend;
-
-    var sm=1-Math.exp(-CFG.ptrSmooth*dt);
-    var speed=0;
-    mx=null; my=null;
-
-    if(ptrInfluence>0.001&&hasPtr){
-      if(ptrSmooth.x<-9000){
-        ptrSmooth.x=ptr.x; ptrSmooth.y=ptr.y;
-        ptrPrev.x=ptr.x; ptrPrev.y=ptr.y;
-        ptrVel.x=0; ptrVel.y=0;
-        ptrEnergy=0;
-      }else{
-        var rawVx=(ptr.x-ptrPrev.x)/Math.max(dt,1e-4);
-        var rawVy=(ptr.y-ptrPrev.y)/Math.max(dt,1e-4);
-        rawVx=clamp(rawVx,-900,900);
-        rawVy=clamp(rawVy,-900,900);
-        var vsm=1-Math.exp(-CFG.ptrVelSmooth*dt);
-        ptrVel.x+=(rawVx-ptrVel.x)*vsm;
-        ptrVel.y+=(rawVy-ptrVel.y)*vsm;
-        ptrPrev.x=ptr.x; ptrPrev.y=ptr.y;
-        ptrSmooth.x+=(ptr.x-ptrSmooth.x)*sm;
-        ptrSmooth.y+=(ptr.y-ptrSmooth.y)*sm;
-      }
-      mx=ptrSmooth.x; my=ptrSmooth.y;
-      speed=hypot(ptrVel.x,ptrVel.y);
-    }else if(ptrInfluence>0.001){
-      ptrVel.x*=Math.exp(-5*dt);
-      ptrVel.y*=Math.exp(-5*dt);
-      mx=ptrSmooth.x; my=ptrSmooth.y;
-      speed=hypot(ptrVel.x,ptrVel.y);
-    }else{
-      ptrSmooth.x=-9999; ptrSmooth.y=-9999;
-      ptrVel.x=0; ptrVel.y=0;
-      ptrEnergy=0;
-    }
-
-    // Continuous interaction energy from smoothed cursor speed
-    if(mx!=null){
-      var eTarget=speed;
-      var eRate=eTarget>ptrEnergy?CFG.energySmoothUp:CFG.energySmoothDown;
-      ptrEnergy+=(eTarget-ptrEnergy)*(1-Math.exp(-eRate*dt));
-    }
-
-    energyN=smoothstep(ptrEnergy/CFG.energyForMaxRadius);
-    radius=CFG.radiusStill+(CFG.radiusMove-CFG.radiusStill)*energyN;
-    var strength=CFG.strengthStill+(CFG.strengthMove-CFG.strengthStill)*energyN;
-    var flowCap=CFG.flowStill+(CFG.flowMove-CFG.flowStill)*energyN;
-    radAccel=CFG.radialAccelStill+(CFG.radialAccelMove-CFG.radialAccelStill)*energyN;
-    tangK=CFG.tangStill+(CFG.tangMove-CFG.tangStill)*energyN;
-
-    recountDensity();
-
-    var driftScale=reduce?0:1;
-    var infl=ptrInfluence;
-
-    for(i=0;i<count;i++){
-      p=parts[i];
-      localFall=0;
-
-      // LAYER 1 — autonomous drift (always on; never replaced)
-      desVx=p.driftX*driftScale;
-      desVy=p.driftY*driftScale;
-
-      // LAYER 2 — LOCAL cursor FLOW (current distance only; no capture)
-      if(infl>0.001&&mx!=null){
-        toCx=mx-p.x;
-        toCy=my-p.y;
-        cDist=hypot(toCx,toCy);
-
-        if(cDist<radius){
-          u=1-cDist/radius;
-          // Soft falloff — strong nearby, weak at edge, zero outside
-          // (single smoothstep; no extra square that killed mid-range feel)
-          fall=smoothstep(u)*infl*strength*p.response;
-          localFall=fall;
-
-          // Personal flow target around cursor (loose cloud, not center)
-          dx=(mx+p.spaceX)-p.x;
-          dy=(my+p.spaceY)-p.y;
-          dist=hypot(dx,dy);
-
-          if(dist>1){
-            inv=1/dist;
-            tx=dx*inv;
-            ty=dy*inv;
-
-            // Arrival softens only very near personal offset (avoids bounce)
-            arrive=dist/(dist+28);
-            flowAmt=flowCap*arrive;
-            flowVx=tx*flowAmt;
-            flowVy=ty*flowAmt;
-
-            // Light tangential — secondary to clear inward attraction
-            tangVx=(-ty)*p.tangSign*p.tangAmt*flowAmt*tangK;
-            tangVy=(tx)*p.tangSign*p.tangAmt*flowAmt*tangK;
-
-            // Cursor carries a local current while moving
-            carryVx=ptrVel.x*p.velInherit;
-            carryVy=ptrVel.y*p.velInherit;
-
-            // Strong mix toward cursor flow (still keeps some autonomous pass-through)
-            mix=clamp(fall*(1-p.autoRetain),0,0.96);
-            desVx=desVx*(1-mix)+(flowVx+tangVx+carryVx)*mix;
-            desVy=desVy*(1-mix)+(flowVy+tangVy+carryVy)*mix;
-
-            // Modest capped radial accel — stronger pull without spring tether
-            var pull=radAccel*fall*arrive;
-            p.vx+=tx*pull*dt;
-            p.vy+=ty*pull*dt;
-          }
-
-          // Keep pointer center relatively clear
-          if(cDist<CFG.centerClear&&cDist>0.5){
-            inv=1/cDist;
-            var push=(1-cDist/CFG.centerClear)*CFG.centerPush*fall;
-            desVx-=toCx*inv*push;
-            desVy-=toCy*inv*push;
-          }
-        }
-      }
-
-      // LAYER 3 — weak density circulation
-      densW=(1-localFall*0.88)*driftScale;
-      if(densW>0.05&&!reduce){
-        p.densTimer-=dt;
-        overfull=densCount[p.cell]>densAvg*CFG.densOverRatio;
-        underNeed=densCount[cellIndex(p.densTx,p.densTy)]>densAvg*CFG.densUnderRatio;
-        if(p.densTimer<=0||(overfull&&Math.random()<0.02)||underNeed){
-          cellCenter(pickUnderCell(p.x,p.y),_densPt);
-          p.densTx=_densPt.x; p.densTy=_densPt.y;
-          p.densTimer=rand(CFG.densRetargetMin,CFG.densRetargetMax);
-          if(Math.random()<0.55)p.densTimer+=rand(0.2,1.1);
-        }
-        ddx=p.densTx-p.x; ddy=p.densTy-p.y;
-        dd=hypot(ddx,ddy);
-        if(dd>8){
-          var need=clamp((densAvg*CFG.densUnderRatio-densCount[cellIndex(p.densTx,p.densTy)])/(densAvg+0.001),0,1.2);
-          var bias=p.densBias*(0.35+need*0.9)*densW;
-          desVx+= (ddx/dd)*bias;
-          desVy+= (ddy/dd)*bias;
-        }
-      }
-
-      // Fast velocity steering under cursor — immediate-feeling, still smooth
-      steer=(p.steer+(localFall>0.02?CFG.cursorSteerBoost*localFall:0))/p.mass;
-      blend=1-Math.exp(-steer*dt);
-      p.vx+=(desVx-p.vx)*blend;
-      p.vy+=(desVy-p.vy)*blend;
-
-      sp=hypot(p.vx,p.vy);
-      if(sp>CFG.speedCap){
-        p.vx*=CFG.speedCap/sp;
-        p.vy*=CFG.speedCap/sp;
-      }
-      if(sp<CFG.driftMin*0.35&&driftScale>0){
-        p.vx+=p.driftX*0.08;
-        p.vy+=p.driftY*0.08;
-      }
-
-      p.x+=p.vx*dt;
-      p.y+=p.vy*dt;
-      wrapPos(p);
-    }
-
-    // Homepage-matched ambient tonal drift + subtle dark sparkles (opacity only)
-    if(!reduce) updateTonal(dt);
-    else{
-      for(i=0;i<count;i++)parts[i].a=parts[i].curA;
-    }
-  }
-
-  function updateTonal(dt){
-    if(!parts||!count)return;
-    var i,p,u,s,env;
+  // ---- ambient luminance + asynchronous dark sparkles ----
+  // Idle cells stay at home; only opacity shimmer/sparkles. Positions
+  // move from cursor physics alone.
+  function updateIdle(dt){
+    var n=cols*rows,i,idx,env,u;
     var ambLerp=1-Math.exp(-CFG.ambientLerp*dt);
-
-    for(i=0;i<count;i++){
-      p=parts[i];
-      p.curA+=(p.tgtA-p.curA)*ambLerp;
-      if(p.spkDur>0){
-        p.spkT+=dt;
-        if(p.spkT>=p.spkDur){p.spkDur=0;p.spkPeak=0;p.spkT=0;}
+    for(i=0;i<n;i++){
+      curA[i]+=(tgtA[i]-curA[i])*ambLerp;
+      if(spkDur[i]>0){
+        spkT[i]+=dt;
+        if(spkT[i]>=spkDur[i]){spkDur[i]=0;spkPeak[i]=0;spkT[i]=0;}
       }
     }
-
-    // Slow ambient retargets — homepage continuous light-grey band
-    var ambPicks=countFromRate(count*0.13*dt);
+    // Slow ambient retargets — pick from a continuous grayscale band.
+    var ambPicks=countFromRate(n*0.10*dt);
     for(i=0;i<ambPicks;i++){
-      p=parts[(Math.random()*count)|0];
-      if(p.spkDur>0)continue;
-      u=Math.random();
+      idx=(Math.random()*n)|0;
+      if(spkDur[idx]>0)continue;
       // Bias toward mid-tones so the field feels layered, not binary.
-      p.tgtA=CFG.aMin+(CFG.aMax-CFG.aMin)*(u*u*0.35+u*0.65);
+      var u=Math.random();
+      tgtA[idx]=CFG.aMin+(CFG.aMax-CFG.aMin)*(u*u*0.35+u*0.65);
     }
-
-    // Sparkle spawns: same rates/rolls; peak shades = homepage palette
-    var spawns=countFromRate(count*CFG.sparkleSpawn*dt);
+    // Sparkle spawns: brief darken with smooth ease in/out.
+    var spawns=countFromRate(n*CFG.sparkleSpawn*dt);
     for(i=0;i<spawns;i++){
-      p=parts[(Math.random()*count)|0];
-      if(p.spkDur>0)continue;
-      p.spkT=0;
-      p.spkDur=rand(CFG.sparkleDurMin,CFG.sparkleDurMax);
-      var roll=Math.random();
-      if(roll<CFG.blackChance){
-        // Occasional charcoal peak — homepage aRare band (was near-black)
-        p.spkPeak=rand(CFG.aRareMin,CFG.aRareMax)-p.curA;
-      }else if(roll<CFG.blackChance+CFG.rareChance){
-        p.spkPeak=rand(CFG.aRareMin,CFG.aRareMax)-p.curA;
-      }else if(Math.random()<0.48){
-        // Mid sparkles — homepage values
-        p.spkPeak=rand(0.050,0.105);
+      idx=(Math.random()*n)|0;
+      if(spkDur[idx]>0)continue;
+      spkT[idx]=0;
+      spkDur[idx]=rand(CFG.sparkleDurMin,CFG.sparkleDurMax);
+      if(Math.random()<CFG.rareChance){
+        // Occasional charcoal peak — still eased via envelope, never near-black.
+        spkPeak[idx]=rand(CFG.aRareMin,CFG.aRareMax)-curA[idx];
+      }else if(Math.random()<0.45){
+        // Mid sparkles — visible but softer than before.
+        spkPeak[idx]=rand(0.050,0.105);
       }else{
-        // Light sparkles — homepage values
-        p.spkPeak=rand(0.020,0.060);
+        // Light sparkles — subtle flicker in the light-grey band.
+        spkPeak[idx]=rand(0.020,0.060);
       }
-      if(p.spkPeak<0.008)p.spkPeak=0.008;
-    }
-
-    for(i=0;i<count;i++){
-      p=parts[i];
-      var a=p.curA;
-      if(p.spkDur>0){
-        u=p.spkT/p.spkDur;
-        s=u*u*(3-2*u);
-        env=s*(1-s)*4;
-        a+=p.spkPeak*env;
-      }
-      if(a>CFG.aCeil)a=CFG.aCeil;
-      p.a=a;
+      if(spkPeak[idx]<0.008)spkPeak[idx]=0.008;
     }
   }
 
-  var bins=new Array(CFG.alphaBins);
-  for(var bi=0;bi<CFG.alphaBins;bi++)bins[bi]=[];
-
-  function draw(){
-    if(!parts)return;
-    ctx.clearRect(0,0,w,h);
-    var i,b,p,a,idx,list,j,n;
-    for(i=0;i<CFG.alphaBins;i++)bins[i].length=0;
-    for(i=0;i<count;i++){
-      p=parts[i];
-      a=p.a;
-      idx=(a*CFG.alphaBins/CFG.aCeil)|0;
-      if(idx<0)idx=0; if(idx>=CFG.alphaBins)idx=CFG.alphaBins-1;
-      bins[idx].push(i);
+  function cellAlpha(idx){
+    var a=curA[idx];
+    if(spkDur[idx]>0){
+      var u=spkT[idx]/spkDur[idx];
+      // Smoothstep envelope — softer shoulders than a raw sine flash.
+      var s=u*u*(3-2*u);
+      var env=s*(1-s)*4; // 0→1→0, peaked mid-life
+      a+=spkPeak[idx]*env;
     }
-    for(b=0;b<CFG.alphaBins;b++){
-      list=bins[b]; n=list.length;
-      if(!n)continue;
-      a=((b+0.5)/CFG.alphaBins)*CFG.aCeil;
-      ctx.fillStyle="rgba("+CFG.color+","+a.toFixed(3)+")";
-      ctx.beginPath();
-      for(j=0;j<n;j++){
-        p=parts[list[j]];
-        ctx.rect(p.x-half,p.y-half,CFG.size,CFG.size);
-      }
-      ctx.fill();
-    }
+    return a;
   }
 
-  // Document-level pointer tracking — canvas stays pointer-events:none
-  if(fine&&!reduce){
+  // ---- pointer tracking + short trail (physics input only) ----
+  // raw* = latest OS sample; mouse* = lightly smoothed drive for forces.
+  var rawPtr={x:-9999,y:-9999,vx:0,vy:0};
+  var mouse={x:-9999,y:-9999,active:false,vx:0,vy:0};
+  var lastMouse={x:0,y:0,t:0};
+  var wake=0;
+  var trail=new Array(CFG.trailLen);
+  var trailCount=0;
+  var trailWrite=0;
+  for(var ti=0;ti<CFG.trailLen;ti++)trail[ti]={x:0,y:0,w:0};
+
+  function pushTrail(x,y,weight){
+    trail[trailWrite].x=x; trail[trailWrite].y=y; trail[trailWrite].w=weight;
+    trailWrite=(trailWrite+1)%CFG.trailLen;
+    if(trailCount<CFG.trailLen)trailCount++;
+  }
+
+  if(fine){
     window.addEventListener("pointermove",function(e){
-      ptr.x=e.clientX; ptr.y=e.clientY; ptr.active=true;
+      var t=performance.now();
+      var mvx=0,mvy=0;
+      if(lastMouse.t){
+        var dtMs=Math.max(1,t-lastMouse.t);
+        mvx=(e.clientX-lastMouse.x)/dtMs*1000;
+        mvy=(e.clientY-lastMouse.y)/dtMs*1000;
+        var sp=Math.hypot(mvx,mvy);
+        // Ease wake up so fast flicks don't snap the force field.
+        var wakeTarget=clamp(sp/CFG.wakeMaxSpeed,0,1);
+        wake=clamp(Math.max(wake,wake+(wakeTarget-wake)*0.35),0,1);
+      }
+      lastMouse.x=e.clientX; lastMouse.y=e.clientY; lastMouse.t=t;
+      rawPtr.x=e.clientX; rawPtr.y=e.clientY; rawPtr.vx=mvx; rawPtr.vy=mvy;
+      mouse.active=true;
     },{passive:true});
     window.addEventListener("pointerdown",function(e){
-      if(e.pointerType==="mouse"||e.pointerType==="pen"){
-        ptr.x=e.clientX; ptr.y=e.clientY; ptr.active=true;
-      }
+      rawPtr.x=e.clientX; rawPtr.y=e.clientY;
+      mouse.x=e.clientX; mouse.y=e.clientY; mouse.active=true;
+      pushTrail(e.clientX,e.clientY,1);
     },{passive:true});
-    document.addEventListener("pointerleave",function(){
-      ptr.active=false;
-    });
-    window.addEventListener("blur",function(){ptr.active=false;});
+    // Leave stops *new* forces only — velocities keep decaying naturally.
+    window.addEventListener("pointerleave",function(){mouse.active=false;});
+    window.addEventListener("blur",function(){mouse.active=false;});
   }
 
-  var lastT=0, raf=0;
-  function frame(t){
-    if(!lastT)lastT=t;
-    var dt=Math.min(0.033,(t-lastT)/1000);
-    lastT=t;
-    step(dt);
-    draw();
-    raf=requestAnimationFrame(frame);
-  }
-
-  function start(){
-    resize();
-    if(reduce){
-      draw();
+  var prevTrailX=-9999,prevTrailY=-9999;
+  function smoothPointer(dt){
+    if(!fine||!mouse.active)return;
+    if(mouse.x<-9000){
+      mouse.x=rawPtr.x; mouse.y=rawPtr.y;
+      mouse.vx=rawPtr.vx; mouse.vy=rawPtr.vy;
+      prevTrailX=mouse.x; prevTrailY=mouse.y;
+      pushTrail(mouse.x,mouse.y,1);
       return;
     }
-    lastT=0;
-    raf=requestAnimationFrame(frame);
+    // Frame-rate independent exponential lerp — small lag, continuous force.
+    var pK=1-Math.exp(-CFG.pointerSmooth*60*dt);
+    var vK=1-Math.exp(-CFG.velSmooth*60*dt);
+    mouse.x+=(rawPtr.x-mouse.x)*pK;
+    mouse.y+=(rawPtr.y-mouse.y)*pK;
+    mouse.vx+=(rawPtr.vx-mouse.vx)*vK;
+    mouse.vy+=(rawPtr.vy-mouse.vy)*vK;
+    // Trail only on real motion — idle hover must not keep re-charging the wake.
+    var tdx=mouse.x-prevTrailX, tdy=mouse.y-prevTrailY;
+    if(tdx*tdx+tdy*tdy>0.64){
+      prevTrailX=mouse.x; prevTrailY=mouse.y;
+      pushTrail(mouse.x,mouse.y,1);
+    }
   }
 
-  var resizeTimer=0;
-  window.addEventListener("resize",function(){
-    clearTimeout(resizeTimer);
-    resizeTimer=setTimeout(function(){
-      resize();
-      if(reduce)draw();
-    },80);
-  });
+  function activate(idx){
+    if(!activeFlag[idx]){activeFlag[idx]=1;activeList.push(idx);}
+  }
 
-  if(document.readyState==="loading"){
-    document.addEventListener("DOMContentLoaded",start);
+  // Marks every cell within the (wake-widened) radius as active so the
+  // physics pass below picks it up — cheap because it only ever touches
+  // a small rectangle of the grid, never the whole field.
+  function markCandidates(effR){
+    var pad=effR+spacing*2;
+    var i0=clamp(Math.floor((mouse.x-pad-offX)/spacing),0,cols-1);
+    var i1=clamp(Math.ceil((mouse.x+pad-offX)/spacing),0,cols-1);
+    var j0=clamp(Math.floor((mouse.y-pad-offY)/spacing),0,rows-1);
+    var j1=clamp(Math.ceil((mouse.y+pad-offY)/spacing),0,rows-1);
+    for(var j=j0;j<=j1;j++){
+      var base=j*cols;
+      for(var i=i0;i<=i1;i++)activate(base+i);
+    }
+  }
+
+  // Expand active set by one ring so neighbour coupling can propagate
+  // a soft elastic wave without all-to-all work. Only cells with real
+  // motion seed the halo — avoids waking the entire grid.
+  function expandActiveRing(){
+    var len=activeList.length,k,idx,c,r;
+    for(k=0;k<len;k++){
+      idx=activeList[k];
+      if(Math.abs(dx[idx])<0.2&&Math.abs(dy[idx])<0.2&&
+         Math.abs(vx[idx])<0.2&&Math.abs(vy[idx])<0.2)continue;
+      c=idx%cols; r=(idx-c)/cols;
+      if(c>0)activate(idx-1);
+      if(c<cols-1)activate(idx+1);
+      if(r>0)activate(idx-cols);
+      if(r<rows-1)activate(idx+cols);
+    }
+  }
+
+  // Soft Gaussian influence from a sample point → cell.
+  function sampleForce(cx,cy,sx,sy,effR,out){
+    var ddx=cx-sx, ddy=cy-sy;
+    var d2=ddx*ddx+ddy*ddy;
+    var sig=effR*0.55;
+    var g=Math.exp(-d2/(2*sig*sig));
+    if(g<0.01){out.g=0;return;}
+    var dist=Math.sqrt(d2)||0.0001;
+    out.g=g; out.nx=ddx/dist; out.ny=ddy/dist;
+  }
+
+  var _sf={g:0,nx:0,ny:0};
+
+  // Underdamped spring + repulsion + pointer momentum + neighbour
+  // Laplacian. Displacement is continuous; nothing snaps or zeros on
+  // pointer leave — motion decays through damping alone.
+  function stepActive(dt,effR,maxD){
+    var doPush=fine&&mouse.active;
+    var farR=effR*2.6, farR2=farR*farR;
+    var tick=dt*60; // ~1 at 60fps; keeps CFG gains in per-tick units
+    var damp=Math.pow(CFG.damping,tick);
+    var i,idx,cx,cy,fx,fy,far,c,r,nCount,avgX,avgY,mag,s;
+    var tIdx,tq,impulseScale,spd,push;
+
+    // Snapshot displacements for stable neighbour reads this frame.
+    for(i=0;i<activeList.length;i++){
+      idx=activeList[i];
+      prevDx[idx]=dx[idx]; prevDy[idx]=dy[idx];
+    }
+
+    // One-cell halo so coupling can carry a soft ripple outward.
+    if(doPush||activeList.length)expandActiveRing();
+
+    i=0;
+    while(i<activeList.length){
+      idx=activeList[i];
+      cx=homeX[idx]+dx[idx]; cy=homeY[idx]+dy[idx];
+
+      // Soft spring home — lower strength, longer recovery.
+      fx=-CFG.springK*dx[idx];
+      fy=-CFG.springK*dy[idx];
+
+      // Lightweight discrete Laplacian vs 4-neighbours (elastic fabric).
+      c=idx%cols; r=(idx-c)/cols;
+      nCount=0; avgX=0; avgY=0;
+      if(c>0){avgX+=prevDx[idx-1];avgY+=prevDy[idx-1];nCount++;}
+      if(c<cols-1){avgX+=prevDx[idx+1];avgY+=prevDy[idx+1];nCount++;}
+      if(r>0){avgX+=prevDx[idx-cols];avgY+=prevDy[idx-cols];nCount++;}
+      if(r<rows-1){avgX+=prevDx[idx+cols];avgY+=prevDy[idx+cols];nCount++;}
+      if(nCount){
+        avgX/=nCount; avgY/=nCount;
+        fx+=CFG.coupleK*(avgX-dx[idx]);
+        fy+=CFG.coupleK*(avgY-dy[idx]);
+      }
+
+      far=true;
+      if(doPush){
+        // Trail samples: newest strongest, older decay fast — fluid wake.
+        tq=1;
+        for(tIdx=0;tIdx<trailCount;tIdx++){
+          var sample=trail[(trailWrite-1-tIdx+CFG.trailLen)%CFG.trailLen];
+          if(sample.w<=0)continue;
+          sampleForce(cx,cy,sample.x,sample.y,effR,_sf);
+          if(_sf.g>0){
+            // (A) Soft Gaussian repulsion — no hard circular rim.
+            push=maxD*CFG.springK*CFG.repulse*_sf.g*tq;
+            fx+=_sf.nx*push;
+            fy+=_sf.ny*push;
+            far=false;
+          }
+          tq*=CFG.trailDecay;
+        }
+
+        // (B) Momentum from pointer travel — impulse in travel direction.
+        spd=Math.hypot(mouse.vx,mouse.vy);
+        if(spd>12){
+          sampleForce(cx,cy,mouse.x,mouse.y,effR*1.2,_sf);
+          if(_sf.g>0){
+            impulseScale=CFG.impulseK*_sf.g*(0.3+0.7*wake)*tick;
+            // Past the cap, momentum stops growing with speed so a fast flick
+            // can't shove neighbours through each other.
+            if(spd>CFG.impulseSpeedCap)impulseScale*=CFG.impulseSpeedCap/spd;
+            fx+=mouse.vx*impulseScale;
+            fy+=mouse.vy*impulseScale;
+            far=false;
+          }
+        }
+
+        var ddx=cx-mouse.x, ddy=cy-mouse.y;
+        if(ddx*ddx+ddy*ddy<farR2)far=false;
+      }
+
+      vx[idx]=(vx[idx]+fx*tick)*damp;
+      vy[idx]=(vy[idx]+fy*tick)*damp;
+      dx[idx]+=vx[idx]*tick;
+      dy[idx]+=vy[idx]*tick;
+
+      mag=Math.sqrt(dx[idx]*dx[idx]+dy[idx]*dy[idx]);
+      if(mag>maxD){
+        s=maxD/mag; dx[idx]*=s; dy[idx]*=s;
+        // Soft clamp — bleed speed, don't kill it.
+        vx[idx]*=0.75; vy[idx]*=0.75;
+      }
+
+      if(far&&Math.abs(dx[idx])<CFG.settleEps&&Math.abs(dy[idx])<CFG.settleEps&&
+         Math.abs(vx[idx])<CFG.settleEps&&Math.abs(vy[idx])<CFG.settleEps){
+        dx[idx]=0;dy[idx]=0;vx[idx]=0;vy[idx]=0;activeFlag[idx]=0;
+        activeList[i]=activeList[activeList.length-1];
+        activeList.pop();
+        continue;
+      }
+      i++;
+    }
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    var n=cols*rows,b;
+    for(b=0;b<CFG.alphaBins;b++)binsPool[b]=null;
+    var half=CFG.size/2, range=CFG.aRareMax;
+    for(var idx=0;idx<n;idx++){
+      var a=cellAlpha(idx);
+      if(a<=0.004)continue;
+      if(a>range)a=range;
+      var bi=Math.min(CFG.alphaBins-1,(a/range*CFG.alphaBins)|0);
+      var path=binsPool[bi]||(binsPool[bi]=new Path2D());
+      path.rect(homeX[idx]+dx[idx]-half,homeY[idx]+dy[idx]-half,CFG.size,CFG.size);
+    }
+    for(b=0;b<CFG.alphaBins;b++){
+      if(!binsPool[b])continue;
+      var alpha=((b+0.5)/CFG.alphaBins)*range;
+      ctx.fillStyle="rgba("+CFG.color+","+alpha.toFixed(3)+")";
+      ctx.fill(binsPool[b]);
+    }
+  }
+
+  // ---- one continuous field: measure hero-top → metrics-top ----
+  var heroEl=null,endEl=null;
+  var bounds={heroTop:0,endTop:1e9},boundsReady=false;
+  function measureBounds(){
+    if(!heroEl){
+      var h1=document.querySelector("main h1")||document.querySelector("h1");
+      heroEl=h1?h1.closest("section"):null;
+    }
+    var stats=document.getElementById("aeo-stats");
+    var proc=document.getElementById("aeo-process");
+    var plat=document.getElementById("aeo-platform");
+    var end=stats||proc||plat;
+    if(end)endEl=end;
+    if(!heroEl||!endEl)return;
+    var sy=window.pageYOffset||document.documentElement.scrollTop||0;
+    var hr=heroEl.getBoundingClientRect(), er=endEl.getBoundingClientRect();
+    bounds.heroTop=hr.top+sy;
+    // Clip at the top of the terminator: stats (preferred) or process
+    // fallback. Platform-only fallback uses its bottom so the field still
+    // covers the stack when later sections have not mounted yet.
+    bounds.endTop=(endEl===plat?er.bottom:er.top)+sy;
+    boundsReady=true;
+  }
+
+  var lastClip="";
+  function applyClip(heroVY,endVY,vh){
+    var top=clamp(heroVY,0,vh);
+    var bottom=clamp(vh-endVY,0,vh);
+    var val="inset("+top.toFixed(1)+"px 0px "+bottom.toFixed(1)+"px 0px)";
+    if(val!==lastClip){canvas.style.clipPath=val;canvas.style.webkitClipPath=val;lastClip=val;}
+  }
+
+  var resizeT=null;
+  function onResize(){
+    if(resizeT)clearTimeout(resizeT);
+    resizeT=setTimeout(function(){buildField();if(!pale)measureBounds();draw();},150);
+  }
+  window.addEventListener("resize",onResize);
+
+  buildField();
+  if(pale){
+    boundsReady=true;
   }else{
-    start();
+    var boot=0,bootIv=setInterval(function(){
+      measureBounds();
+      if(++boot>60)clearInterval(bootIv); // ~15s of settling: async section mounts + pin resizing
+    },250);
   }
+
+  var lastT=performance.now();
+  function frame(now){
+    requestAnimationFrame(frame);
+    if(!pale){
+      if(!boundsReady)return;
+      var sy=window.pageYOffset||document.documentElement.scrollTop||0;
+      var vh=window.innerHeight;
+      var heroVY=bounds.heroTop-sy, endVY=bounds.endTop-sy;
+      if(endVY<=0||heroVY>=vh){lastT=now;return;} // fully out of view
+      applyClip(heroVY,endVY,vh);
+    }
+
+    var dt=Math.min(0.033,(now-lastT)/1000);
+    lastT=now;
+    if(dt<=0)dt=1/60;
+
+    if(!reduce){
+      wake*=Math.pow(0.90,dt*60);
+      // Pointer velocity decays when the cursor idles so impulses don't stick.
+      mouse.vx*=Math.pow(0.88,dt*60);
+      mouse.vy*=Math.pow(0.88,dt*60);
+      rawPtr.vx*=Math.pow(0.88,dt*60);
+      rawPtr.vy*=Math.pow(0.88,dt*60);
+      // Decay trail weights so old samples lose influence quickly.
+      for(var t=0;t<CFG.trailLen;t++)trail[t].w*=Math.pow(0.82,dt*60);
+
+      smoothPointer(dt);
+      updateIdle(dt);
+      var effR=CFG.cursorRadius*(1+CFG.wakeRadiusBoost*wake);
+      var maxD=CFG.maxDisplace*(1+CFG.wakeDisplaceBoost*wake);
+      if(fine&&mouse.active)markCandidates(effR);
+      // Keep simulating while anything is still moving — no binary off switch.
+      if(activeList.length)stepActive(dt,effR,maxD);
+    }
+    draw();
+  }
+  requestAnimationFrame(frame);
 })();
 </script>
 <style id="aeo-pricing-style">
-.aeo-subpage .aeo-plat-inner{padding-top:clamp(120px,14vw,170px)}
+/* Pale-blue field: Pricing + FAQ as text-only labels. Most popular stays a pill. */
+.aeo-plat-intro>.aeo-pill,
+.aeo-faq-h>.aeo-pill{
+  background:transparent;
+  color:var(--aeo-accent-ink);
+  border:none;
+  box-shadow:none;
+}
+.aeo-subpage .aeo-plat-inner{padding-top:clamp(70px,8vw,100px)}
 .aeo-price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch}
 /* Surface matches homepage .aeo-card inset stroke + panel elevation (--aeo-sh-4). */
 .aeo-price{
